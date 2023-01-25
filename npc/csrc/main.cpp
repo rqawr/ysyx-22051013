@@ -3,18 +3,28 @@
 #include <assert.h>
 #include "Vtop.h"
 #include "verilated.h"
-#include "verilated_vcd_c.h"
+//#include "verilated_vcd_c.h"
+#include "nvboard.h"
+
+static TOP_NAME dut;
+
+void nvboard_bind_all_pins(Vtop* top);
 
 int main(int argc, char** argv) {
-	VerilatedContext* contextp = new VerilatedContext;
+  	nvboard_bind_all_pins(&dut);
+  	nvboard_init();
+	/*VerilatedContext* contextp = new VerilatedContext;
 	contextp->commandArgs(argc,argv);
 	Vtop* top = new Vtop{contextp};
 	Verilated::traceEverOn(true);
 	VerilatedVcdC* tfp = new VerilatedVcdC;
 	top->trace(tfp,0);
-	tfp->open("obj_dir/Vtop.vcd");
+	tfp->open("obj_dir/Vtop.vcd");*/
 	while(1){
-		int a = rand() & 1;
+		dut.eval();
+	        nvboard_update();
+    		
+		/*int a = rand() & 1;
 		int b = rand() & 1;
 		top->a = a;
 		top->b = b;
@@ -28,5 +38,6 @@ int main(int argc, char** argv) {
 	delete contextp;
 
  // printf("Hello, ysyx!\n");
-  return 0;
+  return 0;*/
+}
 }
