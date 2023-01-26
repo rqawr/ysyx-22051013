@@ -8,9 +8,9 @@ static void single_cycle(){
 	dut.clk=1;dut.eval();
 }
 static void reset(int n){
-	dut.reset=1;
+	dut.rst=1;
 	while(n-->0)single_cycle();
-	dut.reset=0;
+	dut.rst=0;
 }
 	int main() {
 			nvboard_bind_all_pins(&dut);
