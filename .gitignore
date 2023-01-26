@@ -1,6 +1,9 @@
 *.*
 *
 !*/
+!/digitalexperiment/*/csrc/*
+!/digitalexperiment/*/vsrc/*
+!/digitalexperiment/*/constr/*
 !/nemu/*
 !/nexus-am/*
 !/nanos-lite/*

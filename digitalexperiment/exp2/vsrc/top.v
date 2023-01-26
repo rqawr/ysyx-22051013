@@ -1,0 +1,29 @@
+module top(x,en,y,h);
+  input  [7:0] x;
+  input  en;
+  output [3:0]y;
+  output [6:0]h;
+
+	reg [2:0]l;
+
+  always @(x or en) begin
+    if(en) begin
+      casez(x)
+				8'b1???????: l=3'b111;
+				/* verilator lint_off CASEOVERLAP */
+				8'b?1??????: l=3'b110;
+				8'b??1?????: l=3'b101;
+				8'b???1????: l=3'b100;
+				8'b????1???: l=3'b011;
+				8'b?????1??: l=3'b010;
+				8'b??????1?: l=3'b001;
+				8'b???????1: l=3'b000;
+        default l=3'b000;
+			endcase
+			end
+			end
+assign y={(en&(|x)),l};
+seg seg1(
+	.b(y),
+	.h(h));
+endmodule

@@ -1,0 +1,7 @@
+top=top
+
+reset SW0
+clk BTNC
+in SW1
+out LD0
+state (LD7,LD6,LD5,LD4)
