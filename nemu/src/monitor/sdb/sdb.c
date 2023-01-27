@@ -18,6 +18,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "sdb.h"
+#include <memory/paddr.h>
 
 static int is_batch_mode = false;
 
@@ -64,6 +65,7 @@ static int cmd_info(char *args) {
   char *arg=strtok(NULL, " ");
   if(strcmp(arg,"r")==0){
         isa_reg_display();
+        return 0;
         }
   else if(strcmp(arg,"w")==0){
      assert(0);
@@ -72,6 +74,24 @@ static int cmd_info(char *args) {
    return 0;
  }
 
+static int cmd_x(char *args){
+  char *arg=strtok(NULL, " ");
+  int n=0;
+  sscanf(arg,"%d",&n);
+  char *exp=strtok(NULL, " ");
+  char *str;
+  vaddr_t addr=strtol(exp,&str,16);
+  for (int i=0;i<n;i++){
+     uint64_t byte=paddr_read(addr+i*4,4);
+     printf("0x%08lx ",addr+i*4);
+        for (int j=0;j<4;j++){
+            printf("%02lx ",byte&0xff);
+            byte=byte>>8;
+            }
+     printf("\n");
+     }
+  return 0;
+}
 
 static int cmd_q(char *args) {
   return -1;
@@ -89,6 +109,7 @@ static struct {
   { "q", "Exit NEMU", cmd_q },
   { "si","Execute program step for step N times",cmd_si },
   { "info","Print value of registers or watchpoints", cmd_info},
+  { "x", "Sweep memory at given address", cmd_x },
   /* TODO: Add more commands */
 
 };

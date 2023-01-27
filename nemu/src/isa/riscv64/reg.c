@@ -26,7 +26,7 @@ const char *regs[] = {
 int reg_num = (sizeof(regs))/(sizeof(regs[0]));
 
 void isa_reg_display() {
-	for( int i=0; i<reg_nem;i++){
+	for( int i=0; i<reg_num;i++){
 		printf("%s :  %lu       %lx \n", regs[i],gpr(i),gpr(i));
 	}
 	printf("pc is %lu       %lx \n",cpu.pc,cpu.pc);
