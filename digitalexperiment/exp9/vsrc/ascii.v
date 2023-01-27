@@ -41,7 +41,8 @@ always@(data)begin
 		8'h3e: asc=8'h38; 
 		8'h46: asc=8'h39;
 	        8'hf0: asc=8'hff;	
-	 default asc=8'hff;
+	        8'h5a: asc=8'h0d;
+	 default asc=8'h00;
  endcase
 end
 endmodule
