@@ -64,13 +64,12 @@ static int cmd_si(char *args) {
 static int cmd_info(char *args) {
   char *arg=strtok(NULL, " ");
   if(strcmp(arg,"r")==0){
-        isa_reg_display();
-        return 0;
-        }
+    isa_reg_display();
+    return 0;
+    }
   else if(strcmp(arg,"w")==0){
-     assert(0);
-      }
-
+     print_wp();
+     }
    return 0;
  }
 
@@ -93,6 +92,54 @@ static int cmd_x(char *args){
   return 0;
 }
 
+static int cmd_p(char *args) {
+  bool success;
+  if(strcmp(args, "test") == 0) {
+    char str[3000];
+    uint64_t answer;
+    FILE *fp=fopen("/home/hxy/ysyx-workbench/nemu/tools//gen-expr/input.txt","r");
+    assert(fp!=NULL);
+    while(fscanf(fp,"%lu %[^\n]",&answer,str)>0){
+      uint64_t result=expr(str,&success);
+      if(result!=answer){
+        printf("Wrong calculate for %s, right answer: %lu, wrong calculate: %lu\n",str,answer,result);
+      }
+    }
+    fclose(fp);
+    printf("Test passed.\n");
+  }
+  else{
+  uint64_t result = expr(args,&success);
+  if(!success){
+    printf("wrong calculate in expr\n");
+	}
+  else{
+    printf("%lu\n",result);
+    }
+  }
+      return 0;
+}
+
+static int cmd_w(char *args){
+  WP* temp = new_wp();
+  strcpy(temp->expr, args);
+  bool success;
+  temp->value = expr(args, &success);
+ // printf("watchpoint value set to 0x%08lx \n", temp->value);
+  printf("watchpoint NO.%d for expression %s\n",temp->NO,temp->expr);
+  return 0; 
+}
+
+static int cmd_d(char *args){
+  char *arg=strtok(NULL," ");
+  int N = 0;
+  sscanf(arg, "%d", &N);
+  bool ret = delete_wp(N);
+  if(ret == true){printf("delete watchpoint NO.%d \n",N);}
+  else{printf("delete watchpoint failure\n");}
+  return 0;
+}
+
 static int cmd_q(char *args) {
   return -1;
 }
@@ -110,6 +157,9 @@ static struct {
   { "si","Execute program step for step N times",cmd_si },
   { "info","Print value of registers or watchpoints", cmd_info},
   { "x", "Sweep memory at given address", cmd_x },
+  { "p", "Calculate given  expressions", cmd_p },
+  { "w", "Set the watchpoint", cmd_w },
+  { "d", "Delete the watchpoint whose id is N", cmd_d },
   /* TODO: Add more commands */
 
 };
