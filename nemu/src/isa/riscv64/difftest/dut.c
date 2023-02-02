@@ -17,8 +17,24 @@
 #include <cpu/difftest.h>
 #include "../local-include/reg.h"
 
+extern const char *regs[];
+
 bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
-  return false;
+  for (int i = 0; i < 32; ++i){
+    if (ref_r->gpr[i]!= cpu.gpr[i]){
+      Log("for [%s], expceted %lx, but got %lx.", regs[i], ref_r->gpr[i], cpu.gpr[i]);
+      Assert(ref_r->pc == pc, "PC expected %lx but got %lx", ref_r->pc, pc);
+      return false;
+    }
+  }
+
+  if (ref_r->pc == pc){
+    return true;
+  }
+  else {
+    Log("PC expected %lx but got %lx", ref_r->pc, pc);
+    return false;
+  }
 }
 
 void isa_difftest_attach() {
