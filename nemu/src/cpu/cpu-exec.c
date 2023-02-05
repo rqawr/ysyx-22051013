@@ -33,9 +33,23 @@ static bool g_print_step = false;
 
 void device_update();
 
+#ifdef CONFIG_ITRACE_IRINGBUF
+int ringbufnum = 15;
+char iringbuf[16][128];
+#endif
+
+#ifdef CONFIG_FTRACE
+void ftrace_exec(uint64_t pc, uint64_t addr, bool call_ret);
+void ftrace_print();
+#endif
+
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 #ifdef CONFIG_ITRACE_COND
   if (ITRACE_COND) { log_write("%s\n", _this->logbuf); }
+#endif
+#ifdef CONFIG_ITRACE_IRINGBUF
+  ringbufnum = (ringbufnum + 1)%16;
+  strcpy(iringbuf[ringbufnum] , _this->logbuf);
 #endif
   if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); }
   IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
@@ -50,6 +64,15 @@ static void exec_once(Decode *s, vaddr_t pc) {
   s->snpc = pc;
   isa_exec_once(s);
   cpu.pc = s->dnpc;
+#ifdef CONFIG_FTRACE
+  uint32_t finst = s->isa.inst.val;
+  if (finst == 0x00008067) {  // ret
+    ftrace_exec(pc, pc, false);
+  } 
+  else if ((BITS(finst, 6, 0) == 0x6f || BITS(finst, 6, 0) == 0x67) && BITS(finst, 11, 7) != 0) {
+    ftrace_exec(pc, s->dnpc, true);
+  }
+#endif
 #ifdef CONFIG_ITRACE
   char *p = s->logbuf;
   p += snprintf(p, sizeof(s->logbuf), FMT_WORD ":", s->pc);
@@ -116,13 +139,35 @@ void cpu_exec(uint64_t n) {
 
   switch (nemu_state.state) {
     case NEMU_RUNNING: nemu_state.state = NEMU_STOP; break;
+    
+    case NEMU_ABORT:
+      #ifdef CONFIG_ITRACE_IRINGBUF
+        printf("\n-------------IRINGBUF------------\n");
+        for (int i = 0 ; i <16 ; ++i){
+          if(i==ringbufnum){
+	    printf("--->%s\n",iringbuf[i]);
+	  }
+	  else{
+	    printf("    %s\n",iringbuf[i]);
+	  }
+	}
+	printf("\n");
+      #endif
+      #ifdef CONFIG_FTRACE
+	printf("========== Ftrace Result ==========\n");
+	ftrace_print();
+	printf("\n");
+      #endif
 
-    case NEMU_END: case NEMU_ABORT:
+    case NEMU_END: 
       Log("nemu: %s at pc = " FMT_WORD,
           (nemu_state.state == NEMU_ABORT ? ANSI_FMT("ABORT", ANSI_FG_RED) :
            (nemu_state.halt_ret == 0 ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) :
             ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED))),
           nemu_state.halt_pc);
+      	printf("========== Ftrace Result ==========\n");
+	ftrace_print();
+	printf("\n");
       // fall through
     case NEMU_QUIT: statistic();
   }

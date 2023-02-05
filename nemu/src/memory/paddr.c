@@ -57,7 +57,7 @@ void init_mem() {
 }
 
 word_t paddr_read(paddr_t addr, int len) {
-  if (likely(in_pmem(addr)))
+  if (likely(in_pmem(addr))){
     word_t temp=pmem_read(addr,len);
     #ifdef CONFIG_MTRACE
       Log("Read from memory at %#.8x for %d bytes,content is %#.8lx.",addr,len,temp);

@@ -69,6 +69,7 @@ static int cmd_info(char *args) {
     }
   else if(strcmp(arg,"w")==0){
      print_wp();
+     return 0;
      }
    return 0;
  }
@@ -78,8 +79,8 @@ static int cmd_x(char *args){
   int n=0;
   sscanf(arg,"%d",&n);
   char *exp=strtok(NULL, " ");
-  char *str;
-  vaddr_t addr=strtol(exp,&str,16);
+  bool success;
+  vaddr_t addr=expr(exp,&success);
   for (int i=0;i<n;i++){
      uint64_t byte=paddr_read(addr+i*4,4);
      printf("0x%08lx ",addr+i*4);
