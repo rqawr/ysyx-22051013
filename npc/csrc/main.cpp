@@ -1,43 +1,85 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
-#include "Vtop.h"
-#include "verilated.h"
-//#include "verilated_vcd_c.h"
-#include "nvboard.h"
+ #include <cstdio>
+ #include <assert.h>
+ #include "Vysyx_22051013_rvcpu.h"
+ #include <verilated.h>          
+ #include "verilated_dpi.h"
+ #include <verilated_vcd_c.h>  
+ #include <Vysyx_22051013_rvcpu__Dpi.h>
+ #include <svdpi.h>
+ #include "include/memory.h"
+ 
+Vysyx_22051013_rvcpu* rvcpu ;
+VerilatedVcdC* tfp;
+VerilatedContext* contextp;
 
-static TOP_NAME dut;
+void close_npc();
+void init_monitor(int argc, char *argv[]);
+//uint8_t* gi_to_hi(uint64_t addr);
+//-------------------DPI-C-------------------------//
+ 
+ extern "C" void ebreak(svBit ebreak_ena){
+    if(ebreak_ena) {
+	close_npc();
+  }
+}
 
-void nvboard_bind_all_pins(Vtop* top);
+//------------------MAIN----------------------------//
+
+vluint64_t main_time = 0;
+
+void close_npc(){
+	tfp->close() ;
+	delete rvcpu ;
+	delete contextp ;
+	exit(0) ;
+	
+}
+
+void cpu_reset(){
+  rvcpu -> clk = 0;
+  rvcpu -> rst = 1;
+  rvcpu -> inst = host_read((void *)gi_to_hi(CONFIG_MEM_BASE) , 4);
+  rvcpu -> eval();
+  tfp -> dump(main_time++);
+  
+  rvcpu -> clk = 1;
+  rvcpu -> rst = 1;
+  rvcpu -> eval();
+  tfp -> dump(main_time++);
+  
+  rvcpu -> rst = 0;
+
+}
+
+void execute(){
+  rvcpu->clk = 0;
+  rvcpu -> inst = host_read(gi_to_hi(rvcpu -> inst_pc) , 4);
+  rvcpu -> eval();
+  tfp -> dump(main_time++);
+  
+  rvcpu -> clk = 1;
+  rvcpu -> eval();
+  tfp -> dump(main_time++);
+}
+  
 
 int main(int argc, char** argv) {
-  	nvboard_bind_all_pins(&dut);
-  	nvboard_init();
-	/*VerilatedContext* contextp = new VerilatedContext;
+	contextp = new VerilatedContext;
 	contextp->commandArgs(argc,argv);
-	Vtop* top = new Vtop{contextp};
+	rvcpu = new Vysyx_22051013_rvcpu{contextp};
 	Verilated::traceEverOn(true);
-	VerilatedVcdC* tfp = new VerilatedVcdC;
-	top->trace(tfp,0);
-	tfp->open("obj_dir/Vtop.vcd");*/
+	tfp = new VerilatedVcdC;
+	rvcpu->trace(tfp,0);
+	tfp->open("obj_dir/rvcpu.vcd");
+	
+	init_monitor(argc,argv);
+	cpu_reset();
 	while(1){
-		dut.eval();
-	        nvboard_update();
-    		
-		/*int a = rand() & 1;
-		int b = rand() & 1;
-		top->a = a;
-		top->b = b;
-		top->eval();
-		contextp->timeInc(1);
-		tfp->dump(contextp->time());
-		printf("a = %d, b = %d, f = %d\n",a,b,top->f);
-		assert(top->f == (a^b));}
-	tfp->close();
-	delete top;
-	delete contextp;
+	  execute();
+	  }
+	
+	close_npc();
+	return 0;
+}
 
- // printf("Hello, ysyx!\n");
-  return 0;*/
-}
-}
+
