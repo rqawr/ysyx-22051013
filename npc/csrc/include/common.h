@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include <stdlib.h>
 
 
 //-------------------------------autoconf.h----------------------------------------//
@@ -18,11 +19,11 @@
 
 #define CONFIG_TIMER_GETTIMEOFDAY 1
 
-#define CONFIG_TRACE 0
-#define CONFIG_ITRACE 0
-#define CONFIG_ITRACE_COND "true"
+#define CONFIG_TRACE 1
+#define CONFIG_ITRACE 1
 #define CONFIG_ITRACE_IRINGBUF "true"
-#define CONFIG_FTRACE 0
+//#define CONFIG_WATCHPOINT 1
+//#define CONFIG_FTRACE 1
 
 
 
@@ -110,6 +111,24 @@
 
 
 //--------------------------------------------utils.h------------------------------//
+// ----------- state -----------
+
+enum { NPC_RUNNING, NPC_STOP, NPC_END, NPC_ABORT, NPC_QUIT };
+
+typedef struct{
+  int state;
+  uint64_t halt_pc;
+  uint32_t halt_ret;
+} NPC_State;
+
+extern NPC_State npc_state;
+
+#define FMT_WORD "0x%016lx"
+#define FMT_PADDR "0x%016lx"
+
+// ----------- timer -----------
+
+uint64_t get_time();
 // ----------- log -----------
 
 #define ANSI_FG_BLACK   "\33[1;30m"

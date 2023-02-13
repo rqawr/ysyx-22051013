@@ -51,6 +51,7 @@ ysyx_22051013_ifu ifu0(
 
 ysyx_22051013_idu idu1(
 	.rst(rst)	,
+	.clk(clk)	,
 	.inst_i(inst)	,
 	.pc_i(inst_pc)	,
  	.pc_o(id_ex_pc)	,

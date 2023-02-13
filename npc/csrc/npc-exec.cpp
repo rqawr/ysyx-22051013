@@ -1,23 +1,6 @@
-/***************************************************************************************
-* Copyright (c) 2014-2022 Zihao Yu, Nanjing University
-*
-* NEMU is licensed under Mulan PSL v2.
-* You can use this software according to the terms and conditions of the Mulan PSL v2.
-* You may obtain a copy of Mulan PSL v2 at:
-*          http://license.coscl.org.cn/MulanPSL2
-*
-* THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
-* EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
-* MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
-*
-* See the Mulan PSL v2 for more details.
-***************************************************************************************/
-
-#include <cpu/cpu.h>
-#include <cpu/decode.h>
-#include <cpu/difftest.h>
+#include "include/isa.h"
+#include "sdb.h"
 #include <locale.h>
-#include "../monitor/sdb/sdb.h"
 
 /* The assembly code of instructions executed is only output to the screen
  * when the number of instructions executed is less than this value.
@@ -26,12 +9,16 @@
  */
 #define MAX_INST_TO_PRINT 10
 
-CPU_state cpu = {};
+CPU_state cpu = { .pc =0x80000000};
+Decode s;
+NPC_State npc_state = { .state = NPC_QUIT };
+
 uint64_t g_nr_guest_inst = 0;
 static uint64_t g_timer = 0; // unit: us
 static bool g_print_step = false;
+int flag = 0;
 
-void device_update();
+//void device_update();
 
 #ifdef CONFIG_ITRACE_IRINGBUF
 int ringbufnum = 15;
@@ -43,10 +30,7 @@ void ftrace_exec(uint64_t pc, uint64_t addr, bool call_ret);
 void ftrace_print();
 #endif
 
-static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
-#ifdef CONFIG_ITRACE_COND
-  if (ITRACE_COND) { log_write("%s\n", _this->logbuf); }
-#endif
+static void trace_and_difftest(Decode *_this, uint64_t dnpc) {
 #ifdef CONFIG_ITRACE_IRINGBUF
   ringbufnum = (ringbufnum + 1)%16;
   strcpy(iringbuf[ringbufnum] , _this->logbuf);
@@ -55,54 +39,66 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
   IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
 #ifdef CONFIG_WATCHPOINT
   bool change = test_change();
-  if(change) {nemu_state.state = NEMU_STOP; printf("watchpoint reached\n");}
+  if(change) {npc_state.state = NPC_STOP; printf("watchpoint reached\n");}
 #endif
 }
 
-static void exec_once(Decode *s, vaddr_t pc) {
-  s->pc = pc;
-  s->snpc = pc;
-  isa_exec_once(s);
-  cpu.pc = s->dnpc;
+static void exec_once(Decode *s, uint64_t pc) {
+  s->pc = cpu.pc;
+  isa_exec_once();
+  
+  s->snpc = cpu.pc;
+  // printf("%x , %lx\n",s->val,cpu.pc);
+  
 #ifdef CONFIG_FTRACE
-  uint32_t finst = s->isa.inst.val;
+  uint64_t finst = s->val;
   if (finst == 0x00008067) {  // ret
-    ftrace_exec(pc, pc, false);
+    ftrace_exec(s->snpc, s->snpc, false);
   } 
   else if ((BITS(finst, 6, 0) == 0x6f || BITS(finst, 6, 0) == 0x67) && BITS(finst, 11, 7) != 0) {
-    ftrace_exec(pc, s->dnpc, true);
-  }
+   flag = 1;
+    printf("%d\n",flag);}
+  else if(flag == 1){
+    flag = 0;
+    printf("%d\n",flag);
+    printf("%lx , %lx\n",s->pc,s->snpc);
+    ftrace_exec(s->pc, s->snpc, true);
+    }
+  
 #endif
 #ifdef CONFIG_ITRACE
   char *p = s->logbuf;
+  
   p += snprintf(p, sizeof(s->logbuf), FMT_WORD ":", s->pc);
   int ilen = s->snpc - s->pc;
   int i;
-  uint8_t *inst = (uint8_t *)&s->isa.inst.val;
+  uint8_t *inst = (uint8_t *)&s->val;
   for (i = ilen - 1; i >= 0; i --) {
     p += snprintf(p, 4, " %02x", inst[i]);
   }
+  
   int ilen_max = MUXDEF(CONFIG_ISA_x86, 8, 4);
   int space_len = ilen_max - ilen;
   if (space_len < 0) space_len = 0;
   space_len = space_len * 3 + 1;
   memset(p, ' ', space_len);
   p += space_len;
-
+ 
   void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
   disassemble(p, s->logbuf + sizeof(s->logbuf) - p,
-      MUXDEF(CONFIG_ISA_x86, s->snpc, s->pc), (uint8_t *)&s->isa.inst.val, ilen);
+       s->pc, (uint8_t *)&s->val, ilen);
+  
 #endif
 }
 
 static void execute(uint64_t n) {
-  Decode s;
+  //printf("%x , %lx\n",s.val,cpu.pc);
   for (;n > 0; n --) {
     exec_once(&s, cpu.pc);
     g_nr_guest_inst ++;
     trace_and_difftest(&s, cpu.pc);
-    if (nemu_state.state != NEMU_RUNNING) break;
-    IFDEF(CONFIG_DEVICE, device_update());
+    if (npc_state.state != NPC_RUNNING) break;
+   // IFDEF(CONFIG_DEVICE, device_update());
   }
 }
 
@@ -123,11 +119,11 @@ void assert_fail_msg() {
 /* Simulate how the CPU works. */
 void cpu_exec(uint64_t n) {
   g_print_step = (n < MAX_INST_TO_PRINT);
-  switch (nemu_state.state) {
-    case NEMU_END: case NEMU_ABORT:
-      printf("Program execution has ended. To restart the program, exit NEMU and run again.\n");
+  switch (npc_state.state) {
+    case NPC_END: case NPC_ABORT:
+      printf("Program execution has ended. To restart the program, exit NPC and run again.\n");
       return;
-    default: nemu_state.state = NEMU_RUNNING;
+    default: npc_state.state = NPC_RUNNING;
   }
 
   uint64_t timer_start = get_time();
@@ -137,10 +133,10 @@ void cpu_exec(uint64_t n) {
   uint64_t timer_end = get_time();
   g_timer += timer_end - timer_start;
 
-  switch (nemu_state.state) {
-    case NEMU_RUNNING: nemu_state.state = NEMU_STOP; break;
+  switch (npc_state.state) {
+    case NPC_RUNNING: npc_state.state = NPC_STOP; break;
     
-    case NEMU_ABORT:
+    case NPC_ABORT:
       #ifdef CONFIG_ITRACE_IRINGBUF
         printf("\n-------------IRINGBUF------------\n");
         for (int i = 0 ; i <16 ; ++i){
@@ -159,14 +155,14 @@ void cpu_exec(uint64_t n) {
 	printf("\n");
       #endif
 
-    case NEMU_END: 
-      Log("nemu: %s at pc = " FMT_WORD,
-          (nemu_state.state == NEMU_ABORT ? ANSI_FMT("ABORT", ANSI_FG_RED) :
-           (nemu_state.halt_ret == 0 ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) :
+    case NPC_END: 
+      Log("pc: %s at pc = " FMT_WORD,
+          (npc_state.state == NPC_ABORT ? ANSI_FMT("ABORT", ANSI_FG_RED) :
+           (npc_state.halt_ret == 0 ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) :
             ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED))),
-          nemu_state.halt_pc);
-      // fall through
+          npc_state.halt_pc);
 
-    case NEMU_QUIT: statistic();
+      // fall through
+    case NPC_QUIT: statistic();
   }
 }

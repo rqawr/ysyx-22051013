@@ -9,6 +9,18 @@
 
 //==========
 
+extern "C" void if_id_thepc(long long thepc_data, const svBitVecVal* the_inst);
+
+VL_INLINE_OPT void Vysyx_22051013_rvcpu___024root____Vdpiimwrap_ysyx_22051013_rvcpu__DOT__idu1__DOT__if_id_thepc_TOP(QData/*63:0*/ thepc_data, IData/*31:0*/ the_inst) {
+    VL_DEBUG_IF(VL_DBG_MSGF("+    Vysyx_22051013_rvcpu___024root____Vdpiimwrap_ysyx_22051013_rvcpu__DOT__idu1__DOT__if_id_thepc_TOP\n"); );
+    // Body
+    long long thepc_data__Vcvt;
+    for (size_t thepc_data__Vidx = 0; thepc_data__Vidx < 1; ++thepc_data__Vidx) thepc_data__Vcvt = thepc_data;
+    svBitVecVal the_inst__Vcvt[1];
+    for (size_t the_inst__Vidx = 0; the_inst__Vidx < 1; ++the_inst__Vidx) VL_SET_SVBV_I(32, the_inst__Vcvt + 1 * the_inst__Vidx, the_inst);
+    if_id_thepc(thepc_data__Vcvt, the_inst__Vcvt);
+}
+
 extern "C" void ebreak(svBit ebreak_ena);
 
 VL_INLINE_OPT void Vysyx_22051013_rvcpu___024root____Vdpiimwrap_ysyx_22051013_rvcpu__DOT__idu1__DOT__decode__DOT__ebreak_TOP(CData/*0:0*/ ebreak_ena) {
@@ -17,6 +29,17 @@ VL_INLINE_OPT void Vysyx_22051013_rvcpu___024root____Vdpiimwrap_ysyx_22051013_rv
     svBit ebreak_ena__Vcvt;
     for (size_t ebreak_ena__Vidx = 0; ebreak_ena__Vidx < 1; ++ebreak_ena__Vidx) ebreak_ena__Vcvt = ebreak_ena;
     ebreak(ebreak_ena__Vcvt);
+}
+
+extern "C" void set_gpr_ptr(const svOpenArrayHandle a);
+
+VL_INLINE_OPT void Vysyx_22051013_rvcpu___024root____Vdpiimwrap_ysyx_22051013_rvcpu__DOT__reg3__DOT__set_gpr_ptr__Vdpioc2_TOP(const VlUnpacked<QData/*63:0*/, 32> &a) {
+    VL_DEBUG_IF(VL_DBG_MSGF("+    Vysyx_22051013_rvcpu___024root____Vdpiimwrap_ysyx_22051013_rvcpu__DOT__reg3__DOT__set_gpr_ptr__Vdpioc2_TOP\n"); );
+    // Body
+    static const int a__Vopenprops__ulims[2] = {0, 31};
+    static const VerilatedVarProps a__Vopenprops(VLVT_UINT64, VLVD_IN, VerilatedVarProps::Packed(), 63, 0, VerilatedVarProps::Unpacked(), 1, a__Vopenprops__ulims);
+    VerilatedDpiOpenVar a__Vopenarray (&a__Vopenprops, &a);
+    set_gpr_ptr(&a__Vopenarray);
 }
 
 VL_INLINE_OPT void Vysyx_22051013_rvcpu___024root___combo__TOP__1(Vysyx_22051013_rvcpu___024root* vlSelf) {
@@ -140,13 +163,14 @@ VL_INLINE_OPT void Vysyx_22051013_rvcpu___024root___sequent__TOP__3(Vysyx_220510
     CData/*0:0*/ __Vdlyvset__ysyx_22051013_rvcpu__DOT__reg3__DOT__regs__v32;
     QData/*63:0*/ __Vdlyvval__ysyx_22051013_rvcpu__DOT__reg3__DOT__regs__v32;
     // Body
+    __Vdlyvset__ysyx_22051013_rvcpu__DOT__reg3__DOT__regs__v0 = 0U;
+    __Vdlyvset__ysyx_22051013_rvcpu__DOT__reg3__DOT__regs__v32 = 0U;
     if (vlSelf->rst) {
         vlSelf->ysyx_22051013_rvcpu__DOT__reg3__DOT__i = 0x20U;
     }
-    __Vdlyvset__ysyx_22051013_rvcpu__DOT__reg3__DOT__regs__v0 = 0U;
-    __Vdlyvset__ysyx_22051013_rvcpu__DOT__reg3__DOT__regs__v32 = 0U;
-    vlSelf->inst_pc = ((IData)(vlSelf->rst) ? 0x80000000ULL
-                        : vlSelf->ysyx_22051013_rvcpu__DOT__ifu0__DOT__pc_next);
+    if ((1U & (~ (IData)(vlSelf->rst)))) {
+        Vysyx_22051013_rvcpu___024root____Vdpiimwrap_ysyx_22051013_rvcpu__DOT__idu1__DOT__if_id_thepc_TOP(vlSelf->inst_pc, vlSelf->inst);
+    }
     if (vlSelf->rst) {
         __Vdlyvset__ysyx_22051013_rvcpu__DOT__reg3__DOT__regs__v0 = 1U;
     } else if (((0U != (0x1fU & (vlSelf->inst >> 7U))) 
@@ -195,12 +219,14 @@ VL_INLINE_OPT void Vysyx_22051013_rvcpu___024root___sequent__TOP__3(Vysyx_220510
         vlSelf->ysyx_22051013_rvcpu__DOT__reg3__DOT__regs[__Vdlyvdim0__ysyx_22051013_rvcpu__DOT__reg3__DOT__regs__v32] 
             = __Vdlyvval__ysyx_22051013_rvcpu__DOT__reg3__DOT__regs__v32;
     }
+    vlSelf->inst_pc = ((IData)(vlSelf->rst) ? 0x80000000ULL
+                        : vlSelf->ysyx_22051013_rvcpu__DOT__ifu0__DOT__pc_next);
 }
 
-VL_INLINE_OPT void Vysyx_22051013_rvcpu___024root___combo__TOP__4(Vysyx_22051013_rvcpu___024root* vlSelf) {
+VL_INLINE_OPT void Vysyx_22051013_rvcpu___024root___combo__TOP__5(Vysyx_22051013_rvcpu___024root* vlSelf) {
     if (false && vlSelf) {}  // Prevent unused
     Vysyx_22051013_rvcpu__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+    Vysyx_22051013_rvcpu___024root___combo__TOP__4\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+    Vysyx_22051013_rvcpu___024root___combo__TOP__5\n"); );
     // Body
     vlSelf->ysyx_22051013_rvcpu__DOT__id_reg_rd_addr 
         = ((0U != (0x1fU & (vlSelf->inst >> 7U))) ? 
@@ -303,7 +329,7 @@ void Vysyx_22051013_rvcpu___024root___eval(Vysyx_22051013_rvcpu___024root* vlSel
         Vysyx_22051013_rvcpu___024root___sequent__TOP__3(vlSelf);
         vlSelf->__Vm_traceActivity[2U] = 1U;
     }
-    Vysyx_22051013_rvcpu___024root___combo__TOP__4(vlSelf);
+    Vysyx_22051013_rvcpu___024root___combo__TOP__5(vlSelf);
     // Final
     vlSelf->__Vclklast__TOP__clk = vlSelf->clk;
 }

@@ -54,6 +54,7 @@ void Vysyx_22051013_rvcpu___024root__traceInitSub0(Vysyx_22051013_rvcpu___024roo
         tracep->declQuad(c+96,"ysyx_22051013_rvcpu ifu0 pc_next", false,-1, 63,0);
         tracep->declQuad(c+98,"ysyx_22051013_rvcpu ifu0 pc_plus4", false,-1, 63,0);
         tracep->declBit(c+88,"ysyx_22051013_rvcpu idu1 rst", false,-1);
+        tracep->declBit(c+87,"ysyx_22051013_rvcpu idu1 clk", false,-1);
         tracep->declBus(c+91,"ysyx_22051013_rvcpu idu1 inst_i", false,-1, 31,0);
         tracep->declQuad(c+89,"ysyx_22051013_rvcpu idu1 pc_i", false,-1, 63,0);
         tracep->declBus(c+94,"ysyx_22051013_rvcpu idu1 rs1_addr", false,-1, 4,0);

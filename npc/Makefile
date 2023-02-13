@@ -13,11 +13,14 @@ VERILAGS+= -y ./vsrc/
 GTKFLAG = -CFLAGS -g
 NPC_IMG?= 
 NPC_FLAGS?= 
+LINK= -LDFLAGS "-lreadline  --no-pie  -ldl -lLLVM-14" 
+LLVM= -CFLAGS "-I/usr/lib/llvm-14/include -std=c++14   -fno-exceptions -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS   -D__STDC_LIMIT_MACROS -fPIE"
+
 
 $(shell  mkdir -p $(SIM_DIR))
 
 run:git
-	@verilator $(VERILAGS) $(GTKFLAGS)  ./csrc/*.cpp $(VERILOG)rvcpu.v 
+	@verilator $(VERILAGS) $(GTKFLAGS) $(LINK) $(LLVM) ./csrc/*.cpp $(VERILOG)rvcpu.v 
 	@make -j -C $(OBJ_PATH) -f Vysyx_22051013_rvcpu.mk Vysyx_22051013_rvcpu 
 	./obj_dir/Vysyx_22051013_rvcpu  $(NPC_FLAGS) $(NPC_IMG)
 

@@ -71,7 +71,7 @@ end
 assign imm_ena = inst_addi| inst_jalr | inst_lui | inst_auipc | inst_jal ;
 
 
-import "DPI-C" function void ebreak (input bit ebreak_ena);
+ import "DPI-C" function void ebreak (input bit ebreak_ena);
  
 always@(*) begin
   ebreak(inst_ebreak);

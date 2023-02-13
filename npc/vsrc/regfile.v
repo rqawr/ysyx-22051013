@@ -22,6 +22,10 @@ module ysyx_22051013_regfile(
  );
 
  reg[`ysyx_22051013_REG] regs [0:31];
+ 
+import "DPI-C" function void set_gpr_ptr(input logic [63:0] a []);
+initial set_gpr_ptr(regs);
+ 
 
  integer i;
  always@(posedge clk) begin

@@ -9,6 +9,7 @@ Fucntion : decode dummy
 module ysyx_22051013_idu(
 	//system input
 	input	  wire		       		rst	,
+	input     wire                          clk     ,
 	
 	//ifu input
 	input	  wire [`ysyx_22051013_INST]	inst_i	,
@@ -35,6 +36,7 @@ module ysyx_22051013_idu(
 	output    reg [`ysyx_22051013_DATA]  	op2 , 
 	output	  wire [`ysyx_22051013_PC]	pc_o	
 );
+
 
 wire   [ 4:0]   rd     ;
 wire   [ 4:0]   rs1    ;
@@ -81,5 +83,15 @@ always @(*) begin
 
  
 assign pc_o = rst == `ysyx_22051013_RSTABLE ? `ysyx_22051013_ZERO64 : pc_i	;
+
+
+import "DPI-C" function void if_id_thepc(input longint thepc_data, input bit[31:0] the_inst);
+
+  always @(posedge clk) begin
+   if(rst != `ysyx_22051013_RSTABLE)
+     if_id_thepc(pc_i, inst_i);
+  end
+
+
 
 endmodule

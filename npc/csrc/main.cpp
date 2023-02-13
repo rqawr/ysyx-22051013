@@ -7,6 +7,7 @@
  #include <Vysyx_22051013_rvcpu__Dpi.h>
  #include <svdpi.h>
  #include "include/memory.h"
+ #include "include/isa.h"
  
 Vysyx_22051013_rvcpu* rvcpu ;
 VerilatedVcdC* tfp;
@@ -14,12 +15,30 @@ VerilatedContext* contextp;
 
 void close_npc();
 void init_monitor(int argc, char *argv[]);
-//uint8_t* gi_to_hi(uint64_t addr);
+int is_exit_status_bad();
+void sdb_mainloop();
+
+
 //-------------------DPI-C-------------------------//
  
- extern "C" void ebreak(svBit ebreak_ena){
+extern "C" void if_id_thepc(long long thepc_data, const svBitVecVal* the_inst){
+  cpu.pc=thepc_data;
+  s.val=*((uint32_t*)the_inst);
+  //printf("%lx  %x\n",cpu.pc,s.val);
+}
+
+
+
+
+extern "C" void set_gpr_ptr(const svOpenArrayHandle r) {
+  cpu.gpr = (uint64_t *)(((VerilatedDpiOpenVar*)r)->datap());
+}
+
+extern "C" void ebreak(svBit ebreak_ena){
     if(ebreak_ena) {
-	close_npc();
+    npc_state.halt_ret = cpu.gpr[10];
+    npc_state.state = NPC_END;
+    npc_state.halt_pc = cpu.pc+4;
   }
 }
 
@@ -51,7 +70,7 @@ void cpu_reset(){
 
 }
 
-void execute(){
+void isa_exec_once(){
   rvcpu->clk = 0;
   rvcpu -> inst = host_read(gi_to_hi(rvcpu -> inst_pc) , 4);
   rvcpu -> eval();
@@ -60,6 +79,7 @@ void execute(){
   rvcpu -> clk = 1;
   rvcpu -> eval();
   tfp -> dump(main_time++);
+
 }
   
 
@@ -72,14 +92,13 @@ int main(int argc, char** argv) {
 	rvcpu->trace(tfp,0);
 	tfp->open("obj_dir/rvcpu.vcd");
 	
-	init_monitor(argc,argv);
 	cpu_reset();
-	while(1){
-	  execute();
-	  }
+	init_monitor(argc,argv);
+	sdb_mainloop();
+	
 	
 	close_npc();
-	return 0;
+	is_exit_status_bad();
 }
 
 

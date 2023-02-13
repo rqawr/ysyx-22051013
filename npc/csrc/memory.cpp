@@ -1,4 +1,5 @@
 #include "include/memory.h"
+#include "include/common.h"
 
 uint64_t host_read(void *addr, int len) {
   switch (len) {
