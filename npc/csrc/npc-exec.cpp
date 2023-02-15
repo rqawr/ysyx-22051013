@@ -9,7 +9,7 @@
  */
 #define MAX_INST_TO_PRINT 10
 
-CPU_state cpu = { .pc =0x80000000};
+NPC_reg cpu = { .pc =0x80000000};
 Decode s;
 NPC_State npc_state = { .state = NPC_QUIT };
 
@@ -17,12 +17,17 @@ uint64_t g_nr_guest_inst = 0;
 static uint64_t g_timer = 0; // unit: us
 static bool g_print_step = false;
 int flag = 0;
+int difftest_ena = 0;
 
 //void device_update();
 
 #ifdef CONFIG_ITRACE_IRINGBUF
 int ringbufnum = 15;
 char iringbuf[16][128];
+#endif
+
+#ifdef CONFIG_DIFFTEST
+void difftest_step(uint64_t pc, uint64_t npc);
 #endif
 
 #ifdef CONFIG_FTRACE
@@ -36,7 +41,18 @@ static void trace_and_difftest(Decode *_this, uint64_t dnpc) {
   strcpy(iringbuf[ringbufnum] , _this->logbuf);
 #endif
   if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); }
-  IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
+  //printf("%lx\n",_this->pc);
+#ifdef CONFIG_DIFFTEST
+  if(difftest_ena == 1){
+      difftest_step(_this->pc,dnpc);
+    }
+  else {
+    difftest_ena = 1;
+    
+    }
+#endif
+  
+ // IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc));
 #ifdef CONFIG_WATCHPOINT
   bool change = test_change();
   if(change) {npc_state.state = NPC_STOP; printf("watchpoint reached\n");}
@@ -44,11 +60,13 @@ static void trace_and_difftest(Decode *_this, uint64_t dnpc) {
 }
 
 static void exec_once(Decode *s, uint64_t pc) {
+  //printf("%x , %lx\n",s->val,cpu.pc);
   s->pc = cpu.pc;
+  //printf("%lx , %lx\n",s->pc,cpu.pc);
   isa_exec_once();
   
   s->snpc = cpu.pc;
-  // printf("%x , %lx\n",s->val,cpu.pc);
+   //printf("%x , %lx\n",s->val,cpu.pc);
   
 #ifdef CONFIG_FTRACE
   uint64_t finst = s->val;
@@ -57,11 +75,11 @@ static void exec_once(Decode *s, uint64_t pc) {
   } 
   else if ((BITS(finst, 6, 0) == 0x6f || BITS(finst, 6, 0) == 0x67) && BITS(finst, 11, 7) != 0) {
    flag = 1;
-    printf("%d\n",flag);}
+   // printf("%d\n",flag);}
   else if(flag == 1){
     flag = 0;
-    printf("%d\n",flag);
-    printf("%lx , %lx\n",s->pc,s->snpc);
+    //printf("%d\n",flag);
+    //printf("%lx , %lx\n",s->pc,s->snpc);
     ftrace_exec(s->pc, s->snpc, true);
     }
   
@@ -69,8 +87,8 @@ static void exec_once(Decode *s, uint64_t pc) {
 #ifdef CONFIG_ITRACE
   char *p = s->logbuf;
   
-  p += snprintf(p, sizeof(s->logbuf), FMT_WORD ":", s->pc);
-  int ilen = s->snpc - s->pc;
+  p += snprintf(p, sizeof(s->logbuf), FMT_WORD ":", s->snpc);
+  int ilen = 4;//s->snpc - s->pc;
   int i;
   uint8_t *inst = (uint8_t *)&s->val;
   for (i = ilen - 1; i >= 0; i --) {

@@ -63,7 +63,7 @@ assign jump = inst_jal | inst_jalr ;
 
 always @(*) begin
   if(inst_addi| inst_jalr) begin ext_imm = {{52{i_imm[11]}},i_imm}; end
-  else if (inst_lui | inst_auipc)                            begin ext_imm = {{32{u_imm[19]}},u_imm<<12,{12{1'b0}}}; end
+  else if (inst_lui | inst_auipc)                            begin ext_imm = {{32{u_imm[19]}},u_imm,{12{1'b0}}}; end
   else if (inst_jal)                                         begin ext_imm = {{44{j_imm[20]}},j_imm[20:1]<<1}; end
   else                                                       begin ext_imm = `ysyx_22051013_ZERO64; end
 end  

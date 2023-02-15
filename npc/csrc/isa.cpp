@@ -29,3 +29,21 @@ uint64_t isa_reg_str2val(const char *s, bool *success) {
   
   return 0;
 }
+
+bool isa_difftest_checkregs(NPC_reg *ref_r, uint64_t pc) {
+  for (int i = 0; i < 32; ++i){
+    if (ref_r->gpr[i]!= cpu.gpr[i]){
+      Log("for [%s], expceted %lx, but got %lx.", regs[i], ref_r->gpr[i], cpu.gpr[i]);
+      Assert(ref_r->pc == pc, "PC expected %lx but got %lx", ref_r->pc, pc);
+      return false;
+    }
+  }
+
+  if (ref_r->pc == pc){
+    return true;
+  }
+  else {
+    Log("PC expected %lx but got %lx", ref_r->pc, pc);
+    return false;
+  }
+}

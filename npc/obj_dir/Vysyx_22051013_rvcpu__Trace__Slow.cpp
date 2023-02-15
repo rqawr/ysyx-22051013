@@ -274,9 +274,8 @@ void Vysyx_22051013_rvcpu___024root__traceFullSub0(Vysyx_22051013_rvcpu___024roo
                                                                           >> 0x1fU))))) 
                                               << 0x20U) 
                                              | (QData)((IData)(
-                                                               (0xff000000U 
-                                                                & (vlSelf->inst 
-                                                                   << 0xcU)))))
+                                                               (0xfffff000U 
+                                                                & vlSelf->inst))))
                                           : ((IData)(vlSelf->ysyx_22051013_rvcpu__DOT__idu1__DOT__decode__DOT__inst_jal)
                                               ? (((- (QData)((IData)(
                                                                      (1U 

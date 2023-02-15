@@ -5,7 +5,7 @@
 
 void init_ftrace(const char *elf_file);
 void init_mem();
-//void init_difftest(char *ref_so_file, long img_size, int port);
+void init_difftest(char *ref_so_file, long img_size);
 //void init_device();
 void init_sdb();
 void init_disasm(const char *triple);
@@ -23,9 +23,8 @@ static void welcome() {
 void sdb_set_batch_mode();
 
 
-//static char *diff_so_file = NULL;
+static char *diff_so_file = (char *)"/home/hxy/ysyx-workbench/nemu/build/riscv64-nemu-interpreter-so";;
 static char *img_file = NULL;
-//static int difftest_port = 1234;
 static char *elf_file =NULL;
 
 static long load_img() {
@@ -63,7 +62,6 @@ static int parse_args(int argc, char *argv[]) {
   while ( (o = getopt_long(argc, argv, "-bhl:d:p:e:", table, NULL)) != -1) {
     switch (o) {
       case 'b': sdb_set_batch_mode(); break;
-      //case 'p': sscanf(optarg, "%d", &difftest_port); break;
       //case 'd': diff_so_file = optarg; break;
       case 'e': elf_file = optarg; break;
       case 1: img_file = optarg; return 0;
@@ -72,7 +70,6 @@ static int parse_args(int argc, char *argv[]) {
         printf("\t-b,--batch              run with batch mode\n");
         printf("\t-e,--elf=FILE           open elf from FILE\n");
         printf("\t-d,--diff=REF_SO        run DiffTest with reference REF_SO\n");
-        printf("\t-p,--port=PORT          run DiffTest with port PORT\n");
         printf("\n");
         exit(0);
     }
@@ -102,10 +99,10 @@ void init_monitor(int argc, char *argv[]) {
 
   /* Load the image to memory. This will overwrite the built-in image. */
   long img_size = load_img();
-
+ #ifdef CONFIG_DIFFTEST
   /* Initialize differential testing. */
-//  init_difftest(diff_so_file, img_size, difftest_port);
-
+  init_difftest(diff_so_file, img_size);
+  #endif
   /* Initialize the simple debugger. */
   init_sdb();
 #ifdef CONFIG_ITRACE

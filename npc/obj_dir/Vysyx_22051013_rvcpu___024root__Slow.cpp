@@ -114,9 +114,8 @@ void Vysyx_22051013_rvcpu___024root___settle__TOP__2(Vysyx_22051013_rvcpu___024r
                                                                                 >> 0x1fU))))) 
                                                         << 0x20U) 
                                                        | (QData)((IData)(
-                                                                         (0xff000000U 
-                                                                          & (vlSelf->inst 
-                                                                             << 0xcU)))))
+                                                                         (0xfffff000U 
+                                                                          & vlSelf->inst))))
                                                        : 
                                                       ((IData)(vlSelf->ysyx_22051013_rvcpu__DOT__idu1__DOT__decode__DOT__inst_jal)
                                                         ? 
@@ -228,23 +227,12 @@ void Vysyx_22051013_rvcpu___024root___settle__TOP__2(Vysyx_22051013_rvcpu___024r
     }
 }
 
-void Vysyx_22051013_rvcpu___024root____Vdpiimwrap_ysyx_22051013_rvcpu__DOT__reg3__DOT__set_gpr_ptr__Vdpioc2_TOP(const VlUnpacked<QData/*63:0*/, 32> &a);
-
-void Vysyx_22051013_rvcpu___024root___initial__TOP__4(Vysyx_22051013_rvcpu___024root* vlSelf) {
-    if (false && vlSelf) {}  // Prevent unused
-    Vysyx_22051013_rvcpu__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+    Vysyx_22051013_rvcpu___024root___initial__TOP__4\n"); );
-    // Body
-    Vysyx_22051013_rvcpu___024root____Vdpiimwrap_ysyx_22051013_rvcpu__DOT__reg3__DOT__set_gpr_ptr__Vdpioc2_TOP(vlSelf->ysyx_22051013_rvcpu__DOT__reg3__DOT__regs);
-}
-
 void Vysyx_22051013_rvcpu___024root___eval_initial(Vysyx_22051013_rvcpu___024root* vlSelf) {
     if (false && vlSelf) {}  // Prevent unused
     Vysyx_22051013_rvcpu__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     VL_DEBUG_IF(VL_DBG_MSGF("+    Vysyx_22051013_rvcpu___024root___eval_initial\n"); );
     // Body
     vlSelf->__Vclklast__TOP__clk = vlSelf->clk;
-    Vysyx_22051013_rvcpu___024root___initial__TOP__4(vlSelf);
 }
 
 void Vysyx_22051013_rvcpu___024root___eval_settle(Vysyx_22051013_rvcpu___024root* vlSelf) {

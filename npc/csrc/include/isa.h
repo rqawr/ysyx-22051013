@@ -4,9 +4,9 @@
 #include "common.h"
 typedef struct 
 {
-  uint64_t *gpr;
+  uint64_t gpr[32];
   uint64_t pc;
-} CPU_state;
+} NPC_reg;
 
 
 typedef struct Decode {
@@ -16,7 +16,7 @@ typedef struct Decode {
   IFDEF(CONFIG_ITRACE, char logbuf[128]);
 } Decode;
 
-extern CPU_state cpu;
+extern NPC_reg cpu;
 extern Decode s;
 
 void isa_reg_display();
@@ -25,5 +25,5 @@ void cpu_exec(uint64_t n);
 
 void isa_exec_once();
 
-
+bool isa_difftest_checkregs(NPC_reg *ref_r, uint64_t pc);
 #endif
