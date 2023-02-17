@@ -12,6 +12,7 @@ uint64_t host_read(void *addr, int len) {
 }
 
 void host_write(void *addr, int len, uint64_t data) {
+  //printf("%lx\n",(uint64_t *)addr);
   switch (len) {
     case 1: *(uint8_t  *)addr = data; return;
     case 2: *(uint16_t *)addr = data; return;

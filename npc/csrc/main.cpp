@@ -27,7 +27,29 @@ extern "C" void if_id_thepc(long long thepc_data, const svBitVecVal* the_inst){
   //printf("%lx  %x\n",cpu.pc,s.val);
 }
 
+extern "C" void pmem_read(long long raddr, long long* rdata, char rlen)
+{
+  if (raddr < CONFIG_MEM_BASE) return;
+  *rdata = host_read(gi_to_hi(raddr),rlen);
+#ifdef CONFIG_MTRACE
+      Log("Read from memory at %#.8llx for %d bytes,content is %#.8llx.",raddr,rlen,*rdata);
+#endif
+}
 
+// Memory Write
+extern "C" void pmem_write(long long waddr, long long wdata, char wlen){
+//printf("%lx %llx\n",gi_to_hi(waddr),waddr);
+  if (waddr < CONFIG_MEM_BASE) return;
+  for (int i = 0; i < 8; ++i) {
+    if (wlen & 0x01 & 1) {
+      host_write(gi_to_hi(waddr+i),1,wdata);
+      }
+    wdata >>= 8, wlen >>= 1;
+  }
+#ifdef CONFIG_MTRACE
+   Log("Write to memory at %#.8llx with mask %x,content is %#.8llx",waddr,wlen,wdata);
+#endif
+}
 
 
 extern "C" void difftest_dut_regs(long long Z0, long long ra, long long sp, long long gp, long long tp, long long t0, long long t1, long long t2, long long fp, long long s1, long long a0, long long a1, long long a2, long long a3, long long a4, long long a5, long long a6, long long a7, long long s2, long long s3, long long s4, long long s5, long long s6, long long s7, long long s8, long long s9, long long s10, long long a11, long long t3, long long t4, long long t5, long long t6){
@@ -94,7 +116,6 @@ void cpu_reset(){
   
   rvcpu -> clk = 1;
   rvcpu -> rst = 1;
-  //rvcpu -> inst = host_read((void *)gi_to_hi(CONFIG_MEM_BASE) , 4);
   rvcpu -> eval();
   tfp -> dump(main_time++);
   
@@ -104,7 +125,6 @@ void cpu_reset(){
 
 void isa_exec_once(){
   rvcpu->clk = 0;
-  rvcpu -> inst = host_read(gi_to_hi(rvcpu -> inst_pc) , 4);
   rvcpu -> eval();
   tfp -> dump(main_time++);
   
@@ -124,8 +144,9 @@ int main(int argc, char** argv) {
 	rvcpu->trace(tfp,0);
 	tfp->open("obj_dir/rvcpu.vcd");
 	
-	cpu_reset();
+	
 	init_monitor(argc,argv);
+	cpu_reset();
 	sdb_mainloop();
 	
 	

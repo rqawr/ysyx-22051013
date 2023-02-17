@@ -74,7 +74,7 @@ static void exec_once(Decode *s, uint64_t pc) {
     ftrace_exec(s->snpc, s->snpc, false);
   } 
   else if ((BITS(finst, 6, 0) == 0x6f || BITS(finst, 6, 0) == 0x67) && BITS(finst, 11, 7) != 0) {
-   flag = 1;
+   flag = 1;}
    // printf("%d\n",flag);}
   else if(flag == 1){
     flag = 0;
@@ -104,7 +104,7 @@ static void exec_once(Decode *s, uint64_t pc) {
  
   void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
   disassemble(p, s->logbuf + sizeof(s->logbuf) - p,
-       s->pc, (uint8_t *)&s->val, ilen);
+       s->snpc, (uint8_t *)&s->val, ilen);
   
 #endif
 }
@@ -158,7 +158,7 @@ void cpu_exec(uint64_t n) {
       #ifdef CONFIG_ITRACE_IRINGBUF
         printf("\n-------------IRINGBUF------------\n");
         for (int i = 0 ; i <16 ; ++i){
-          if(i==ringbufnum){
+          if(i==ringbufnum-1){
 	    printf("--->%s\n",iringbuf[i]);
 	  }
 	  else{

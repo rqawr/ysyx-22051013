@@ -13,8 +13,6 @@ Vysyx_22051013_rvcpu::Vysyx_22051013_rvcpu(VerilatedContext* _vcontextp__, const
     : vlSymsp{new Vysyx_22051013_rvcpu__Syms(_vcontextp__, _vcname__, this)}
     , clk{vlSymsp->TOP.clk}
     , rst{vlSymsp->TOP.rst}
-    , inst_pc{vlSymsp->TOP.inst_pc}
-    , inst{vlSymsp->TOP.inst}
     , rootp{&(vlSymsp->TOP)}
 {
 }
@@ -61,7 +59,7 @@ static void _eval_initial_loop(Vysyx_22051013_rvcpu__Syms* __restrict vlSymsp) {
             Verilated::debug(1);
             __Vchange = Vysyx_22051013_rvcpu___024root___change_request(&(vlSymsp->TOP));
             Verilated::debug(__Vsaved_debug);
-            VL_FATAL_MT("vsrc/rvcpu.v", 12, "",
+            VL_FATAL_MT("vsrc/rvcpu.v", 14, "",
                 "Verilated model didn't DC converge\n"
                 "- See https://verilator.org/warn/DIDNOTCONVERGE");
         } else {
@@ -92,7 +90,7 @@ void Vysyx_22051013_rvcpu::eval_step() {
             Verilated::debug(1);
             __Vchange = Vysyx_22051013_rvcpu___024root___change_request(&(vlSymsp->TOP));
             Verilated::debug(__Vsaved_debug);
-            VL_FATAL_MT("vsrc/rvcpu.v", 12, "",
+            VL_FATAL_MT("vsrc/rvcpu.v", 14, "",
                 "Verilated model didn't converge\n"
                 "- See https://verilator.org/warn/DIDNOTCONVERGE");
         } else {

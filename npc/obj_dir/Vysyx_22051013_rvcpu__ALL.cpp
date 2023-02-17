@@ -4,6 +4,7 @@
 #include "Vysyx_22051013_rvcpu___024root.cpp"
 #include "Vysyx_22051013_rvcpu__Dpi.cpp"
 #include "Vysyx_22051013_rvcpu__Trace.cpp"
+#include "Vysyx_22051013_rvcpu__ConstPool_0.cpp"
 #include "Vysyx_22051013_rvcpu___024root__Slow.cpp"
 #include "Vysyx_22051013_rvcpu__Syms.cpp"
 #include "Vysyx_22051013_rvcpu__Trace__Slow.cpp"

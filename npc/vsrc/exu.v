@@ -1,6 +1,6 @@
 /*-------
-* Last modify date : 2022/2/8
-* Function : execute addi 
+* Last modify date : 2022/2/16
+* Function : execute support more instructs 
 */
  
  `include "define.v"
@@ -9,36 +9,137 @@ module ysyx_22051013_exu(
 	input wire          rst,
 	input wire [`ysyx_22051013_DATA] op1,
 	input wire [`ysyx_22051013_DATA] op2,
+	input wire [`ysyx_22051013_IMM] imm ,
 	input wire [`ysyx_22051013_PC]	pc_i	,
 	input wire            jump_i   ,
-
-	input wire [6:0]                 alu_sel,
+	input wire [ 7:0]     alu_sel   ,
+	input wire            branch_i ,
+	
+	output wire [`ysyx_22051013_REG] store_data ,
 	output wire [`ysyx_22051013_PC]   jump_pc_o  ,
 	output wire            		ex_pcsrc_o ,
 	output reg [`ysyx_22051013_DATA] alu_res
 );
+// addxx
+wire     [`ysyx_22051013_DATA]  op1_add_op2   = op1 + op2 ;
+wire     [`ysyx_22051013_DATA]  op1_addw_op2  = {{32{op1_add_op2[31]}},op1_add_op2[31:0]} ;
+
+// sub subw
+wire     [`ysyx_22051013_DATA]  op1_sub_op2	 = $signed(op1) - $signed(op2) ; 
+wire     [`ysyx_22051013_DATA]  op1_subw_op2     = {{32{op1_sub_op2[31]}},op1_sub_op2[31:0]} ;
+
+//slt slti sltiu sltu
+wire     op1_lt_op2 = (op1[63] && ~op2[63]) || (~op1[63] && ~op2[63] && op1_sub_op2[63]) || (op1[63] && op2[63] && op1_sub_op2[63]) ;
+
+//sra srai
+wire	 [`ysyx_22051013_DATA] op1_sra_op2 = $signed(op1) >>> op2[5:0] ;
+
+//sllw slliw
+wire     [31:0]     sllw  = op1[31:0] << op2[4:0]          ;
+wire     [`ysyx_22051013_DATA] op1_sllw_op2 = {{32{sllw[31]}} , sllw} ;
+
+//srlw srliw 
+wire     [31:0]     srlw  = op1[31:0] >> op2[4:0]          ;
+wire     [`ysyx_22051013_DATA] op1_srlw_op2 = {{32{srlw[31]}} , srlw} ;
+
+//sraiw sraw
+wire	 [31:0]     sraw = $signed(op1[31:0]) >>> op2[4:0] ;
+wire	 [`ysyx_22051013_DATA] op1_sraw_op2 = {{32{sraw[31]}} , sraw} ;
+
+// mul mulh[[s]u] 
+wire     [127:0]     mul  = op1 * op2  ;
+wire     [`ysyx_22051013_DATA]   op1_mul_op2      = mul[63:0]  ;
+wire     [`ysyx_22051013_DATA]   op1_mulh_op2     = mul[127:64]  ;
+wire     [`ysyx_22051013_DATA]   op1_mulw_op2     = {{32{mul[31]}},mul[31:0]}    ;
+
+//divxx
+wire     [`ysyx_22051013_DATA]   div = op1 / op2 ;
+wire     [31:0]     		divw  = $signed(op1[31:0]) / $signed(op2[31:0])   ;
+wire     [`ysyx_22051013_DATA]  op1_divw_op2       = {{32{divw[31]}},divw}    ;
+wire     [`ysyx_22051013_DATA]  op1_divuw_op2      = {{32{div[31]}},div[31:0]}    ;
+
+//remxx
+wire     [`ysyx_22051013_DATA]   rem = op1 % op2 ;
+wire     [31:0]     		remw  = $signed(op1[31:0]) % $signed(op2[31:0])   ;
+wire     [`ysyx_22051013_DATA]  op1_remw_op2       = {{32{remw[31]}},remw}    ;
+wire     [`ysyx_22051013_DATA]  op1_remuw_op2      = {{32{rem[31]}},rem[31:0]}    ;
 
 always@(*)begin
-	if(rst == `ysyx_22051013_RSTABLE) begin
-		alu_res = `ysyx_22051013_ZERO64;
-	end
-	else begin
-		case(alu_sel)
-			7'b0000001 ,
-			7'b0000010 ,
-			7'b0000100 : begin alu_res = op1 + op2   ; end
-			
-			7'b0001000 ,
-			7'b0010000 : begin alu_res = pc_i + `ysyx_22051013_PLUS4; end
-		  default : begin alu_res = `ysyx_22051013_ZERO64; end
-		endcase
-	end
+  if(rst == `ysyx_22051013_RSTABLE) begin
+    alu_res = `ysyx_22051013_ZERO64;
+  end
+  else begin
+    case(alu_sel)
+          `INST_ADDI ,  `INST_ADD,
+          `INST_LUI  ,  `INST_AUIPC:  begin alu_res = op1_add_op2   	       ;end
+          `INST_ADDW ,  `INST_ADDIW:  begin alu_res = op1_addw_op2             ;end
+          
+          `INST_LB   ,  `INST_LH,
+          `INST_LW   ,  `INST_LD,
+          `INST_SB   ,  `INST_SH,
+          `INST_SW   ,  `INST_SD,
+          `INST_LBU  ,  `INST_LHU,  
+          `INST_LWU		   :  begin alu_res = op1 + imm   	       ;end
+          `INST_SUB                :  begin alu_res = op1_sub_op2              ;end
+          `INST_SUBW               :  begin alu_res = op1_subw_op2             ;end
+          
+          `INST_SLTI ,  `INST_SLT  :  begin alu_res = {63'd0 , op1_lt_op2}     ;end
+          `INST_SLTIU , `INST_SLTU :  begin alu_res = {63'd0 , (op1 < op2)}    ;end
+          `INST_SRAI ,  `INST_SRA  :  begin alu_res = op1_sra_op2              ;end
+          `INST_SLLIW,  `INST_SLLW :  begin alu_res = op1_sllw_op2             ;end
+          `INST_SRLIW,  `INST_SRLW :  begin alu_res = op1_srlw_op2             ;end
+          `INST_SRAIW,  `INST_SRAW :  begin alu_res = op1_sraw_op2             ;end
+          `INST_XORI ,  `INST_XOR  :  begin alu_res = op1 ^ op2                ;end
+          `INST_ORI  ,  `INST_OR   :  begin alu_res = op1 | op2                ;end
+          `INST_ANDI ,  `INST_AND  :  begin alu_res = op1 & op2                ;end
+          `INST_SLLI ,  `INST_SLL  :  begin alu_res = op1 << op2 [5:0]         ;end
+          `INST_SRLI ,  `INST_SRL  :  begin alu_res = op1 >> op2 [5:0]         ;end
+          `INST_JAL  ,  `INST_JALR :  begin alu_res = pc_i + 64'd4             ;end
+	  `INST_EBREAK             :  begin alu_res = op1                      ;end
+	  
+	  `INST_MUL                :  begin alu_res = op1_mul_op2              ;end 
+          `INST_MULH               :  begin alu_res = op1_mulh_op2             ;end 
+	  `INST_MULW               :  begin alu_res = op1_mulw_op2             ;end 
+	  
+	  `INST_DIV , `INST_DIVU   :  begin alu_res = div	               ;end 
+	  `INST_DIVW		   :  begin alu_res = op1_divw_op2 	       ;end 
+	  `INST_DIVUW		   :  begin alu_res = op1_divuw_op2	       ;end 
+	  
+	  `INST_REM , `INST_REMU   :  begin alu_res = rem	               ;end 
+	  `INST_REMW		   :  begin alu_res = op1_remw_op2 	       ;end 
+	  `INST_REMUW		   :  begin alu_res = op1_remuw_op2	       ;end 
+	  
+          default 		   :  begin alu_res = `ysyx_22051013_ZERO64; end
+    endcase
+  end
 end
 
+reg ex_branch ;
+
+always @(*) begin
+    if(~branch_i)  begin ex_branch = `ysyx_22051013_BRANCHDISABLE  ;    end
+    else begin
+        case (alu_sel) 
+             `INST_BEQ     : begin  ex_branch = (op1 == op2) ? `ysyx_22051013_BRANCHABLE : `ysyx_22051013_BRANCHDISABLE ;  end
+             `INST_BNE     : begin  ex_branch = (op1 != op2) ? `ysyx_22051013_BRANCHABLE : `ysyx_22051013_BRANCHDISABLE ;  end
+             `INST_BLTU    : begin  ex_branch = (op1 <  op2) ? `ysyx_22051013_BRANCHABLE : `ysyx_22051013_BRANCHDISABLE ;  end
+             `INST_BGEU    : begin  ex_branch = (op1 >= op2) ? `ysyx_22051013_BRANCHABLE : `ysyx_22051013_BRANCHDISABLE ;  end
+             `INST_BLT     : begin  ex_branch = ( op1_lt_op2 ) ? `ysyx_22051013_BRANCHABLE : `ysyx_22051013_BRANCHDISABLE ;  end
+             `INST_BGE     : begin  ex_branch = (~op1_lt_op2 ) ? `ysyx_22051013_BRANCHABLE : `ysyx_22051013_BRANCHDISABLE ;  end
+             default:        begin  ex_branch = `ysyx_22051013_BRANCHDISABLE  ;    end 
+        endcase
+    end
+end
+
+
 //out to ifu
-assign ex_pcsrc_o = jump_i ;
-assign jump_pc_o = (alu_sel == 7'b0001000 ) ? pc_i + op2 :
-		     (alu_sel == 7'b0010000) ? op1 + op2 :
-		     `ysyx_22051013_ZERO64 ;
+assign ex_pcsrc_o = jump_i | ex_branch;
+assign jump_pc_o = (alu_sel == `INST_JAL | branch_i ) ? pc_i + imm : 
+		   (alu_sel == `INST_JALR) ? op1 + imm :
+		   `ysyx_22051013_ZERO64 ;
+		     
+		     
+assign store_data = op2 ;
+
 
 endmodule

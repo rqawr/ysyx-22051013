@@ -26,6 +26,8 @@ run:git
 
 gtk:
 	@gtkwave ./obj_dir/rvcpu.vcd
+gdb:
+	@gdb -s ./obj_dir/Vysyx_22051013_rvcpu --args ./obj_dir/Vysyx_22051013_rvcpu $(NPC_FLAGS) $(NPC_IMG)
 git:
 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
 clean:
