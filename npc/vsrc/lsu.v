@@ -28,7 +28,7 @@
  
  assign re    = (rst == `ysyx_22051013_RSTABLE | ls_ctl == 4'b0000) ? 1'b0 : ls_ctl[3];
  assign we    = (rst == `ysyx_22051013_RSTABLE | ls_ctl == 4'b0000) ? 1'b0 : ~ls_ctl[3] ;
- assign waddr    = (rst == `ysyx_22051013_RSTABLE) ? `ysyx_22051013_ZERO64 : {alu_res[63:3],3'b000} ;
+ assign waddr    = (rst == `ysyx_22051013_RSTABLE) ? `ysyx_22051013_ZERO64 : alu_res ;
  assign raddr    = (rst == `ysyx_22051013_RSTABLE) ? `ysyx_22051013_ZERO64 : {alu_res[63:3],3'b000} ;
 
  
@@ -96,50 +96,38 @@ end
 
 
 //--------------------------store--------------------------------------------------------------------//
-reg [`ysyx_22051013_DATA] sb_data    ;
-reg [`ysyx_22051013_DATA] sh_data    ;
-reg [`ysyx_22051013_DATA] sw_data    ;
 reg [ 7:0]      sb_mask    ;
 reg [ 7:0]      sh_mask    ;
 reg [ 7:0]      sw_mask    ;
 
 always @(*) begin
     if(rst == `ysyx_22051013_RSTABLE) begin
-        sb_data = `ysyx_22051013_ZERO64 ;
         sb_mask = 8'd0  ;
     end
     else begin
         case (byte_sel)
             3'b000:    begin
-                sb_data = {56'd0 , store_data[7:0]} ; 
                 sb_mask = 8'b00000001 ;
             end 
             3'b001:    begin
-                sb_data = {48'd0 , store_data[7:0] , 8'd0} ; 
                 sb_mask = 8'b00000010 ;
             end 
-            3'b010:    begin
-                sb_data = {40'd0 , store_data[7:0] , 16'd0} ; 
+            3'b010:    begin 
                 sb_mask = 8'b00000100 ;
             end 
             3'b011:    begin
-                sb_data = {32'd0 , store_data[7:0] , 24'd0} ; 
                 sb_mask = 8'b00001000 ;
             end 
-            3'b100:    begin
-                sb_data = {24'd0 , store_data[7:0] , 32'd0} ; 
+            3'b100:    begin 
                 sb_mask = 8'b00010000 ;
             end 
-            3'b101:    begin
-                sb_data = {16'd0 , store_data[7:0] , 40'd0} ; 
+            3'b101:    begin 
                 sb_mask = 8'b00100000 ;
             end 
             3'b110:    begin
-                sb_data = {8'd0 , store_data[7:0] , 48'd0} ; 
                 sb_mask = 8'b01000000 ;
             end  
-            default:   begin
-                sb_data = {store_data[7:0] , 56'd0} ; 
+            default:   begin 
                 sb_mask = 8'b10000000 ;
             end
         endcase
@@ -148,25 +136,20 @@ end
 
 always @(*) begin
     if(rst == `ysyx_22051013_RSTABLE) begin
-        sh_data = `ysyx_22051013_ZERO64 ;
         sh_mask = 8'd0  ;
     end
     else begin
         case (half_sel)
             2'b00:     begin
-                sh_data = {48'd0 , store_data[15:0]} ;
                 sh_mask = 8'b00000011  ;
             end 
             2'b01:     begin
-                sh_data = {32'd0 , store_data[15:0] , 16'd0} ;
                 sh_mask = 8'b00001100  ;
             end
             2'b10:     begin
-                sh_data = {16'd0 , store_data[15:0] , 32'd0} ;
                 sh_mask = 8'b00110000  ;
             end
             default:   begin
-                sh_data = {store_data[15:0] , 48'd0} ;
                 sh_mask = 8'b11000000  ;
             end 
         endcase
@@ -175,17 +158,14 @@ end
 
 always @(*) begin
     if(rst == `ysyx_22051013_RSTABLE) begin
-        sw_data = `ysyx_22051013_ZERO64 ;
         sw_mask = 8'd0  ;
     end
     else begin
         case (word_sel)
             1'b0:    begin
-                sw_data = {32'd0 , store_data[31:0]} ;
                 sw_mask = 8'b00001111  ;
             end 
             default: begin
-                sw_data = {store_data[31:0] , 32'd0} ;
                 sw_mask = 8'b11110000  ;
             end 
         endcase
@@ -200,15 +180,15 @@ always @(*) begin
     else begin
         case (ls_ctl)
             4'b0001:   begin
-                data_o = sb_data ;
+                data_o = store_data ;
                 wlen = sb_mask ; 
             end
             4'b0010:   begin
-                data_o = sh_data ;
+                data_o = store_data;
                 wlen = sh_mask ; 
             end
             4'b0100:   begin
-                data_o = sw_data ;
+                data_o = store_data ;
                 wlen = sw_mask ; 
             end
             4'b0101:   begin

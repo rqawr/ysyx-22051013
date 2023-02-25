@@ -19,7 +19,6 @@
 
 #define CONFIG_TIMER_GETTIMEOFDAY 1
 
-//#define CONFIG_GTK
 
 //#define CONFIG_TRACE 1
 
@@ -29,10 +28,11 @@
 //#define CONFIG_WATCHPOINT 1
 //#define CONFIG_FTRACE 1
 //#define CONFIG_MTRACE 1
-#define CONFIG_DTRACE
+//#define CONFIG_DTRACE
 #endif
 
 //#define CONFIG_DIFFTEST 1
+
 //#define CONFIG_GTK
 
 

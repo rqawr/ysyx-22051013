@@ -154,9 +154,101 @@ VL_INLINE_OPT void Vysyx_22051013_rvcpu___024root___sequent__TOP__1(Vysyx_220510
         Vysyx_22051013_rvcpu___024root____Vdpiimwrap_ysyx_22051013_rvcpu__DOT__lsu3__DOT__pmem_write_TOP(
                                                                                 ((IData)(vlSelf->rst)
                                                                                  ? 0ULL
+                                                                                 : vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata), 
+                                                                                ((IData)(vlSelf->rst)
+                                                                                 ? 0ULL
                                                                                  : 
-                                                                                (0xfffffffffffffff8ULL 
-                                                                                & vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata)), vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__data_o, (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__wlen));
+                                                                                ((8U 
+                                                                                & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                                                                 ? 0ULL
+                                                                                 : 
+                                                                                ((4U 
+                                                                                & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                                                                 ? 
+                                                                                ((2U 
+                                                                                & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                                                                 ? 0ULL
+                                                                                 : vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)
+                                                                                 : 
+                                                                                ((2U 
+                                                                                & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                                                                 ? 
+                                                                                ((1U 
+                                                                                & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                                                                 ? 0ULL
+                                                                                 : vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)
+                                                                                 : 
+                                                                                ((1U 
+                                                                                & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                                                                 ? vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2
+                                                                                 : 0ULL))))), 
+                                                                                ((IData)(vlSelf->rst)
+                                                                                 ? 0U
+                                                                                 : 
+                                                                                ((8U 
+                                                                                & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                                                                 ? 0U
+                                                                                 : 
+                                                                                ((4U 
+                                                                                & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                                                                 ? 
+                                                                                ((2U 
+                                                                                & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                                                                 ? 0U
+                                                                                 : 
+                                                                                ((1U 
+                                                                                & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                                                                 ? 0xffU
+                                                                                 : 
+                                                                                ((IData)(vlSelf->rst)
+                                                                                 ? 0U
+                                                                                 : 
+                                                                                ((1U 
+                                                                                & (IData)(
+                                                                                (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
+                                                                                >> 2U)))
+                                                                                 ? 0xf0U
+                                                                                 : 0xfU))))
+                                                                                 : 
+                                                                                ((2U 
+                                                                                & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                                                                 ? 
+                                                                                ((1U 
+                                                                                & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                                                                 ? 0U
+                                                                                 : 
+                                                                                ((IData)(vlSelf->rst)
+                                                                                 ? 0U
+                                                                                 : 
+                                                                                ((0U 
+                                                                                == 
+                                                                                (3U 
+                                                                                & (IData)(
+                                                                                (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
+                                                                                >> 1U))))
+                                                                                 ? 3U
+                                                                                 : 
+                                                                                ((1U 
+                                                                                == 
+                                                                                (3U 
+                                                                                & (IData)(
+                                                                                (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
+                                                                                >> 1U))))
+                                                                                 ? 0xcU
+                                                                                 : 
+                                                                                ((2U 
+                                                                                == 
+                                                                                (3U 
+                                                                                & (IData)(
+                                                                                (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
+                                                                                >> 1U))))
+                                                                                 ? 0x30U
+                                                                                 : 0xc0U)))))
+                                                                                 : 
+                                                                                ((1U 
+                                                                                & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                                                                 ? (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__sb_mask)
+                                                                                 : 0U))))));
     }
 }
 
@@ -386,6 +478,7 @@ VL_INLINE_OPT void Vysyx_22051013_rvcpu___024root___sequent__TOP__2(Vysyx_220510
 }
 
 extern const VlUnpacked<CData/*3:0*/, 256> Vysyx_22051013_rvcpu__ConstPool__TABLE_3685cfcf_0;
+extern const VlUnpacked<CData/*7:0*/, 16> Vysyx_22051013_rvcpu__ConstPool__TABLE_d9be0853_0;
 
 VL_INLINE_OPT void Vysyx_22051013_rvcpu___024root___combo__TOP__4(Vysyx_22051013_rvcpu___024root* vlSelf) {
     if (false && vlSelf) {}  // Prevent unused
@@ -393,6 +486,7 @@ VL_INLINE_OPT void Vysyx_22051013_rvcpu___024root___combo__TOP__4(Vysyx_22051013
     VL_DEBUG_IF(VL_DBG_MSGF("+    Vysyx_22051013_rvcpu___024root___combo__TOP__4\n"); );
     // Variables
     CData/*7:0*/ __Vtableidx1;
+    CData/*3:0*/ __Vtableidx2;
     VlWide<4>/*127:0*/ __Vtemp4;
     VlWide<4>/*127:0*/ __Vtemp5;
     VlWide<4>/*127:0*/ __Vtemp6;
@@ -1549,8 +1643,6 @@ VL_INLINE_OPT void Vysyx_22051013_rvcpu___024root___combo__TOP__4(Vysyx_22051013
     if (vlSelf->rst) {
         vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__data_byte = 0U;
         vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__data_half = 0U;
-        vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__wlen = 0U;
-        vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__data_o = 0ULL;
     } else {
         vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__data_byte 
             = (0xffU & ((1U & (IData)((vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
@@ -1604,207 +1696,12 @@ VL_INLINE_OPT void Vysyx_22051013_rvcpu___024root___combo__TOP__4(Vysyx_22051013
                                               >> 0x20U))
                                    : (IData)((vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__data_i 
                                               >> 0x30U))))));
-        vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__wlen 
-            = ((8U & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
-                ? 0U : ((4U & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
-                         ? ((2U & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
-                             ? 0U : ((1U & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
-                                      ? 0xffU : ((IData)(vlSelf->rst)
-                                                  ? 0U
-                                                  : 
-                                                 ((1U 
-                                                   & (IData)(
-                                                             (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
-                                                              >> 2U)))
-                                                   ? 0xf0U
-                                                   : 0xfU))))
-                         : ((2U & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
-                             ? ((1U & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
-                                 ? 0U : ((IData)(vlSelf->rst)
-                                          ? 0U : ((0U 
-                                                   == 
-                                                   (3U 
-                                                    & (IData)(
-                                                              (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
-                                                               >> 1U))))
-                                                   ? 3U
-                                                   : 
-                                                  ((1U 
-                                                    == 
-                                                    (3U 
-                                                     & (IData)(
-                                                               (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
-                                                                >> 1U))))
-                                                    ? 0xcU
-                                                    : 
-                                                   ((2U 
-                                                     == 
-                                                     (3U 
-                                                      & (IData)(
-                                                                (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
-                                                                 >> 1U))))
-                                                     ? 0x30U
-                                                     : 0xc0U)))))
-                             : ((1U & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
-                                 ? ((IData)(vlSelf->rst)
-                                     ? 0U : ((1U & (IData)(
-                                                           (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
-                                                            >> 2U)))
-                                              ? ((1U 
-                                                  & (IData)(
-                                                            (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
-                                                             >> 1U)))
-                                                  ? 
-                                                 ((1U 
-                                                   & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata))
-                                                   ? 0x80U
-                                                   : 0x40U)
-                                                  : 
-                                                 ((1U 
-                                                   & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata))
-                                                   ? 0x20U
-                                                   : 0x10U))
-                                              : ((1U 
-                                                  & (IData)(
-                                                            (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
-                                                             >> 1U)))
-                                                  ? 
-                                                 ((1U 
-                                                   & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata))
-                                                   ? 8U
-                                                   : 4U)
-                                                  : 
-                                                 ((1U 
-                                                   & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata))
-                                                   ? 2U
-                                                   : 1U))))
-                                 : 0U))));
-        vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__data_o 
-            = ((8U & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
-                ? 0ULL : ((4U & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
-                           ? ((2U & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
-                               ? 0ULL : ((1U & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
-                                          ? vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2
-                                          : ((IData)(vlSelf->rst)
-                                              ? 0ULL
-                                              : ((1U 
-                                                  & (IData)(
-                                                            (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
-                                                             >> 2U)))
-                                                  ? 
-                                                 ((QData)((IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)) 
-                                                  << 0x20U)
-                                                  : (QData)((IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2))))))
-                           : ((2U & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
-                               ? ((1U & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
-                                   ? 0ULL : ((IData)(vlSelf->rst)
-                                              ? 0ULL
-                                              : ((0U 
-                                                  == 
-                                                  (3U 
-                                                   & (IData)(
-                                                             (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
-                                                              >> 1U))))
-                                                  ? (QData)((IData)(
-                                                                    (0xffffU 
-                                                                     & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2))))
-                                                  : 
-                                                 ((1U 
-                                                   == 
-                                                   (3U 
-                                                    & (IData)(
-                                                              (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
-                                                               >> 1U))))
-                                                   ? 
-                                                  ((QData)((IData)(
-                                                                   (0xffffU 
-                                                                    & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)))) 
-                                                   << 0x10U)
-                                                   : 
-                                                  ((2U 
-                                                    == 
-                                                    (3U 
-                                                     & (IData)(
-                                                               (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
-                                                                >> 1U))))
-                                                    ? 
-                                                   ((QData)((IData)(
-                                                                    (0xffffU 
-                                                                     & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)))) 
-                                                    << 0x20U)
-                                                    : 
-                                                   ((QData)((IData)(
-                                                                    (0xffffU 
-                                                                     & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)))) 
-                                                    << 0x30U))))))
-                               : ((1U & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
-                                   ? ((IData)(vlSelf->rst)
-                                       ? 0ULL : ((1U 
-                                                  & (IData)(
-                                                            (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
-                                                             >> 2U)))
-                                                  ? 
-                                                 ((1U 
-                                                   & (IData)(
-                                                             (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
-                                                              >> 1U)))
-                                                   ? 
-                                                  ((1U 
-                                                    & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata))
-                                                    ? 
-                                                   ((QData)((IData)(
-                                                                    (0xffU 
-                                                                     & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)))) 
-                                                    << 0x38U)
-                                                    : 
-                                                   ((QData)((IData)(
-                                                                    (0xffU 
-                                                                     & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)))) 
-                                                    << 0x30U))
-                                                   : 
-                                                  ((1U 
-                                                    & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata))
-                                                    ? 
-                                                   ((QData)((IData)(
-                                                                    (0xffU 
-                                                                     & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)))) 
-                                                    << 0x28U)
-                                                    : 
-                                                   ((QData)((IData)(
-                                                                    (0xffU 
-                                                                     & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)))) 
-                                                    << 0x20U)))
-                                                  : 
-                                                 ((1U 
-                                                   & (IData)(
-                                                             (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
-                                                              >> 1U)))
-                                                   ? 
-                                                  ((1U 
-                                                    & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata))
-                                                    ? 
-                                                   ((QData)((IData)(
-                                                                    (0xffU 
-                                                                     & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)))) 
-                                                    << 0x18U)
-                                                    : 
-                                                   ((QData)((IData)(
-                                                                    (0xffU 
-                                                                     & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)))) 
-                                                    << 0x10U))
-                                                   : 
-                                                  ((1U 
-                                                    & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata))
-                                                    ? 
-                                                   ((QData)((IData)(
-                                                                    (0xffU 
-                                                                     & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)))) 
-                                                    << 8U)
-                                                    : (QData)((IData)(
-                                                                      (0xffU 
-                                                                       & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2))))))))
-                                   : 0ULL))));
     }
+    __Vtableidx2 = ((0xeU & ((IData)(vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata) 
+                             << 1U)) | (IData)(vlSelf->rst));
+    vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__sb_mask 
+        = Vysyx_22051013_rvcpu__ConstPool__TABLE_d9be0853_0
+        [__Vtableidx2];
 }
 
 void Vysyx_22051013_rvcpu___024root___eval(Vysyx_22051013_rvcpu___024root* vlSelf) {

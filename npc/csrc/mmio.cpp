@@ -42,7 +42,7 @@ void init_map() {
 
 uint64_t map_read(uint64_t addr, int len, IOMap *map) {
  #ifdef CONFIG_DTRACE
-    Log("%#x\t for len=%d at %s", addr, len, map ? map->name : "No device");
+    Log("%#lx\t for len=%d at %s", addr, len, map ? map->name : "No device");
  #endif
   assert(len >= 1 && len <= 8);
   check_bound(map, addr);
@@ -54,7 +54,7 @@ uint64_t map_read(uint64_t addr, int len, IOMap *map) {
 
 void map_write(uint64_t addr, int len, uint64_t data, IOMap *map) {
 #ifdef CONFIG_DTRACE
-    Log("%#x\t write data to %s", addr, map ? map->name : "No device");
+    Log("%#lx\t write data= %llx to %s", addr,data, map ? map->name : "No device");
  #endif
   assert(len >= 1 && len <= 8);
   check_bound(map, addr);

@@ -395,23 +395,22 @@ void Vysyx_22051013_rvcpu___024root__traceChgSub0(Vysyx_22051013_rvcpu___024root
                                                      ((0x70U 
                                                        == (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_alu_sel)) 
                                                       & (~ (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__exu2__DOT__op1_lt_op2)))))))))));
-            tracep->chgCData(oldp+217,(vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__wlen),8);
-            tracep->chgQData(oldp+218,(vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__data_o),64);
-            tracep->chgBit(oldp+220,(vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__re));
-            tracep->chgCData(oldp+221,((7U & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata))),3);
-            tracep->chgCData(oldp+222,((3U & (IData)(
+            tracep->chgBit(oldp+217,(vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__re));
+            tracep->chgCData(oldp+218,((7U & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata))),3);
+            tracep->chgCData(oldp+219,((3U & (IData)(
                                                      (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
                                                       >> 1U)))),2);
-            tracep->chgBit(oldp+223,((1U & (IData)(
+            tracep->chgBit(oldp+220,((1U & (IData)(
                                                    (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
                                                     >> 2U)))));
-            tracep->chgCData(oldp+224,(vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__data_byte),8);
-            tracep->chgSData(oldp+225,(vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__data_half),16);
-            tracep->chgIData(oldp+226,(vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__data_word),32);
+            tracep->chgCData(oldp+221,(vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__data_byte),8);
+            tracep->chgSData(oldp+222,(vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__data_half),16);
+            tracep->chgIData(oldp+223,(vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__data_word),32);
+            tracep->chgCData(oldp+224,(vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__sb_mask),8);
         }
-        tracep->chgBit(oldp+227,(vlSelf->clk));
-        tracep->chgBit(oldp+228,(vlSelf->rst));
-        tracep->chgQData(oldp+229,(((IData)(vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__re)
+        tracep->chgBit(oldp+225,(vlSelf->clk));
+        tracep->chgBit(oldp+226,(vlSelf->rst));
+        tracep->chgQData(oldp+227,(((IData)(vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__re)
                                      ? ((IData)(vlSelf->rst)
                                          ? 0ULL : (
                                                    (8U 
@@ -465,7 +464,7 @@ void Vysyx_22051013_rvcpu___024root__traceChgSub0(Vysyx_22051013_rvcpu___024root
                                                        : 0ULL)))
                                                     : 0ULL))
                                      : 0ULL)),64);
-        tracep->chgQData(oldp+231,(((IData)(vlSelf->rst)
+        tracep->chgQData(oldp+229,(((IData)(vlSelf->rst)
                                      ? 0ULL : ((1U 
                                                 == (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_wb_ctl))
                                                 ? ((IData)(vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__re)
@@ -529,7 +528,7 @@ void Vysyx_22051013_rvcpu___024root__traceChgSub0(Vysyx_22051013_rvcpu___024root
                                                     == (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_wb_ctl))
                                                     ? vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata
                                                     : 0ULL)))),64);
-        tracep->chgQData(oldp+233,((((~ (IData)(vlSelf->rst)) 
+        tracep->chgQData(oldp+231,((((~ (IData)(vlSelf->rst)) 
                                      & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_reg_rs1_ena))
                                      ? vlSelf->ysyx_22051013_rvcpu__DOT__reg3__DOT__regs
                                     [((IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_reg_rs1_ena)
@@ -537,7 +536,7 @@ void Vysyx_22051013_rvcpu___024root__traceChgSub0(Vysyx_22051013_rvcpu___024root
                                                           (vlSelf->ysyx_22051013_rvcpu__DOT__ifu0__DOT__rinst 
                                                            >> 0xfU)))
                                        : 0U)] : 0ULL)),64);
-        tracep->chgQData(oldp+235,((((~ (IData)(vlSelf->rst)) 
+        tracep->chgQData(oldp+233,((((~ (IData)(vlSelf->rst)) 
                                      & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_reg_rs2_ena))
                                      ? vlSelf->ysyx_22051013_rvcpu__DOT__reg3__DOT__regs
                                     [((IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_reg_rs2_ena)
@@ -545,18 +544,105 @@ void Vysyx_22051013_rvcpu___024root__traceChgSub0(Vysyx_22051013_rvcpu___024root
                                                           (vlSelf->ysyx_22051013_rvcpu__DOT__ifu0__DOT__rinst 
                                                            >> 0x14U)))
                                        : 0U)] : 0ULL)),64);
-        tracep->chgQData(oldp+237,(((IData)(vlSelf->rst)
+        tracep->chgQData(oldp+235,(((IData)(vlSelf->rst)
                                      ? 0x80000000ULL
                                      : (4ULL + vlSelf->ysyx_22051013_rvcpu__DOT__if_id_pc))),64);
-        tracep->chgQData(oldp+239,(((IData)(vlSelf->rst)
+        tracep->chgQData(oldp+237,(((IData)(vlSelf->rst)
                                      ? 0ULL : (0xfffffffffffffff8ULL 
                                                & vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata))),64);
-        tracep->chgQData(oldp+241,(vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__data_i),64);
-        tracep->chgBit(oldp+243,((1U & ((~ ((IData)(vlSelf->rst) 
+        tracep->chgQData(oldp+239,(((IData)(vlSelf->rst)
+                                     ? 0ULL : vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata)),64);
+        tracep->chgCData(oldp+241,(((IData)(vlSelf->rst)
+                                     ? 0U : ((8U & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                              ? 0U : 
+                                             ((4U & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                               ? ((2U 
+                                                   & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                                   ? 0U
+                                                   : 
+                                                  ((1U 
+                                                    & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                                    ? 0xffU
+                                                    : 
+                                                   ((IData)(vlSelf->rst)
+                                                     ? 0U
+                                                     : 
+                                                    ((1U 
+                                                      & (IData)(
+                                                                (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
+                                                                 >> 2U)))
+                                                      ? 0xf0U
+                                                      : 0xfU))))
+                                               : ((2U 
+                                                   & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                                   ? 
+                                                  ((1U 
+                                                    & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                                    ? 0U
+                                                    : 
+                                                   ((IData)(vlSelf->rst)
+                                                     ? 0U
+                                                     : 
+                                                    ((0U 
+                                                      == 
+                                                      (3U 
+                                                       & (IData)(
+                                                                 (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
+                                                                  >> 1U))))
+                                                      ? 3U
+                                                      : 
+                                                     ((1U 
+                                                       == 
+                                                       (3U 
+                                                        & (IData)(
+                                                                  (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
+                                                                   >> 1U))))
+                                                       ? 0xcU
+                                                       : 
+                                                      ((2U 
+                                                        == 
+                                                        (3U 
+                                                         & (IData)(
+                                                                   (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
+                                                                    >> 1U))))
+                                                        ? 0x30U
+                                                        : 0xc0U)))))
+                                                   : 
+                                                  ((1U 
+                                                    & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                                    ? (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__sb_mask)
+                                                    : 0U)))))),8);
+        tracep->chgQData(oldp+242,(vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__data_i),64);
+        tracep->chgQData(oldp+244,(((IData)(vlSelf->rst)
+                                     ? 0ULL : ((8U 
+                                                & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                                ? 0ULL
+                                                : (
+                                                   (4U 
+                                                    & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                                    ? 
+                                                   ((2U 
+                                                     & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                                     ? 0ULL
+                                                     : vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)
+                                                    : 
+                                                   ((2U 
+                                                     & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                                     ? 
+                                                    ((1U 
+                                                      & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                                      ? 0ULL
+                                                      : vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)
+                                                     : 
+                                                    ((1U 
+                                                      & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                                      ? vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2
+                                                      : 0ULL)))))),64);
+        tracep->chgBit(oldp+246,((1U & ((~ ((IData)(vlSelf->rst) 
                                             | (0U == (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl)))) 
                                         & (~ ((IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl) 
                                               >> 3U))))));
-        tracep->chgQData(oldp+244,(((IData)(vlSelf->rst)
+        tracep->chgQData(oldp+247,(((IData)(vlSelf->rst)
                                      ? 0ULL : ((8U 
                                                 & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
                                                 ? (
@@ -607,151 +693,7 @@ void Vysyx_22051013_rvcpu___024root__traceChgSub0(Vysyx_22051013_rvcpu___024root
                                                       | (QData)((IData)(vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__data_byte)))
                                                       : 0ULL)))
                                                 : 0ULL))),64);
-        tracep->chgQData(oldp+246,(((IData)(vlSelf->rst)
-                                     ? 0ULL : ((1U 
-                                                & (IData)(
-                                                          (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
-                                                           >> 2U)))
-                                                ? (
-                                                   (1U 
-                                                    & (IData)(
-                                                              (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
-                                                               >> 1U)))
-                                                    ? 
-                                                   ((1U 
-                                                     & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata))
-                                                     ? 
-                                                    ((QData)((IData)(
-                                                                     (0xffU 
-                                                                      & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)))) 
-                                                     << 0x38U)
-                                                     : 
-                                                    ((QData)((IData)(
-                                                                     (0xffU 
-                                                                      & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)))) 
-                                                     << 0x30U))
-                                                    : 
-                                                   ((1U 
-                                                     & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata))
-                                                     ? 
-                                                    ((QData)((IData)(
-                                                                     (0xffU 
-                                                                      & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)))) 
-                                                     << 0x28U)
-                                                     : 
-                                                    ((QData)((IData)(
-                                                                     (0xffU 
-                                                                      & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)))) 
-                                                     << 0x20U)))
-                                                : (
-                                                   (1U 
-                                                    & (IData)(
-                                                              (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
-                                                               >> 1U)))
-                                                    ? 
-                                                   ((1U 
-                                                     & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata))
-                                                     ? 
-                                                    ((QData)((IData)(
-                                                                     (0xffU 
-                                                                      & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)))) 
-                                                     << 0x18U)
-                                                     : 
-                                                    ((QData)((IData)(
-                                                                     (0xffU 
-                                                                      & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)))) 
-                                                     << 0x10U))
-                                                    : 
-                                                   ((1U 
-                                                     & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata))
-                                                     ? 
-                                                    ((QData)((IData)(
-                                                                     (0xffU 
-                                                                      & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)))) 
-                                                     << 8U)
-                                                     : (QData)((IData)(
-                                                                       (0xffU 
-                                                                        & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2))))))))),64);
-        tracep->chgQData(oldp+248,(((IData)(vlSelf->rst)
-                                     ? 0ULL : ((0U 
-                                                == 
-                                                (3U 
-                                                 & (IData)(
-                                                           (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
-                                                            >> 1U))))
-                                                ? (QData)((IData)(
-                                                                  (0xffffU 
-                                                                   & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2))))
-                                                : (
-                                                   (1U 
-                                                    == 
-                                                    (3U 
-                                                     & (IData)(
-                                                               (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
-                                                                >> 1U))))
-                                                    ? 
-                                                   ((QData)((IData)(
-                                                                    (0xffffU 
-                                                                     & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)))) 
-                                                    << 0x10U)
-                                                    : 
-                                                   ((2U 
-                                                     == 
-                                                     (3U 
-                                                      & (IData)(
-                                                                (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
-                                                                 >> 1U))))
-                                                     ? 
-                                                    ((QData)((IData)(
-                                                                     (0xffffU 
-                                                                      & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)))) 
-                                                     << 0x20U)
-                                                     : 
-                                                    ((QData)((IData)(
-                                                                     (0xffffU 
-                                                                      & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)))) 
-                                                     << 0x30U)))))),64);
-        tracep->chgQData(oldp+250,(((IData)(vlSelf->rst)
-                                     ? 0ULL : ((1U 
-                                                & (IData)(
-                                                          (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
-                                                           >> 2U)))
-                                                ? ((QData)((IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)) 
-                                                   << 0x20U)
-                                                : (QData)((IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2))))),64);
-        tracep->chgCData(oldp+252,(((IData)(vlSelf->rst)
-                                     ? 0U : ((1U & (IData)(
-                                                           (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
-                                                            >> 2U)))
-                                              ? ((1U 
-                                                  & (IData)(
-                                                            (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
-                                                             >> 1U)))
-                                                  ? 
-                                                 ((1U 
-                                                   & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata))
-                                                   ? 0x80U
-                                                   : 0x40U)
-                                                  : 
-                                                 ((1U 
-                                                   & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata))
-                                                   ? 0x20U
-                                                   : 0x10U))
-                                              : ((1U 
-                                                  & (IData)(
-                                                            (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
-                                                             >> 1U)))
-                                                  ? 
-                                                 ((1U 
-                                                   & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata))
-                                                   ? 8U
-                                                   : 4U)
-                                                  : 
-                                                 ((1U 
-                                                   & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata))
-                                                   ? 2U
-                                                   : 1U))))),8);
-        tracep->chgCData(oldp+253,(((IData)(vlSelf->rst)
+        tracep->chgCData(oldp+249,(((IData)(vlSelf->rst)
                                      ? 0U : ((0U == 
                                               (3U & (IData)(
                                                             (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
@@ -771,7 +713,7 @@ void Vysyx_22051013_rvcpu___024root__traceChgSub0(Vysyx_22051013_rvcpu___024root
                                                                >> 1U))))
                                                    ? 0x30U
                                                    : 0xc0U))))),8);
-        tracep->chgCData(oldp+254,(((IData)(vlSelf->rst)
+        tracep->chgCData(oldp+250,(((IData)(vlSelf->rst)
                                      ? 0U : ((1U & (IData)(
                                                            (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
                                                             >> 2U)))

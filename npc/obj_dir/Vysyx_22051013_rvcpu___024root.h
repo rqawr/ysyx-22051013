@@ -91,9 +91,9 @@ VL_MODULE(Vysyx_22051013_rvcpu___024root) {
         CData/*0:0*/ ysyx_22051013_rvcpu__DOT__exu2__DOT__op1_lt_op2;
     };
     struct {
-        CData/*7:0*/ ysyx_22051013_rvcpu__DOT__lsu3__DOT__wlen;
         CData/*0:0*/ ysyx_22051013_rvcpu__DOT__lsu3__DOT__re;
         CData/*7:0*/ ysyx_22051013_rvcpu__DOT__lsu3__DOT__data_byte;
+        CData/*7:0*/ ysyx_22051013_rvcpu__DOT__lsu3__DOT__sb_mask;
         SData/*11:0*/ ysyx_22051013_rvcpu__DOT__idu1__DOT__decode__DOT__s_imm;
         SData/*11:0*/ ysyx_22051013_rvcpu__DOT__idu1__DOT__decode__DOT__b_imm;
         SData/*15:0*/ ysyx_22051013_rvcpu__DOT__lsu3__DOT__data_half;
@@ -124,7 +124,6 @@ VL_MODULE(Vysyx_22051013_rvcpu___024root) {
         QData/*63:0*/ ysyx_22051013_rvcpu__DOT__exu2__DOT__div;
         QData/*63:0*/ ysyx_22051013_rvcpu__DOT__exu2__DOT__rem;
         QData/*63:0*/ ysyx_22051013_rvcpu__DOT__lsu3__DOT__data_i;
-        QData/*63:0*/ ysyx_22051013_rvcpu__DOT__lsu3__DOT__data_o;
         VlUnpacked<QData/*63:0*/, 32> ysyx_22051013_rvcpu__DOT__reg3__DOT__regs;
     };
 

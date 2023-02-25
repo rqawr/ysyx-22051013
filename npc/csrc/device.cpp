@@ -228,20 +228,21 @@ static inline void update_screen() {
   SDL_RenderCopy(renderer, texture, NULL, NULL);
   SDL_RenderPresent(renderer);
 }
-#endif
+
 
 void vga_update_screen() {
   //printf("sync = %d\n",vgactl_port_base[1]);
-  if (vgactl_port_base[1] != 0){
-    printf("update screen\n");
+  if (vgactl_port_base[1] &0x01){
+    //printf("update screen\n");
     update_screen();
     vgactl_port_base[1] = 0;
   }
   // TODO: call `update_screen()` when the sync register is non-zero,
   // then zero out the sync register
 }
-
+#endif
 void init_vga() {
+#ifdef CONFIG_HAS_VGA
   vgactl_port_base = (uint32_t *)new_space(8);
   vgactl_port_base[0] = (screen_width() << 16) | screen_height();
   add_mmio_map("vgactl", CONFIG_VGA_CTL_MMIO, vgactl_port_base, 8, NULL);
@@ -250,5 +251,6 @@ void init_vga() {
   add_mmio_map("vmem", CONFIG_FB_ADDR, vmem, screen_size(), NULL);
   IFDEF(CONFIG_VGA_SHOW_SCREEN, init_screen());
   IFDEF(CONFIG_VGA_SHOW_SCREEN, memset(vmem, 0, screen_size()));
+#endif
 }
 

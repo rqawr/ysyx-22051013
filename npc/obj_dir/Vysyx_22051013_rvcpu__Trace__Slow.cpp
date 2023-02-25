@@ -22,10 +22,10 @@ void Vysyx_22051013_rvcpu___024root__traceInitSub0(Vysyx_22051013_rvcpu___024roo
     if (false && tracep && c) {}  // Prevent unused
     // Body
     {
-        tracep->declBit(c+228,"clk", false,-1);
-        tracep->declBit(c+229,"rst", false,-1);
-        tracep->declBit(c+228,"ysyx_22051013_rvcpu clk", false,-1);
-        tracep->declBit(c+229,"ysyx_22051013_rvcpu rst", false,-1);
+        tracep->declBit(c+226,"clk", false,-1);
+        tracep->declBit(c+227,"rst", false,-1);
+        tracep->declBit(c+226,"ysyx_22051013_rvcpu clk", false,-1);
+        tracep->declBit(c+227,"ysyx_22051013_rvcpu rst", false,-1);
         tracep->declBus(c+1,"ysyx_22051013_rvcpu if_id_inst", false,-1, 31,0);
         tracep->declQuad(c+2,"ysyx_22051013_rvcpu if_id_pc", false,-1, 63,0);
         tracep->declBus(c+82,"ysyx_22051013_rvcpu id_reg_rs1_addr", false,-1, 4,0);
@@ -47,29 +47,29 @@ void Vysyx_22051013_rvcpu___024root__traceInitSub0(Vysyx_22051013_rvcpu___024roo
         tracep->declQuad(c+107,"ysyx_22051013_rvcpu ex_ls_store_data", false,-1, 63,0);
         tracep->declQuad(c+111,"ysyx_22051013_rvcpu ex_if_pc", false,-1, 63,0);
         tracep->declBit(c+113,"ysyx_22051013_rvcpu ex_if_pc_sel", false,-1);
-        tracep->declQuad(c+230,"ysyx_22051013_rvcpu ls_wb_data", false,-1, 63,0);
-        tracep->declQuad(c+232,"ysyx_22051013_rvcpu wb_reg_rd_data", false,-1, 63,0);
-        tracep->declQuad(c+234,"ysyx_22051013_rvcpu reg_id_rs1_data", false,-1, 63,0);
-        tracep->declQuad(c+236,"ysyx_22051013_rvcpu reg_id_rs2_data", false,-1, 63,0);
-        tracep->declBit(c+228,"ysyx_22051013_rvcpu ifu0 clk", false,-1);
-        tracep->declBit(c+229,"ysyx_22051013_rvcpu ifu0 rst", false,-1);
+        tracep->declQuad(c+228,"ysyx_22051013_rvcpu ls_wb_data", false,-1, 63,0);
+        tracep->declQuad(c+230,"ysyx_22051013_rvcpu wb_reg_rd_data", false,-1, 63,0);
+        tracep->declQuad(c+232,"ysyx_22051013_rvcpu reg_id_rs1_data", false,-1, 63,0);
+        tracep->declQuad(c+234,"ysyx_22051013_rvcpu reg_id_rs2_data", false,-1, 63,0);
+        tracep->declBit(c+226,"ysyx_22051013_rvcpu ifu0 clk", false,-1);
+        tracep->declBit(c+227,"ysyx_22051013_rvcpu ifu0 rst", false,-1);
         tracep->declBit(c+113,"ysyx_22051013_rvcpu ifu0 pcsrc_i", false,-1);
         tracep->declQuad(c+111,"ysyx_22051013_rvcpu ifu0 ex_pc_i", false,-1, 63,0);
         tracep->declBus(c+1,"ysyx_22051013_rvcpu ifu0 inst_o", false,-1, 31,0);
         tracep->declQuad(c+2,"ysyx_22051013_rvcpu ifu0 pc_o", false,-1, 63,0);
         tracep->declQuad(c+114,"ysyx_22051013_rvcpu ifu0 pc_next", false,-1, 63,0);
-        tracep->declQuad(c+238,"ysyx_22051013_rvcpu ifu0 pc_plus4", false,-1, 63,0);
-        tracep->declBus(c+256,"ysyx_22051013_rvcpu ifu0 rlen", false,-1, 7,0);
+        tracep->declQuad(c+236,"ysyx_22051013_rvcpu ifu0 pc_plus4", false,-1, 63,0);
+        tracep->declBus(c+252,"ysyx_22051013_rvcpu ifu0 rlen", false,-1, 7,0);
         tracep->declQuad(c+4,"ysyx_22051013_rvcpu ifu0 rinst", false,-1, 63,0);
-        tracep->declBit(c+229,"ysyx_22051013_rvcpu idu1 rst", false,-1);
+        tracep->declBit(c+227,"ysyx_22051013_rvcpu idu1 rst", false,-1);
         tracep->declBus(c+1,"ysyx_22051013_rvcpu idu1 inst_i", false,-1, 31,0);
         tracep->declQuad(c+2,"ysyx_22051013_rvcpu idu1 pc_i", false,-1, 63,0);
         tracep->declBus(c+82,"ysyx_22051013_rvcpu idu1 rs1_addr", false,-1, 4,0);
         tracep->declBit(c+93,"ysyx_22051013_rvcpu idu1 rs1_ena", false,-1);
-        tracep->declQuad(c+234,"ysyx_22051013_rvcpu idu1 rs1_data", false,-1, 63,0);
+        tracep->declQuad(c+232,"ysyx_22051013_rvcpu idu1 rs1_data", false,-1, 63,0);
         tracep->declBus(c+83,"ysyx_22051013_rvcpu idu1 rs2_addr", false,-1, 4,0);
         tracep->declBit(c+94,"ysyx_22051013_rvcpu idu1 rs2_ena", false,-1);
-        tracep->declQuad(c+236,"ysyx_22051013_rvcpu idu1 rs2_data", false,-1, 63,0);
+        tracep->declQuad(c+234,"ysyx_22051013_rvcpu idu1 rs2_data", false,-1, 63,0);
         tracep->declBit(c+95,"ysyx_22051013_rvcpu idu1 rd_ena", false,-1);
         tracep->declBus(c+92,"ysyx_22051013_rvcpu idu1 rd_addr", false,-1, 4,0);
         tracep->declBus(c+102,"ysyx_22051013_rvcpu idu1 alusrc_o", false,-1, 7,0);
@@ -85,7 +85,7 @@ void Vysyx_22051013_rvcpu___024root__traceInitSub0(Vysyx_22051013_rvcpu___024roo
         tracep->declBus(c+7,"ysyx_22051013_rvcpu idu1 rs1", false,-1, 4,0);
         tracep->declBus(c+8,"ysyx_22051013_rvcpu idu1 rs2", false,-1, 4,0);
         tracep->declBit(c+116,"ysyx_22051013_rvcpu idu1 imm_ena", false,-1);
-        tracep->declBit(c+229,"ysyx_22051013_rvcpu idu1 decode rst", false,-1);
+        tracep->declBit(c+227,"ysyx_22051013_rvcpu idu1 decode rst", false,-1);
         tracep->declBus(c+1,"ysyx_22051013_rvcpu idu1 decode inst", false,-1, 31,0);
         tracep->declBit(c+93,"ysyx_22051013_rvcpu idu1 decode rs1_ena", false,-1);
         tracep->declBit(c+94,"ysyx_22051013_rvcpu idu1 decode rs2_ena", false,-1);
@@ -168,7 +168,7 @@ void Vysyx_22051013_rvcpu___024root__traceInitSub0(Vysyx_22051013_rvcpu___024roo
         tracep->declBit(c+170,"ysyx_22051013_rvcpu idu1 decode inst_remuw", false,-1);
         tracep->declBit(c+171,"ysyx_22051013_rvcpu idu1 decode inst_remw", false,-1);
         tracep->declBit(c+172,"ysyx_22051013_rvcpu idu1 decode inst_ebreak", false,-1);
-        tracep->declBit(c+229,"ysyx_22051013_rvcpu exu2 rst", false,-1);
+        tracep->declBit(c+227,"ysyx_22051013_rvcpu exu2 rst", false,-1);
         tracep->declQuad(c+105,"ysyx_22051013_rvcpu exu2 op1", false,-1, 63,0);
         tracep->declQuad(c+107,"ysyx_22051013_rvcpu exu2 op2", false,-1, 63,0);
         tracep->declQuad(c+96,"ysyx_22051013_rvcpu exu2 imm", false,-1, 63,0);
@@ -205,48 +205,45 @@ void Vysyx_22051013_rvcpu___024root__traceInitSub0(Vysyx_22051013_rvcpu___024roo
         tracep->declQuad(c+213,"ysyx_22051013_rvcpu exu2 op1_remw_op2", false,-1, 63,0);
         tracep->declQuad(c+215,"ysyx_22051013_rvcpu exu2 op1_remuw_op2", false,-1, 63,0);
         tracep->declBit(c+217,"ysyx_22051013_rvcpu exu2 ex_branch", false,-1);
-        tracep->declBit(c+229,"ysyx_22051013_rvcpu lsu3 rst", false,-1);
-        tracep->declBit(c+228,"ysyx_22051013_rvcpu lsu3 clk", false,-1);
+        tracep->declBit(c+227,"ysyx_22051013_rvcpu lsu3 rst", false,-1);
+        tracep->declBit(c+226,"ysyx_22051013_rvcpu lsu3 clk", false,-1);
         tracep->declQuad(c+109,"ysyx_22051013_rvcpu lsu3 alu_res", false,-1, 63,0);
         tracep->declQuad(c+107,"ysyx_22051013_rvcpu lsu3 store_data", false,-1, 63,0);
         tracep->declBus(c+100,"ysyx_22051013_rvcpu lsu3 ls_ctl", false,-1, 3,0);
-        tracep->declQuad(c+230,"ysyx_22051013_rvcpu lsu3 ls_data_o", false,-1, 63,0);
-        tracep->declQuad(c+240,"ysyx_22051013_rvcpu lsu3 raddr", false,-1, 63,0);
+        tracep->declQuad(c+228,"ysyx_22051013_rvcpu lsu3 ls_data_o", false,-1, 63,0);
+        tracep->declQuad(c+238,"ysyx_22051013_rvcpu lsu3 raddr", false,-1, 63,0);
         tracep->declQuad(c+240,"ysyx_22051013_rvcpu lsu3 waddr", false,-1, 63,0);
-        tracep->declBus(c+256,"ysyx_22051013_rvcpu lsu3 rlen", false,-1, 7,0);
-        tracep->declBus(c+218,"ysyx_22051013_rvcpu lsu3 wlen", false,-1, 7,0);
-        tracep->declQuad(c+242,"ysyx_22051013_rvcpu lsu3 data_i", false,-1, 63,0);
-        tracep->declQuad(c+219,"ysyx_22051013_rvcpu lsu3 data_o", false,-1, 63,0);
-        tracep->declBit(c+221,"ysyx_22051013_rvcpu lsu3 re", false,-1);
-        tracep->declBit(c+244,"ysyx_22051013_rvcpu lsu3 we", false,-1);
-        tracep->declQuad(c+245,"ysyx_22051013_rvcpu lsu3 load_data", false,-1, 63,0);
-        tracep->declBus(c+222,"ysyx_22051013_rvcpu lsu3 byte_sel", false,-1, 2,0);
-        tracep->declBus(c+223,"ysyx_22051013_rvcpu lsu3 half_sel", false,-1, 1,0);
-        tracep->declBit(c+224,"ysyx_22051013_rvcpu lsu3 word_sel", false,-1);
-        tracep->declBus(c+225,"ysyx_22051013_rvcpu lsu3 data_byte", false,-1, 7,0);
-        tracep->declBus(c+226,"ysyx_22051013_rvcpu lsu3 data_half", false,-1, 15,0);
-        tracep->declBus(c+227,"ysyx_22051013_rvcpu lsu3 data_word", false,-1, 31,0);
-        tracep->declQuad(c+247,"ysyx_22051013_rvcpu lsu3 sb_data", false,-1, 63,0);
-        tracep->declQuad(c+249,"ysyx_22051013_rvcpu lsu3 sh_data", false,-1, 63,0);
-        tracep->declQuad(c+251,"ysyx_22051013_rvcpu lsu3 sw_data", false,-1, 63,0);
-        tracep->declBus(c+253,"ysyx_22051013_rvcpu lsu3 sb_mask", false,-1, 7,0);
-        tracep->declBus(c+254,"ysyx_22051013_rvcpu lsu3 sh_mask", false,-1, 7,0);
-        tracep->declBus(c+255,"ysyx_22051013_rvcpu lsu3 sw_mask", false,-1, 7,0);
-        tracep->declBit(c+229,"ysyx_22051013_rvcpu wbu4 rst", false,-1);
-        tracep->declQuad(c+230,"ysyx_22051013_rvcpu wbu4 ls_rd_data", false,-1, 63,0);
+        tracep->declBus(c+252,"ysyx_22051013_rvcpu lsu3 rlen", false,-1, 7,0);
+        tracep->declBus(c+242,"ysyx_22051013_rvcpu lsu3 wlen", false,-1, 7,0);
+        tracep->declQuad(c+243,"ysyx_22051013_rvcpu lsu3 data_i", false,-1, 63,0);
+        tracep->declQuad(c+245,"ysyx_22051013_rvcpu lsu3 data_o", false,-1, 63,0);
+        tracep->declBit(c+218,"ysyx_22051013_rvcpu lsu3 re", false,-1);
+        tracep->declBit(c+247,"ysyx_22051013_rvcpu lsu3 we", false,-1);
+        tracep->declQuad(c+248,"ysyx_22051013_rvcpu lsu3 load_data", false,-1, 63,0);
+        tracep->declBus(c+219,"ysyx_22051013_rvcpu lsu3 byte_sel", false,-1, 2,0);
+        tracep->declBus(c+220,"ysyx_22051013_rvcpu lsu3 half_sel", false,-1, 1,0);
+        tracep->declBit(c+221,"ysyx_22051013_rvcpu lsu3 word_sel", false,-1);
+        tracep->declBus(c+222,"ysyx_22051013_rvcpu lsu3 data_byte", false,-1, 7,0);
+        tracep->declBus(c+223,"ysyx_22051013_rvcpu lsu3 data_half", false,-1, 15,0);
+        tracep->declBus(c+224,"ysyx_22051013_rvcpu lsu3 data_word", false,-1, 31,0);
+        tracep->declBus(c+225,"ysyx_22051013_rvcpu lsu3 sb_mask", false,-1, 7,0);
+        tracep->declBus(c+250,"ysyx_22051013_rvcpu lsu3 sh_mask", false,-1, 7,0);
+        tracep->declBus(c+251,"ysyx_22051013_rvcpu lsu3 sw_mask", false,-1, 7,0);
+        tracep->declBit(c+227,"ysyx_22051013_rvcpu wbu4 rst", false,-1);
+        tracep->declQuad(c+228,"ysyx_22051013_rvcpu wbu4 ls_rd_data", false,-1, 63,0);
         tracep->declBus(c+101,"ysyx_22051013_rvcpu wbu4 wb_ctl", false,-1, 1,0);
         tracep->declQuad(c+109,"ysyx_22051013_rvcpu wbu4 alu_res", false,-1, 63,0);
-        tracep->declQuad(c+232,"ysyx_22051013_rvcpu wbu4 wb_data", false,-1, 63,0);
-        tracep->declBit(c+228,"ysyx_22051013_rvcpu reg3 clk", false,-1);
-        tracep->declBit(c+229,"ysyx_22051013_rvcpu reg3 rst", false,-1);
+        tracep->declQuad(c+230,"ysyx_22051013_rvcpu wbu4 wb_data", false,-1, 63,0);
+        tracep->declBit(c+226,"ysyx_22051013_rvcpu reg3 clk", false,-1);
+        tracep->declBit(c+227,"ysyx_22051013_rvcpu reg3 rst", false,-1);
         tracep->declBus(c+92,"ysyx_22051013_rvcpu reg3 waddr", false,-1, 4,0);
-        tracep->declQuad(c+232,"ysyx_22051013_rvcpu reg3 wdata", false,-1, 63,0);
+        tracep->declQuad(c+230,"ysyx_22051013_rvcpu reg3 wdata", false,-1, 63,0);
         tracep->declBit(c+95,"ysyx_22051013_rvcpu reg3 wen", false,-1);
         tracep->declBus(c+82,"ysyx_22051013_rvcpu reg3 raddr1", false,-1, 4,0);
-        tracep->declQuad(c+234,"ysyx_22051013_rvcpu reg3 rdata1", false,-1, 63,0);
+        tracep->declQuad(c+232,"ysyx_22051013_rvcpu reg3 rdata1", false,-1, 63,0);
         tracep->declBit(c+93,"ysyx_22051013_rvcpu reg3 ren1", false,-1);
         tracep->declBus(c+83,"ysyx_22051013_rvcpu reg3 raddr2", false,-1, 4,0);
-        tracep->declQuad(c+236,"ysyx_22051013_rvcpu reg3 rdata2", false,-1, 63,0);
+        tracep->declQuad(c+234,"ysyx_22051013_rvcpu reg3 rdata2", false,-1, 63,0);
         tracep->declBit(c+94,"ysyx_22051013_rvcpu reg3 ren2", false,-1);
         {int i; for (i=0; i<32; i++) {
                 tracep->declQuad(c+17+i*2,"ysyx_22051013_rvcpu reg3 regs", true,(i+0), 63,0);}}
@@ -635,20 +632,19 @@ void Vysyx_22051013_rvcpu___024root__traceFullSub0(Vysyx_22051013_rvcpu___024roo
                                                      ((0x70U 
                                                        == (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_alu_sel)) 
                                                       & (~ (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__exu2__DOT__op1_lt_op2)))))))))));
-        tracep->fullCData(oldp+218,(vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__wlen),8);
-        tracep->fullQData(oldp+219,(vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__data_o),64);
-        tracep->fullBit(oldp+221,(vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__re));
-        tracep->fullCData(oldp+222,((7U & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata))),3);
-        tracep->fullCData(oldp+223,((3U & (IData)((vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
+        tracep->fullBit(oldp+218,(vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__re));
+        tracep->fullCData(oldp+219,((7U & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata))),3);
+        tracep->fullCData(oldp+220,((3U & (IData)((vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
                                                    >> 1U)))),2);
-        tracep->fullBit(oldp+224,((1U & (IData)((vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
+        tracep->fullBit(oldp+221,((1U & (IData)((vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
                                                  >> 2U)))));
-        tracep->fullCData(oldp+225,(vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__data_byte),8);
-        tracep->fullSData(oldp+226,(vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__data_half),16);
-        tracep->fullIData(oldp+227,(vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__data_word),32);
-        tracep->fullBit(oldp+228,(vlSelf->clk));
-        tracep->fullBit(oldp+229,(vlSelf->rst));
-        tracep->fullQData(oldp+230,(((IData)(vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__re)
+        tracep->fullCData(oldp+222,(vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__data_byte),8);
+        tracep->fullSData(oldp+223,(vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__data_half),16);
+        tracep->fullIData(oldp+224,(vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__data_word),32);
+        tracep->fullCData(oldp+225,(vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__sb_mask),8);
+        tracep->fullBit(oldp+226,(vlSelf->clk));
+        tracep->fullBit(oldp+227,(vlSelf->rst));
+        tracep->fullQData(oldp+228,(((IData)(vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__re)
                                       ? ((IData)(vlSelf->rst)
                                           ? 0ULL : 
                                          ((8U & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
@@ -697,7 +693,7 @@ void Vysyx_22051013_rvcpu___024root__traceFullSub0(Vysyx_22051013_rvcpu___024roo
                                                     : 0ULL)))
                                            : 0ULL))
                                       : 0ULL)),64);
-        tracep->fullQData(oldp+232,(((IData)(vlSelf->rst)
+        tracep->fullQData(oldp+230,(((IData)(vlSelf->rst)
                                       ? 0ULL : ((1U 
                                                  == (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_wb_ctl))
                                                  ? 
@@ -762,7 +758,7 @@ void Vysyx_22051013_rvcpu___024root__traceFullSub0(Vysyx_22051013_rvcpu___024roo
                                                   == (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_wb_ctl))
                                                   ? vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata
                                                   : 0ULL)))),64);
-        tracep->fullQData(oldp+234,((((~ (IData)(vlSelf->rst)) 
+        tracep->fullQData(oldp+232,((((~ (IData)(vlSelf->rst)) 
                                       & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_reg_rs1_ena))
                                       ? vlSelf->ysyx_22051013_rvcpu__DOT__reg3__DOT__regs
                                      [((IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_reg_rs1_ena)
@@ -770,7 +766,7 @@ void Vysyx_22051013_rvcpu___024root__traceFullSub0(Vysyx_22051013_rvcpu___024roo
                                                            (vlSelf->ysyx_22051013_rvcpu__DOT__ifu0__DOT__rinst 
                                                             >> 0xfU)))
                                         : 0U)] : 0ULL)),64);
-        tracep->fullQData(oldp+236,((((~ (IData)(vlSelf->rst)) 
+        tracep->fullQData(oldp+234,((((~ (IData)(vlSelf->rst)) 
                                       & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_reg_rs2_ena))
                                       ? vlSelf->ysyx_22051013_rvcpu__DOT__reg3__DOT__regs
                                      [((IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_reg_rs2_ena)
@@ -778,19 +774,109 @@ void Vysyx_22051013_rvcpu___024root__traceFullSub0(Vysyx_22051013_rvcpu___024roo
                                                            (vlSelf->ysyx_22051013_rvcpu__DOT__ifu0__DOT__rinst 
                                                             >> 0x14U)))
                                         : 0U)] : 0ULL)),64);
-        tracep->fullQData(oldp+238,(((IData)(vlSelf->rst)
+        tracep->fullQData(oldp+236,(((IData)(vlSelf->rst)
                                       ? 0x80000000ULL
                                       : (4ULL + vlSelf->ysyx_22051013_rvcpu__DOT__if_id_pc))),64);
-        tracep->fullQData(oldp+240,(((IData)(vlSelf->rst)
+        tracep->fullQData(oldp+238,(((IData)(vlSelf->rst)
                                       ? 0ULL : (0xfffffffffffffff8ULL 
                                                 & vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata))),64);
-        tracep->fullQData(oldp+242,(vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__data_i),64);
-        tracep->fullBit(oldp+244,((1U & ((~ ((IData)(vlSelf->rst) 
+        tracep->fullQData(oldp+240,(((IData)(vlSelf->rst)
+                                      ? 0ULL : vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata)),64);
+        tracep->fullCData(oldp+242,(((IData)(vlSelf->rst)
+                                      ? 0U : ((8U & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                               ? 0U
+                                               : ((4U 
+                                                   & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                                   ? 
+                                                  ((2U 
+                                                    & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                                    ? 0U
+                                                    : 
+                                                   ((1U 
+                                                     & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                                     ? 0xffU
+                                                     : 
+                                                    ((IData)(vlSelf->rst)
+                                                      ? 0U
+                                                      : 
+                                                     ((1U 
+                                                       & (IData)(
+                                                                 (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
+                                                                  >> 2U)))
+                                                       ? 0xf0U
+                                                       : 0xfU))))
+                                                   : 
+                                                  ((2U 
+                                                    & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                                    ? 
+                                                   ((1U 
+                                                     & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                                     ? 0U
+                                                     : 
+                                                    ((IData)(vlSelf->rst)
+                                                      ? 0U
+                                                      : 
+                                                     ((0U 
+                                                       == 
+                                                       (3U 
+                                                        & (IData)(
+                                                                  (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
+                                                                   >> 1U))))
+                                                       ? 3U
+                                                       : 
+                                                      ((1U 
+                                                        == 
+                                                        (3U 
+                                                         & (IData)(
+                                                                   (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
+                                                                    >> 1U))))
+                                                        ? 0xcU
+                                                        : 
+                                                       ((2U 
+                                                         == 
+                                                         (3U 
+                                                          & (IData)(
+                                                                    (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
+                                                                     >> 1U))))
+                                                         ? 0x30U
+                                                         : 0xc0U)))))
+                                                    : 
+                                                   ((1U 
+                                                     & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                                     ? (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__sb_mask)
+                                                     : 0U)))))),8);
+        tracep->fullQData(oldp+243,(vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__data_i),64);
+        tracep->fullQData(oldp+245,(((IData)(vlSelf->rst)
+                                      ? 0ULL : ((8U 
+                                                 & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                                 ? 0ULL
+                                                 : 
+                                                ((4U 
+                                                  & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                                  ? 
+                                                 ((2U 
+                                                   & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                                   ? 0ULL
+                                                   : vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)
+                                                  : 
+                                                 ((2U 
+                                                   & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                                   ? 
+                                                  ((1U 
+                                                    & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                                    ? 0ULL
+                                                    : vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)
+                                                   : 
+                                                  ((1U 
+                                                    & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
+                                                    ? vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2
+                                                    : 0ULL)))))),64);
+        tracep->fullBit(oldp+247,((1U & ((~ ((IData)(vlSelf->rst) 
                                              | (0U 
                                                 == (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl)))) 
                                          & (~ ((IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl) 
                                                >> 3U))))));
-        tracep->fullQData(oldp+245,(((IData)(vlSelf->rst)
+        tracep->fullQData(oldp+248,(((IData)(vlSelf->rst)
                                       ? 0ULL : ((8U 
                                                  & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ls_ctl))
                                                  ? 
@@ -841,152 +927,7 @@ void Vysyx_22051013_rvcpu___024root__traceFullSub0(Vysyx_22051013_rvcpu___024roo
                                                     | (QData)((IData)(vlSelf->ysyx_22051013_rvcpu__DOT__lsu3__DOT__data_byte)))
                                                     : 0ULL)))
                                                  : 0ULL))),64);
-        tracep->fullQData(oldp+247,(((IData)(vlSelf->rst)
-                                      ? 0ULL : ((1U 
-                                                 & (IData)(
-                                                           (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
-                                                            >> 2U)))
-                                                 ? 
-                                                ((1U 
-                                                  & (IData)(
-                                                            (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
-                                                             >> 1U)))
-                                                  ? 
-                                                 ((1U 
-                                                   & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata))
-                                                   ? 
-                                                  ((QData)((IData)(
-                                                                   (0xffU 
-                                                                    & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)))) 
-                                                   << 0x38U)
-                                                   : 
-                                                  ((QData)((IData)(
-                                                                   (0xffU 
-                                                                    & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)))) 
-                                                   << 0x30U))
-                                                  : 
-                                                 ((1U 
-                                                   & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata))
-                                                   ? 
-                                                  ((QData)((IData)(
-                                                                   (0xffU 
-                                                                    & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)))) 
-                                                   << 0x28U)
-                                                   : 
-                                                  ((QData)((IData)(
-                                                                   (0xffU 
-                                                                    & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)))) 
-                                                   << 0x20U)))
-                                                 : 
-                                                ((1U 
-                                                  & (IData)(
-                                                            (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
-                                                             >> 1U)))
-                                                  ? 
-                                                 ((1U 
-                                                   & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata))
-                                                   ? 
-                                                  ((QData)((IData)(
-                                                                   (0xffU 
-                                                                    & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)))) 
-                                                   << 0x18U)
-                                                   : 
-                                                  ((QData)((IData)(
-                                                                   (0xffU 
-                                                                    & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)))) 
-                                                   << 0x10U))
-                                                  : 
-                                                 ((1U 
-                                                   & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata))
-                                                   ? 
-                                                  ((QData)((IData)(
-                                                                   (0xffU 
-                                                                    & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)))) 
-                                                   << 8U)
-                                                   : (QData)((IData)(
-                                                                     (0xffU 
-                                                                      & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2))))))))),64);
-        tracep->fullQData(oldp+249,(((IData)(vlSelf->rst)
-                                      ? 0ULL : ((0U 
-                                                 == 
-                                                 (3U 
-                                                  & (IData)(
-                                                            (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
-                                                             >> 1U))))
-                                                 ? (QData)((IData)(
-                                                                   (0xffffU 
-                                                                    & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2))))
-                                                 : 
-                                                ((1U 
-                                                  == 
-                                                  (3U 
-                                                   & (IData)(
-                                                             (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
-                                                              >> 1U))))
-                                                  ? 
-                                                 ((QData)((IData)(
-                                                                  (0xffffU 
-                                                                   & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)))) 
-                                                  << 0x10U)
-                                                  : 
-                                                 ((2U 
-                                                   == 
-                                                   (3U 
-                                                    & (IData)(
-                                                              (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
-                                                               >> 1U))))
-                                                   ? 
-                                                  ((QData)((IData)(
-                                                                   (0xffffU 
-                                                                    & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)))) 
-                                                   << 0x20U)
-                                                   : 
-                                                  ((QData)((IData)(
-                                                                   (0xffffU 
-                                                                    & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)))) 
-                                                   << 0x30U)))))),64);
-        tracep->fullQData(oldp+251,(((IData)(vlSelf->rst)
-                                      ? 0ULL : ((1U 
-                                                 & (IData)(
-                                                           (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
-                                                            >> 2U)))
-                                                 ? 
-                                                ((QData)((IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2)) 
-                                                 << 0x20U)
-                                                 : (QData)((IData)(vlSelf->ysyx_22051013_rvcpu__DOT__id_ex_op2))))),64);
-        tracep->fullCData(oldp+253,(((IData)(vlSelf->rst)
-                                      ? 0U : ((1U & (IData)(
-                                                            (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
-                                                             >> 2U)))
-                                               ? ((1U 
-                                                   & (IData)(
-                                                             (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
-                                                              >> 1U)))
-                                                   ? 
-                                                  ((1U 
-                                                    & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata))
-                                                    ? 0x80U
-                                                    : 0x40U)
-                                                   : 
-                                                  ((1U 
-                                                    & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata))
-                                                    ? 0x20U
-                                                    : 0x10U))
-                                               : ((1U 
-                                                   & (IData)(
-                                                             (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
-                                                              >> 1U)))
-                                                   ? 
-                                                  ((1U 
-                                                    & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata))
-                                                    ? 8U
-                                                    : 4U)
-                                                   : 
-                                                  ((1U 
-                                                    & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata))
-                                                    ? 2U
-                                                    : 1U))))),8);
-        tracep->fullCData(oldp+254,(((IData)(vlSelf->rst)
+        tracep->fullCData(oldp+250,(((IData)(vlSelf->rst)
                                       ? 0U : ((0U == 
                                                (3U 
                                                 & (IData)(
@@ -1009,12 +950,12 @@ void Vysyx_22051013_rvcpu___024root__traceFullSub0(Vysyx_22051013_rvcpu___024roo
                                                                 >> 1U))))
                                                     ? 0x30U
                                                     : 0xc0U))))),8);
-        tracep->fullCData(oldp+255,(((IData)(vlSelf->rst)
+        tracep->fullCData(oldp+251,(((IData)(vlSelf->rst)
                                       ? 0U : ((1U & (IData)(
                                                             (vlSelf->ysyx_22051013_rvcpu__DOT__ex_aludata 
                                                              >> 2U)))
                                                ? 0xf0U
                                                : 0xfU))),8);
-        tracep->fullCData(oldp+256,(8U),8);
+        tracep->fullCData(oldp+252,(8U),8);
     }
 }

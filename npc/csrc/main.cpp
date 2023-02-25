@@ -32,11 +32,12 @@ extern "C" void if_id_thepc(long long thepc_data, const svBitVecVal* the_inst){
 }
 
 extern "C" void pmem_read(long long raddr, long long* rdata, char rlen){
+
+  if (likely(in_pmem(raddr))) {
+    *rdata = host_read(gi_to_hi(raddr),rlen);
 #ifdef CONFIG_MTRACE
       Log("Read from memory at %#.8llx for %d bytes,content is %#.8llx.",raddr,rlen,*rdata);
 #endif
-  if (likely(in_pmem(raddr))) {
-    *rdata = host_read(gi_to_hi(raddr),rlen);
     return;
     }
    IFDEF(CONFIG_DEVICE, *rdata = mmio_read(raddr, rlen);return);
@@ -49,25 +50,39 @@ extern "C" void pmem_write(long long waddr, long long wdata, char wlen){
 #ifdef CONFIG_MTRACE
    Log("Write to memory at %#.8llx with mask %x,content is %#.8llx",waddr,wlen,wdata);
 #endif
-  unsigned int len=0;
+  int len=0;
+
+  //printf("%lx\n",addr);
   if (likely(in_pmem(waddr))) {
   for (int i = 0; i < 8; ++i) {
     if (wlen & 0x01 & 1) {
-      //printf("%llx\n", waddr);
-      host_write(gi_to_hi(waddr+i),1,wdata);
+      //printf("%llx\n", (waddr & ~0x7ull)+i);
+      uint64_t addr = waddr & ~0x7ull;
+      host_write(gi_to_hi(addr+i),1,wdata);
+      wdata >>= 8;
       }
-    wdata >>= 8, wlen >>= 1;
+    wlen >>= 1;
     }
    return; 
   }
   else{
-    if(wlen&0xff){len=8;}
-    if(wlen&0x0f || wlen & 0xf0){len=4;if((wlen&0xf0) && (waddr == 0xa0000100)){waddr+=4; wdata>>=32;}}
+    uint64_t ulen = atoi(&wlen);
+    //printf("%lx\n",wlen);
+    switch(wlen){
+      case 1 : len = 1; break;
+      case 15 : case -16 : len = 4; break;
+      case 0xff : len=8; break;
+      default : len = 0; break;
+      
+      }
+     // printf("%u\n",len);
+   /* if(wlen&0xff){len=8;}
+    if(wlen&0x0f || wlen & 0xf0){len=4;}
     if(wlen&0x03 || wlen&0x0c || wlen&0x30 || wlen&0xc0){len=2;}
     if(wlen&0x01 || wlen&0x02 || wlen&0x04 || wlen&0x08 || wlen&0x10 || wlen&0x20 || wlen&0x40 || wlen&0x80){len=1;}
-   // printf("%u\n",len);
+    //printf("%u\n",len);*/
     }
-    if(waddr == 0xa0000104){printf("sync write %llx\n",wdata);}
+    //if(waddr == 0xa0000104){printf("sync write %llx\n",wdata);}
   IFDEF(CONFIG_DEVICE, mmio_write(waddr, len, wdata); return);
 }
 

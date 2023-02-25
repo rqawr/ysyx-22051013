@@ -66,7 +66,7 @@ word_t map_read(paddr_t addr, int len, IOMap *map) {
 
 void map_write(paddr_t addr, int len, word_t data, IOMap *map) {
 #ifdef CONFIG_DTRACE
-    Log("%#x\t write data to %s", addr, map ? map->name : "No device");
+    Log("%#x\t write data = %lx to %s", addr,data, map ? map->name : "No device");
  #endif
   assert(len >= 1 && len <= 8);
   check_bound(map, addr);
