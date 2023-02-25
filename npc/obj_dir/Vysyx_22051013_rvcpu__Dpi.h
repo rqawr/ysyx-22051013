@@ -21,7 +21,7 @@ extern "C" {
     extern void if_id_thepc(long long thepc_data, const svBitVecVal* the_inst);
     // DPI import at vsrc//ifu.v:34:30
     extern void pmem_read(long long raddr, long long* rdata, char rlen);
-    // DPI import at vsrc//lsu.v:227:31
+    // DPI import at vsrc//lsu.v:228:31
     extern void pmem_write(long long waddr, long long wdata, char wlen);
 
 #ifdef __cplusplus

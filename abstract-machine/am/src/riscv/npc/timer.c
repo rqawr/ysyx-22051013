@@ -1,10 +1,18 @@
 #include <am.h>
+#include "../riscv.h"
+#include <stdio.h>
+uint64_t init_time_us;
 
 void __am_timer_init() {
+  init_time_us = inll(RTC_ADDR);
+   //printf("%d,,, \n",init_time_us);
 }
 
 void __am_timer_uptime(AM_TIMER_UPTIME_T *uptime) {
-  uptime->us = 0;
+  uint64_t now_time_us = inll(RTC_ADDR);
+  uint64_t time_us = now_time_us ;
+  uptime->us = time_us;
+  //printf("%d,,, \n",now_time_us);
 }
 
 void __am_timer_rtc(AM_TIMER_RTC_T *rtc) {

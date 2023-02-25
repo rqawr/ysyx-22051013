@@ -6,7 +6,7 @@
 void init_ftrace(const char *elf_file);
 void init_mem();
 void init_difftest(char *ref_so_file, long img_size);
-//void init_device();
+void init_device();
 void init_sdb();
 void init_disasm(const char *triple);
 
@@ -90,6 +90,9 @@ void init_monitor(int argc, char *argv[]) {
 
   /* Initialize memory. */
   init_mem();
+  
+  /* Initialize devices. */
+  IFDEF(CONFIG_DEVICE, init_device());
 
   /* Initialize devices. */
 //  IFDEF(CONFIG_DEVICE, init_device());

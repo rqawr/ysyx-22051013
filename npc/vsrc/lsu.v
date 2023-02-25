@@ -7,6 +7,7 @@
  /* verilator lint_off DECLFILENAME */
  module ysyx_22051013_lsu(
   	input     wire                    		rst       ,
+  	input     wire                    		clk       ,
  	input     wire [`ysyx_22051013_DATA]            alu_res   ,
  	input     wire [`ysyx_22051013_DATA]            store_data ,
  	input     wire [3:0]               		ls_ctl ,
@@ -227,10 +228,10 @@ end
  import "DPI-C" function void pmem_write( input longint waddr, input longint wdata, input byte wlen);
   
   
-always @(*) begin
+always @(negedge clk) begin
   if(re) begin
   pmem_read(raddr, data_i, rlen);end
-  else begin data_i = `ysyx_22051013_ZERO64;end
+  //else begin data_i = `ysyx_22051013_ZERO64;end
   if(we)begin
   pmem_write(waddr, data_o , wlen);end
 

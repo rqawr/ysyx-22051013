@@ -19,7 +19,7 @@ static bool g_print_step = false;
 int flag = 0;
 int difftest_ena = 0;
 
-//void device_update();
+void device_update();
 
 #ifdef CONFIG_ITRACE_IRINGBUF
 int ringbufnum = 15;
@@ -116,7 +116,7 @@ static void execute(uint64_t n) {
     g_nr_guest_inst ++;
     trace_and_difftest(&s, cpu.pc);
     if (npc_state.state != NPC_RUNNING) break;
-   // IFDEF(CONFIG_DEVICE, device_update());
+    IFDEF(CONFIG_DEVICE, device_update());
   }
 }
 

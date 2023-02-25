@@ -108,6 +108,7 @@ ysyx_22051013_exu exu2(
 
 ysyx_22051013_lsu lsu3(
  	.rst(rst)		,
+ 	.clk(clk)	,
  	.alu_res(ex_aludata)	,
  	.store_data(ex_ls_store_data)	,
  	.ls_ctl	(id_ls_ctl) ,
@@ -116,8 +117,7 @@ ysyx_22051013_lsu lsu3(
 
 ysyx_22051013_wbu wbu4(
  	.rst(rst),
- 	.
- 	ls_rd_data(ls_wb_data)	,
+ 	.ls_rd_data(ls_wb_data)	,
  	.wb_ctl(id_wb_ctl)	,
  	.alu_res(ex_aludata)	,
  	.wb_data(wb_reg_rd_data)	
