@@ -3,6 +3,17 @@
 
 static void strace(Context *c);
 
+#define STRACE 1
+#undef STRACE
+
+static void strace(Context *c){
+  #ifdef STRACE
+    //TODO: 缺一个trace
+    printf("System call trace\nmcause\t\t\t\tGPR1\t\t\t\tGPR2\t\t\t\tGPR3\t\t\t\tGPR4 \n0x%x\t\t\t\t %d\t\t\t\t 0x%x\t\t\t\t 0x%x\t\t\t\t 0x%x\n",
+      c->mcause, c->GPR1, c->GPR2, c->GPR3, c->GPR4);
+  #endif
+}
+
 void do_syscall(Context *c) {
   uintptr_t a[4];
   a[0] = c->GPR1;
@@ -12,6 +23,7 @@ void do_syscall(Context *c) {
       halt(0);
       break;
     case SYS_yield:
+   //   printf("sys_yield\n");
       yield();
       c->GPRx = 0;
       break;
@@ -30,13 +42,4 @@ void do_syscall(Context *c) {
   }
 }
 
-#define STRACE 1
-//#undef STRACE
 
-static void strace(Context *c){
-  #ifdef STRACE
-    //TODO: 缺一个trace
-    printf("System call trace\nmcause\t\t\t\tGPR1\t\t\t\tGPR2\t\t\t\tGPR3\t\t\t\tGPR4 \n0x%x\t\t\t\t %d\t\t\t\t 0x%x\t\t\t\t 0x%x\t\t\t\t 0x%x\n",
-      c->mcause, c->GPR1, c->GPR2, c->GPR3, c->GPR4);
-  #endif
-}

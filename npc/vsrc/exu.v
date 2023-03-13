@@ -4,8 +4,10 @@
 */
  
  `include "define.v"
+ `include "csr.v"
  /* verilator lint_off DECLFILENAME */
 module ysyx_22051013_exu(
+	input wire          clk,
 	input wire          rst,
 	input wire [`ysyx_22051013_DATA] op1,
 	input wire [`ysyx_22051013_DATA] op2,
@@ -14,11 +16,12 @@ module ysyx_22051013_exu(
 	input wire            jump_i   ,
 	input wire [ 7:0]     alu_sel   ,
 	input wire            branch_i ,
+	input wire [3:0]      csr_ctl  ,
 	
 	output wire [`ysyx_22051013_REG] store_data ,
 	output wire [`ysyx_22051013_PC]   jump_pc_o  ,
 	output wire            		ex_pcsrc_o ,
-	output reg [`ysyx_22051013_DATA] alu_res
+	output reg [`ysyx_22051013_DATA] exu_res
 );
 // addxx
 wire     [`ysyx_22051013_DATA]  op1_add_op2   = op1 + op2 ;
@@ -63,6 +66,9 @@ wire     [`ysyx_22051013_DATA]   rem = op1 % op2 ;
 wire     [31:0]     		remw  = $signed(op1[31:0]) % $signed(op2[31:0])   ;
 wire     [`ysyx_22051013_DATA]  op1_remw_op2       = {{32{remw[31]}},remw}    ;
 wire     [`ysyx_22051013_DATA]  op1_remuw_op2      = {{32{rem[31]}},rem[31:0]}    ;
+
+reg [`ysyx_22051013_DATA] alu_res ;
+
 
 always@(*)begin
   if(rst == `ysyx_22051013_RSTABLE) begin
@@ -133,13 +139,54 @@ end
 
 
 //out to ifu
-assign ex_pcsrc_o = jump_i | ex_branch;
+assign ex_pcsrc_o = jump_i | ex_branch | csr_ctl[1] | csr_ctl[0] ;
 assign jump_pc_o = (alu_sel == `INST_JAL | branch_i ) ? pc_i + imm : 
 		   (alu_sel == `INST_JALR) ? op1 + imm :
+		   (csr_ctl[1] | csr_ctl[0]) ? read_csr_data :
 		   `ysyx_22051013_ZERO64 ;
 		     
-		     
+//out to lsu		     
 assign store_data = op2 ;
 
+
+//csr
+wire [11:0]  csr_addr = (csr_ctl != 4'd0) ? imm[11:0] : 12'd0;
+wire  [`ysyx_22051013_DATA]    read_csr_data  ;
+reg   [`ysyx_22051013_DATA]    write_csr_data  ;
+reg   [`ysyx_22051013_REG]    mcause_value  ;
+
+wire [`ysyx_22051013_DATA] set_data     = read_csr_data | op1 ;
+wire [`ysyx_22051013_DATA] clear_data   = read_csr_data & (~op1) ;
+
+always @(*) begin
+  write_csr_data = `ysyx_22051013_ZERO64;
+  mcause_value = `ysyx_22051013_ZERO64;
+  case(alu_sel)
+  	`INST_ECALL : begin  write_csr_data = pc_i; mcause_value = op1;end
+				
+	`INST_CSRRW, `INST_CSRRWI :  begin write_csr_data = op1        ;end
+		 
+	`INST_CSRRS, `INST_CSRRSI :  begin write_csr_data = set_data   ;end
+	
+	`INST_CSRRC, `INST_CSRRCI :  begin write_csr_data = clear_data;	end
+	default : begin	
+           write_csr_data = `ysyx_22051013_ZERO64;
+           mcause_value = `ysyx_22051013_ZERO64;
+	end
+  endcase 
+end
+
+ ysyx_22051013_csr csr_operate(
+	.clk(clk)	,
+	.rst(rst)	,
+	.csr_ctl(csr_ctl)	,
+	.csr_addr(csr_addr)	,
+	.mcause_value(mcause_value),
+	.read_csr_data(read_csr_data),
+	.write_csr_data(write_csr_data)
+);
+
+//out to wbu
+assign exu_res = (csr_ctl != 4'd0) ? read_csr_data : alu_res ;
 
 endmodule

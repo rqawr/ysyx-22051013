@@ -66,7 +66,7 @@ extern "C" void pmem_write(long long waddr, long long wdata, char wlen){
    return; 
   }
   else{
-    uint64_t ulen = atoi(&wlen);
+    //uint64_t ulen = atoi(&wlen);
     //printf("%lx\n",wlen);
     switch(wlen){
       case 1 : len = 1; break;
@@ -120,6 +120,13 @@ extern "C" void difftest_dut_regs(long long Z0, long long ra, long long sp, long
   cpu.gpr[29] = t4;
   cpu.gpr[30] = t5;
   cpu.gpr[31] = t6;
+}
+
+extern "C" void difftest_dut_csr(long long csr_mstatus, long long csr_mtvec, long long csr_mepc, long long csr_mcause){
+    cpu.csr[0] = csr_mstatus;
+    cpu.csr[1] = csr_mtvec;
+    cpu.csr[2] = csr_mepc;    
+    cpu.csr[3] = csr_mcause;
 }
 
 extern "C" void ebreak(svBit ebreak_ena){

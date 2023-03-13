@@ -3,6 +3,14 @@
 #include "include/memory.h"
 
 #ifdef CONFIG_DIFFTEST
+
+static bool is_skip_ref = false;
+
+void difftest_skip_ref() {
+  is_skip_ref = true;
+  //printf("skip\n");
+  }
+  
 // Definations of Ref
 enum { DIFFTEST_TO_DUT, DIFFTEST_TO_REF };
 void (*ref_difftest_memcpy)(uint32_t addr, void *buf, size_t n, bool direction) = NULL;
@@ -45,9 +53,23 @@ static void checkregs(NPC_reg *ref, uint64_t pc) {
 
 void difftest_step(uint64_t pc, uint64_t npc ) {
   NPC_reg ref_r;
+  int t;
+  if (is_skip_ref) {
+    if(t==1){
+    //printf("step skip\n");
+    // to skip the checking of an instruction, just copy the reg state to reference design
+    ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF);
+    is_skip_ref = false;
+    t=0;
+    }
+    t=1;
+    return;
+
+  }
+  
   ref_difftest_exec(1);
   ref_difftest_regcpy(&ref_r, DIFFTEST_TO_DUT);
- // printf("%lx\n",ref_r.pc);
+  //printf("%lx\n",ref_r.pc);
   checkregs(&ref_r, pc);
   }
 #endif

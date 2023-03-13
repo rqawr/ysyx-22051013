@@ -1,5 +1,5 @@
 /*---------
-* Last modify date : 2022/2/16
+* Last modify date : 2022/3/8
 * Function : decode inst to control signal
 */
 
@@ -126,32 +126,40 @@ wire inst_mulw  = inst_type[6] &  ~funct3[2] & ~funct3[1] & ~funct3[0] & funct7[
 wire inst_remuw = inst_type[6] &  funct3[2] &  funct3[1] &  funct3[0]  & funct7[0] ;
 wire inst_remw  = inst_type[6] &  funct3[2] &  funct3[1] & ~funct3[0]  & funct7[0] ;
 
+
+wire inst_ecall  = inst_type[7] & ~funct3[2] & ~funct3[1] & ~funct3[0] && (i_imm == 12'd0)         ;
+wire inst_mret   = inst_type[7] & ~funct3[2] & ~funct3[1] & ~funct3[0] & funct7[3] & funct7[4];
+wire inst_csrrw  = inst_type[7] & ~funct3[2] & ~funct3[1] &  funct3[0]   ;
+wire inst_csrrs  = inst_type[7] & ~funct3[2] &  funct3[1] & ~funct3[0]   ;
+wire inst_csrrc  = inst_type[7] & ~funct3[2] &  funct3[1] &  funct3[0]   ;
+wire inst_csrrwi = inst_type[7] &  funct3[2] & ~funct3[1] &  funct3[0]   ;
+wire inst_csrrsi = inst_type[7] &  funct3[2] &  funct3[1] & ~funct3[0]   ;
+wire inst_csrrci = inst_type[7] &  funct3[2] &  funct3[1] &  funct3[0]   ;
 wire inst_ebreak = inst_type[7] & ~funct3[2] & ~funct3[1] & ~funct3[0] && (i_imm == 12'd1)         ;
 
-assign alu_ctl[7] = (rst == `ysyx_22051013_RSTABLE) ? 0 :   inst_srli | inst_xor | inst_auipc | inst_addw | inst_sraw | inst_ebreak | inst_sh | inst_sw | inst_bltu | inst_ld | inst_mulh | inst_div | inst_divw | inst_remu | inst_remuw ;
+assign alu_ctl[7] = (rst == `ysyx_22051013_RSTABLE) ? 0 :   inst_srli | inst_xor | inst_auipc | inst_addw | inst_sraw | inst_ebreak | inst_sh | inst_sw | inst_bltu | inst_ld | inst_mulh | inst_div | inst_divw | inst_remu | inst_remuw | inst_csrrw | inst_csrrwi  |  inst_csrrsi | inst_csrrci;
 
-assign alu_ctl[6] = (rst == `ysyx_22051013_RSTABLE) ? 0 :   inst_slli | inst_sltu | inst_xor | inst_lui | inst_sraiw | inst_srlw | inst_jalr | inst_sb | inst_bge | inst_bltu | inst_lw | inst_ld | inst_mul | inst_mulw | inst_divuw | inst_rem ;
+assign alu_ctl[6] = (rst == `ysyx_22051013_RSTABLE) ? 0 :   inst_slli | inst_sltu | inst_xor | inst_lui | inst_sraiw | inst_srlw | inst_jalr | inst_sb | inst_bge | inst_bltu | inst_lw | inst_ld | inst_mul | inst_mulw | inst_divuw | inst_rem | inst_mret | inst_csrrc | inst_csrrsi;
 
-assign alu_ctl[5] = (rst == `ysyx_22051013_RSTABLE) ? 0 :   inst_andi | inst_slt | inst_sltu | inst_and |inst_auipc | inst_srliw | inst_sllw | inst_jal | inst_blt | inst_bge | inst_bltu | inst_lh | inst_lw | inst_lwu | inst_mulh | inst_mulhu | inst_divu ;
+assign alu_ctl[5] = (rst == `ysyx_22051013_RSTABLE) ? 0 :   inst_andi | inst_slt | inst_sltu | inst_and |inst_auipc | inst_srliw | inst_sllw | inst_jal | inst_blt | inst_bge | inst_bltu | inst_lh | inst_lw | inst_lwu | inst_mulh | inst_mulhu | inst_divu | inst_ecall | inst_csrrw | inst_csrrs | inst_csrrci;
 
-assign alu_ctl[4] = (rst == `ysyx_22051013_RSTABLE) ? 0 :   inst_ori | inst_sll | inst_slt | inst_or | inst_lui |inst_slliw | inst_addw | inst_subw | inst_bne | inst_blt | inst_bge | inst_lb | inst_lh | inst_ld | inst_lhu | inst_mul | inst_mulh | inst_mulhu | inst_div | inst_remw ;
+assign alu_ctl[4] = (rst == `ysyx_22051013_RSTABLE) ? 0 :   inst_ori | inst_sll | inst_slt | inst_or | inst_lui |inst_slliw | inst_addw | inst_subw | inst_bne | inst_blt | inst_bge | inst_lb | inst_lh | inst_ld | inst_lhu | inst_mul | inst_mulh | inst_mulhu | inst_div | inst_remw | inst_mret | inst_csrrwi;
 
-assign alu_ctl[3] = (rst == `ysyx_22051013_RSTABLE) ? 0 :   inst_xori  | inst_sub | inst_sll  | inst_sra  | inst_and  | inst_addiw  | inst_sraiw | inst_sraw | inst_beq | inst_bne   | inst_blt | inst_bgeu  | inst_lb  | inst_lw   | inst_lbu | inst_lwu | inst_mul | inst_mulw | inst_div | inst_divw     ;
+assign alu_ctl[3] = (rst == `ysyx_22051013_RSTABLE) ? 0 :   inst_xori  | inst_sub | inst_sll  | inst_sra  | inst_and  | inst_addiw  | inst_sraiw | inst_sraw | inst_beq | inst_bne   | inst_blt | inst_bgeu  | inst_lb  | inst_lw   | inst_lbu | inst_lwu | inst_mul | inst_mulw | inst_div | inst_divw | inst_ecall  | inst_csrrw | inst_csrrc | inst_csrrsi ;
 
-assign alu_ctl[2] = (rst == `ysyx_22051013_RSTABLE) ? 0 :   inst_sltiu   | inst_add | inst_sub | inst_srl  | inst_or  | inst_srliw   | inst_srlw  | inst_ebreak  | inst_sd | inst_beq | inst_bne | inst_bgeu   | inst_lh | inst_lhu | inst_lwu | inst_mulhu | inst_mulw | inst_divuw | inst_divw | inst_remu | inst_remw     ;
+assign alu_ctl[2] = (rst == `ysyx_22051013_RSTABLE) ? 0 :   inst_sltiu   | inst_add | inst_sub | inst_srl  | inst_or  | inst_srliw   | inst_srlw  | inst_ebreak  | inst_sd | inst_beq | inst_bne | inst_bgeu   | inst_lh | inst_lhu | inst_lwu | inst_mulhu | inst_mulw | inst_divuw | inst_divw | inst_remu | inst_remw | inst_mret  | inst_csrrs | inst_csrrwi | inst_csrrci ;
 
-assign alu_ctl[1] = (rst == `ysyx_22051013_RSTABLE) ? 0 :   inst_slti | inst_srai  | inst_add  | inst_sra   | inst_slliw  | inst_sllw | inst_jalr  | inst_sh  | inst_sd   | inst_beq   | inst_lb  | inst_lbu | inst_lhu | inst_mulhsu | inst_mulhu | inst_divu | inst_divuw | inst_rem | inst_remu | inst_remuw    ;
+assign alu_ctl[1] = (rst == `ysyx_22051013_RSTABLE) ? 0 :   inst_slti | inst_srai  | inst_add  | inst_sra   | inst_slliw  | inst_sllw | inst_jalr  | inst_sh  | inst_sd   | inst_beq   | inst_lb  | inst_lbu | inst_lhu | inst_mulhsu | inst_mulhu | inst_divu | inst_divuw | inst_rem | inst_remu | inst_remuw | inst_ecall |inst_csrrc  ;
 
-assign alu_ctl[0] = (rst == `ysyx_22051013_RSTABLE) ? 0 :   inst_addi | inst_srai  | inst_srl  | inst_addiw  | inst_subw | inst_jal | inst_sb | inst_sw   | inst_sd   | inst_bgeu    | inst_lbu | inst_mulhsu | inst_divu | inst_rem | inst_remuw | inst_remw               ;
+assign alu_ctl[0] = (rst == `ysyx_22051013_RSTABLE) ? 0 :   inst_addi | inst_srai  | inst_srl  | inst_addiw  | inst_subw | inst_jal | inst_sb | inst_sw   | inst_sd   | inst_bgeu    | inst_lbu | inst_mulhsu | inst_divu | inst_rem | inst_remuw | inst_remw  | inst_csrrs             ;
 
-
-
+wire inst_csr   = inst_csrrw | inst_csrrs | inst_csrrc ;
 
 
 //--------------------------output signal-----------------------//
 
 //output to regfile signal
-assign rs1_ena =  inst_type[6] | inst_type[5] | inst_type[4] | inst_type[3] | inst_type[2] | inst_type[1] | inst_type[0] | inst_jalr;
+assign rs1_ena =  inst_type[6] | inst_type[5] | inst_type[4] | inst_type[3] | inst_type[2] | inst_type[1] | inst_type[0] | inst_jalr | inst_csr | inst_ecall;
 assign rs2_ena =  inst_type[6] | inst_type[3] | inst_type[2] | inst_type[0] ;
 
 
@@ -191,7 +199,7 @@ end
 
 
 //output to wb signal 
-assign wb_ctl = (inst_type[1]) ? 2'b01 : (( inst_type[6] | inst_type[5] |inst_type[4] | inst_type[3] | inst_lui | inst_auipc | inst_jal | inst_jalr) ? 2'b10 : 2'b00 ) ;
+assign wb_ctl = (inst_type[1] ) ? 2'b01 : (( inst_type[7] | inst_type[6] | inst_type[5] |inst_type[4] | inst_type[3] | inst_lui | inst_auipc | jump) ? 2'b10 : 2'b00 ) ;
 
 
 //--------------------------------DPI-C----------------------------//

@@ -1,7 +1,9 @@
 #ifndef __MMIO_H__
 #define __MMIO_H__
 
-//#include <cpu/difftest.h>
+#ifdef CONFIG_DIFFTEST
+void difftest_skip_ref();
+#endif
 
 typedef void(*io_callback_t)(uint32_t, int, bool);
 uint8_t* new_space(int size);
@@ -23,7 +25,9 @@ static inline int find_mapid_by_addr(IOMap *maps, int size, uint64_t  addr) {
   int i;
   for (i = 0; i < size; i ++) {
     if (map_inside(maps + i, addr)) {
-      //difftest_skip_ref();
+    #ifdef CONFIG_DIFFTEST
+      difftest_skip_ref();
+      #endif
       return i;
     }
   }

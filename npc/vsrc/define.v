@@ -11,7 +11,9 @@
   `define ysyx_22051013_REGADDR 4:0
 	`define ysyx_22051013_REG 63:0
 	`define ysyx_22051013_WENABLE 1'b1
+	`define ysyx_22051013_WDISABLE 1'b0
 	`define ysyx_22051013_RENABLE 1'b1
+	`define ysyx_22051013_RDISABLE 1'b0
 
 //idu
   `define ysyx_22051013_INST 31:0
@@ -109,3 +111,12 @@
 	`define INST_REMU          8'b10000110
 	`define INST_REMUW         8'b10000011
 	`define INST_REMW          8'b00010101
+	
+	`define INST_ECALL         8'b00101010
+	`define INST_MRET          8'b01010100
+	`define INST_CSRRW         8'b10101000
+	`define INST_CSRRS         8'b00100101
+	`define INST_CSRRC         8'b01001010
+	`define INST_CSRRWI        8'b10010100
+	`define INST_CSRRSI        8'b11001000
+	`define INST_CSRRCI        8'b10100100

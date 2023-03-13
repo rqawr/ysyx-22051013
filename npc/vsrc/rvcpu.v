@@ -39,6 +39,7 @@ wire [7:0]			id_ex_alu_sel;
 wire [`ysyx_22051013_PC]    	id_ex_pc    	   ;
 wire [`ysyx_22051013_DATA] 	id_ex_op1 ;
 wire [`ysyx_22051013_DATA] 	id_ex_op2 ;
+wire [3:0]                      id_ex_csrctl;
 
 
 //exu
@@ -87,20 +88,23 @@ ysyx_22051013_idu idu1(
 	.jump_o(id_ex_jump)		,
 	.branch_o(id_ex_branch)		,
 	.imm(id_ex_imm)			,
+	.csr_ctl(id_ex_csrctl)		,
 	.op1(id_ex_op1)			,
 	.op2(id_ex_op2)
 );
 
 ysyx_22051013_exu exu2(
+	.clk(clk)	,
 	.rst(rst)	,
 	.op1(id_ex_op1)	,
 	.op2(id_ex_op2)	,
 	.pc_i(id_ex_pc)	,
 	.imm(id_ex_imm)	,
+	.csr_ctl(id_ex_csrctl)	,
 	.jump_i(id_ex_jump)	,
 	.branch_i(id_ex_branch)	,
 	.alu_sel(id_ex_alu_sel)	,
-	.alu_res(ex_aludata)	,
+	.exu_res(ex_aludata)	,
 	.store_data(ex_ls_store_data) ,
 	.jump_pc_o(ex_if_pc)	,
  	.ex_pcsrc_o(ex_if_pc_sel)		
@@ -119,7 +123,7 @@ ysyx_22051013_wbu wbu4(
  	.rst(rst),
  	.ls_rd_data(ls_wb_data)	,
  	.wb_ctl(id_wb_ctl)	,
- 	.alu_res(ex_aludata)	,
+ 	.exu_res(ex_aludata)	,
  	.wb_data(wb_reg_rd_data)	
 );
 

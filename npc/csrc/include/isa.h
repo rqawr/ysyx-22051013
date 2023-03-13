@@ -6,6 +6,7 @@ typedef struct
 {
   uint64_t gpr[32];
   uint64_t pc;
+  uint64_t csr[4] ;
 } NPC_reg;
 
 
