@@ -103,11 +103,63 @@ int sprintf(char *out, const char *fmt, ...) {
 }
 
 int snprintf(char *out, size_t n, const char *fmt, ...) {
-  panic("Not implemented");
+  va_list ap;
+  int i;
+  va_start(ap,fmt);
+  i = vsnprintf(out,n,fmt,ap);
+  va_end(ap);
+  return i;
 }
 
 int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
-  panic("Not implemented");
+  char *s;
+  char *str;
+  int cnt = 0;
+  for (str = out; *fmt; fmt++) {
+  if(cnt<=n){
+    cnt += 1;
+    if (*fmt != '%') {
+      *str++ = *fmt;
+      continue;
+    }
+    fmt++;
+  if(*fmt == '0') {fmt++;}
+  
+  unsigned int field_width = -1;
+  
+  if('0'<=*fmt && *fmt <= '9'){
+    field_width = klib_atoi(&fmt);}
+   
+  switch (*fmt) {
+    case 'c':
+      *str++ = (unsigned char)va_arg(ap, int);
+      break;
+    case 's':
+      s = va_arg(ap, char *);
+      while (*s) *str++ = *s++;
+      break;
+    case 'd':      
+      str = num2str(str, (long long)va_arg(ap,  int), 10 , field_width);
+      break;
+    case 'p' :
+      str = num2str(str, (long long)va_arg(ap, void *), 16, field_width);
+      break;    
+    case 'o' :
+      str = num2str(str, (long long)va_arg(ap, int), 8, field_width);
+      break;          
+    case 'x' :
+      str = num2str(str, (long long)va_arg(ap, int), 16, field_width);
+      break;        
+    default:
+      *str++ = '%';
+      if (*fmt) *str++ = *fmt;
+      else fmt--;
+      break;
+    }
+   }
+  }
+  *str = '\0';
+  return str-out;
 }
 
 #endif

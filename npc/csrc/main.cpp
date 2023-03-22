@@ -44,6 +44,17 @@ extern "C" void pmem_read(long long raddr, long long* rdata, char rlen){
    return;
 }
 
+static inline int maskToLen(uint8_t mask) {
+  switch (mask) {
+    case 0x01: case 0x02: case 0x04: case 0x08: case 0x10: case 0x20: case 0x40: case 0x80: return 1;
+    case 0x03: case 0x0c: case 0x30: case 0xc0: return 2;
+    case 0x0f: case 0xf0: return 4;
+    case 0xff: return 8;
+    default: assert(0);
+  }
+}
+
+
 // Memory Write
 extern "C" void pmem_write(long long waddr, long long wdata, char wlen){
 //printf("%lx %llx\n",gi_to_hi(waddr),waddr);
@@ -66,23 +77,9 @@ extern "C" void pmem_write(long long waddr, long long wdata, char wlen){
    return; 
   }
   else{
-    //uint64_t ulen = atoi(&wlen);
-    //printf("%lx\n",wlen);
-    switch(wlen){
-      case 1 : len = 1; break;
-      case 15 : case -16 : len = 4; break;
-      case 0xff : len=8; break;
-      default : len = 0; break;
-      
-      }
-     // printf("%u\n",len);
-   /* if(wlen&0xff){len=8;}
-    if(wlen&0x0f || wlen & 0xf0){len=4;}
-    if(wlen&0x03 || wlen&0x0c || wlen&0x30 || wlen&0xc0){len=2;}
-    if(wlen&0x01 || wlen&0x02 || wlen&0x04 || wlen&0x08 || wlen&0x10 || wlen&0x20 || wlen&0x40 || wlen&0x80){len=1;}
-    //printf("%u\n",len);*/
-    }
-    //if(waddr == 0xa0000104){printf("sync write %llx\n",wdata);}
+    len = maskToLen(wlen);
+   // printf("%u\n",len);
+  }
   IFDEF(CONFIG_DEVICE, mmio_write(waddr, len, wdata); return);
 }
 

@@ -20,7 +20,7 @@
 #define CONFIG_TIMER_GETTIMEOFDAY 1
 
 
-#define CONFIG_TRACE 1
+//#define CONFIG_TRACE 1
 
 #ifdef CONFIG_TRACE
 #define CONFIG_ITRACE 1
@@ -33,7 +33,7 @@
 
 //#define CONFIG_DIFFTEST 1
 
-#define CONFIG_GTK
+//#define CONFIG_GTK
 
 
 #define CONFIG_DEVICE 1

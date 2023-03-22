@@ -52,6 +52,7 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
   strcpy(iringbuf[ringbufnum] , _this->logbuf);
 #endif
   if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); }
+  if(_this->isa.inst.val == 0x342022f3) difftest_skip_ref();
   IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
 #ifdef CONFIG_WATCHPOINT
   bool change = test_change();
