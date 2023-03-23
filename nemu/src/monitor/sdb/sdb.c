@@ -19,6 +19,7 @@
 #include <readline/history.h>
 #include "sdb.h"
 #include <memory/paddr.h>
+#include <cpu/difftest.h>
 
 static int is_batch_mode = false;
 
@@ -144,6 +145,43 @@ static int cmd_d(char *args){
 static int cmd_q(char *args) {
   return -1;
 }
+#ifdef CONFIG_DIFFTEST
+static int cmd_attach(char *args){
+	difftest_attach();
+  return 0;	
+}
+
+static int cmd_detach(char * args){
+	difftest_detach();
+	return 0;
+}
+
+#endif
+
+static int cmd_load(char *args){
+  char *arg=strtok(NULL," ");
+//	printf("%s\n",args);
+	FILE *fp = fopen(arg, "r");
+	assert(fp);
+	int temp = 0;
+	temp +=fread(&cpu,sizeof(cpu),1,fp);
+	temp +=fread(guest_to_host(RESET_VECTOR),1,CONFIG_MSIZE,fp);
+	fclose(fp);
+	if(temp > 0) return 0;
+	else return 1;
+}
+
+static int cmd_save(char *args){
+  char *arg=strtok(NULL," ");
+	FILE *fp = fopen(arg, "w");
+	assert(fp);
+
+	fwrite(&cpu,sizeof(cpu),1,fp);
+	fwrite(guest_to_host(RESET_VECTOR),1,CONFIG_MSIZE,fp);
+	fclose(fp);
+	return 0;
+}
+
 
 static int cmd_help(char *args);
 
@@ -161,6 +199,12 @@ static struct {
   { "p", "Calculate given  expressions", cmd_p },
   { "w", "Set the watchpoint", cmd_w },
   { "d", "Delete the watchpoint whose id is N", cmd_d },
+#ifdef CONFIG_DIFFTEST
+	{ "attach", "Difftest Enable", cmd_attach },
+	{ "detach", "Difftest Disable", cmd_detach},
+#endif
+	{ "save", "Save NEMU state to [path] file", cmd_save},
+	{ "load", "load [path] file state to NEMU", cmd_load},
   /* TODO: Add more commands */
 
 };

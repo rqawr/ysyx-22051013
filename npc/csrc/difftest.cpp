@@ -40,6 +40,7 @@ void init_difftest(char *ref_so_file, long img_size)
   ref_difftest_memcpy(CONFIG_MEM_BASE, gi_to_hi(CONFIG_MEM_BASE), img_size, DIFFTEST_TO_REF);
   ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF);
   //printf("%lx\n",cpu.pc);
+  Log("Differential testing: %s", ANSI_FMT("ON", ANSI_FG_GREEN));
 }
 
 static void checkregs(NPC_reg *ref, uint64_t pc) {

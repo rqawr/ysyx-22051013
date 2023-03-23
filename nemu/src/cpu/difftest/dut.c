@@ -25,10 +25,13 @@ void (*ref_difftest_memcpy)(paddr_t addr, void *buf, size_t n, bool direction) =
 void (*ref_difftest_regcpy)(void *dut, bool direction) = NULL;
 void (*ref_difftest_exec)(uint64_t n) = NULL;
 void (*ref_difftest_raise_intr)(uint64_t NO) = NULL;
-
+void difftest_attach();
+void difftest_detach();
 #ifdef CONFIG_DIFFTEST
 
 static bool is_skip_ref = false;
+bool is_diff_on = true;
+static size_t diff_img_size = 0;
 static int skip_dut_nr_inst = 0;
 
 // this is used to let ref skip instructions which
@@ -88,6 +91,7 @@ void init_difftest(char *ref_so_file, long img_size, int port) {
 
   ref_difftest_init(port);
   ref_difftest_memcpy(RESET_VECTOR, guest_to_host(RESET_VECTOR), img_size, DIFFTEST_TO_REF);
+  diff_img_size = img_size;
   ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF);
 }
 
@@ -100,6 +104,7 @@ static void checkregs(CPU_state *ref, vaddr_t pc) {
 }
 
 void difftest_step(vaddr_t pc, vaddr_t npc) {
+	if(is_diff_on){
   CPU_state ref_r;
 
   if (skip_dut_nr_inst > 0) {
@@ -126,7 +131,22 @@ void difftest_step(vaddr_t pc, vaddr_t npc) {
   ref_difftest_regcpy(&ref_r, DIFFTEST_TO_DUT);
 
   checkregs(&ref_r, npc);
+	}
 }
+
+void difftest_attach(){
+  if(is_diff_on) return;
+	ref_difftest_memcpy(RESET_VECTOR, guest_to_host(RESET_VECTOR), diff_img_size, DIFFTEST_TO_REF);
+  ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF);
+	is_diff_on = true;
+	printf("difftest attached\n");
+}
+
+void difftest_detach(){
+  is_diff_on = false;
+	printf("difftest detached\n");
+}
+
 #else
 void init_difftest(char *ref_so_file, long img_size, int port) { }
 #endif
