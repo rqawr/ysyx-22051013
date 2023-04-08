@@ -23,12 +23,14 @@ import "DPI-C" function void difftest_dut_csr(
 );
 
 always@(*) begin
+  if(csr_ctl != 4'd0) begin
    difftest_dut_csr(
    	mstatus,
    	mtvec,
    	mepc,
    	mcause
    );
+   end
 end
 
 //0X300 mstatus

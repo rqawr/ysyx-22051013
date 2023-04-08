@@ -3,13 +3,13 @@
 * Function : top layer of processor(single)
 */
 
-  `include "define.v"
-	`include "ifu.v"
-	`include "idu.v"
-	`include "exu.v"
-	`include "lsu.v"
-	`include "wbu.v"
-	`include "regfile.v"
+  `include "single_cpu/define.v"
+	`include "single_cpu/ifu.v"
+	`include "single_cpu/idu.v"
+	`include "single_cpu/exu.v"
+	`include "single_cpu/lsu.v"
+	`include "single_cpu/wbu.v"
+	`include "single_cpu/regfile.v"
 	/* verilator lint_off DECLFILENAME */
 module ysyx_22051013_rvcpu(
 	input wire              clk		,

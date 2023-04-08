@@ -21,18 +21,29 @@ void init_monitor(int argc, char *argv[]);
 int is_exit_status_bad();
 void sdb_mainloop();
 uint64_t get_time();
-
+void isa_reg_display();
+#ifdef PIP_CPU
+static int inst_end = 1;
+#endif
 
 //-------------------DPI-C-------------------------//
  
-extern "C" void if_id_thepc(long long thepc_data, const svBitVecVal* the_inst){
+extern "C" void pc_inst_end(long long thepc_data, const svBitVecVal* the_inst){
+  #ifdef PIP_CPU
+  if(thepc_data != 0 && the_inst != 0){
+  #endif
   cpu.pc=thepc_data;
   s.val=*((uint32_t*)the_inst);
   //printf("%lx  %x\n",cpu.pc,s.val);
+  #ifdef PIP_CPU
+  inst_end = 0;
+  }
+  #endif
 }
 
 extern "C" void pmem_read(long long raddr, long long* rdata, char rlen){
 
+  if (raddr < CONFIG_MEM_BASE) return;
   if (likely(in_pmem(raddr))) {
     *rdata = host_read(gi_to_hi(raddr),rlen);
 #ifdef CONFIG_MTRACE
@@ -57,6 +68,7 @@ static inline int maskToLen(uint8_t mask) {
 
 // Memory Write
 extern "C" void pmem_write(long long waddr, long long wdata, char wlen){
+ if (waddr < CONFIG_MEM_BASE) return;
 //printf("%lx %llx\n",gi_to_hi(waddr),waddr);
 #ifdef CONFIG_MTRACE
    Log("Write to memory at %#.8llx with mask %x,content is %#.8llx",waddr,wlen,wdata);
@@ -119,18 +131,21 @@ extern "C" void difftest_dut_regs(long long Z0, long long ra, long long sp, long
   cpu.gpr[31] = t6;
 }
 
+#ifdef HAS_CSR
 extern "C" void difftest_dut_csr(long long csr_mstatus, long long csr_mtvec, long long csr_mepc, long long csr_mcause){
     cpu.csr[0] = csr_mstatus;
     cpu.csr[1] = csr_mtvec;
     cpu.csr[2] = csr_mepc;    
     cpu.csr[3] = csr_mcause;
+   // isa_reg_display();
 }
+#endif
 
 extern "C" void ebreak(svBit ebreak_ena){
     if(ebreak_ena) {
     npc_state.halt_ret = cpu.gpr[10];
     npc_state.state = NPC_END;
-    npc_state.halt_pc = cpu.pc+4;
+    npc_state.halt_pc = cpu.pc;
   }
 }
 
@@ -168,6 +183,11 @@ void cpu_reset(){
 }
 
 void isa_exec_once(){
+
+#ifdef PIP_CPU
+ while(inst_end){
+#endif
+
   rvcpu->clk = 0;
   rvcpu -> eval();
 #ifdef CONFIG_GTK
@@ -178,6 +198,11 @@ void isa_exec_once(){
   rvcpu -> eval();
 #ifdef CONFIG_GTK
   tfp -> dump(main_time++);
+#endif
+
+#ifdef PIP_CPU
+ }
+ inst_end = 1;
 #endif
 }
   

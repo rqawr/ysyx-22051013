@@ -3,8 +3,8 @@
 * Function : execute support more instructs 
 */
  
- `include "single_cpu/define.v"
- `include "single_cpu/csr.v"
+ `include "pip_cpu/define.v"
+ `include "pip_cpu/csr.v"
  /* verilator lint_off DECLFILENAME */
 module ysyx_22051013_exu(
 	input wire          clk,
@@ -13,14 +13,13 @@ module ysyx_22051013_exu(
 	input wire [`ysyx_22051013_DATA] op2,
 	input wire [`ysyx_22051013_IMM] imm ,
 	input wire [`ysyx_22051013_PC]	pc_i	,
-	input wire            jump_i   ,
 	input wire [ 7:0]     alu_sel   ,
-	input wire            branch_i ,
 	input wire [3:0]      csr_ctl  ,
 	
 	output wire [`ysyx_22051013_REG] store_data ,
-	output wire [`ysyx_22051013_PC]   jump_pc_o  ,
-	output wire            		ex_pcsrc_o ,
+	output wire			 ex_jump_flush,
+	output wire			 ex_jump_ena,
+	output wire [`ysyx_22051013_PC]  ex_jump_pc,
 	output reg [`ysyx_22051013_DATA] exu_res
 );
 // addxx
@@ -120,31 +119,6 @@ always@(*)begin
   end
 end
 
-reg ex_branch ;
-
-always @(*) begin
-    if(~branch_i)  begin ex_branch = `ysyx_22051013_BRANCHDISABLE  ;    end
-    else begin
-        case (alu_sel) 
-             `INST_BEQ     : begin  ex_branch = (op1 == op2) ? `ysyx_22051013_BRANCHABLE : `ysyx_22051013_BRANCHDISABLE ;  end
-             `INST_BNE     : begin  ex_branch = (op1 != op2) ? `ysyx_22051013_BRANCHABLE : `ysyx_22051013_BRANCHDISABLE ;  end
-             `INST_BLTU    : begin  ex_branch = (op1 <  op2) ? `ysyx_22051013_BRANCHABLE : `ysyx_22051013_BRANCHDISABLE ;  end
-             `INST_BGEU    : begin  ex_branch = (op1 >= op2) ? `ysyx_22051013_BRANCHABLE : `ysyx_22051013_BRANCHDISABLE ;  end
-             `INST_BLT     : begin  ex_branch = ( op1_lt_op2 ) ? `ysyx_22051013_BRANCHABLE : `ysyx_22051013_BRANCHDISABLE ;  end
-             `INST_BGE     : begin  ex_branch = (~op1_lt_op2 ) ? `ysyx_22051013_BRANCHABLE : `ysyx_22051013_BRANCHDISABLE ;  end
-             default:        begin  ex_branch = `ysyx_22051013_BRANCHDISABLE  ;    end 
-        endcase
-    end
-end
-
-
-//out to ifu
-assign ex_pcsrc_o = jump_i | ex_branch | csr_ctl[1] | csr_ctl[0] ;
-assign jump_pc_o = (alu_sel == `INST_JAL | branch_i ) ? pc_i + imm : 
-		   (alu_sel == `INST_JALR) ? op1 + imm :
-		   (csr_ctl[1] | csr_ctl[0]) ? read_csr_data :
-		   `ysyx_22051013_ZERO64 ;
-		     
 //out to lsu		     
 assign store_data = op2 ;
 
@@ -185,6 +159,10 @@ end
 	.read_csr_data(read_csr_data),
 	.write_csr_data(write_csr_data)
 );
+
+assign ex_jump_ena = rst == `ysyx_22051013_RSTABLE ? 1'b0 : csr_ctl[1] | csr_ctl[0];
+assign ex_jump_pc = rst == `ysyx_22051013_RSTABLE ? `ysyx_22051013_ZERO64 : read_csr_data;
+assign ex_jump_flush = rst == `ysyx_22051013_RSTABLE ? 1'b0 : ex_jump_ena;
 
 //out to wbu
 assign exu_res = (csr_ctl != 4'd0) ? read_csr_data : alu_res ;

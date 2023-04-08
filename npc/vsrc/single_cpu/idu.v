@@ -3,8 +3,8 @@ Last modify date : 2022/3/8
 Fucntion : decode , add more instruct 
 */
 
-  `include "define.v" 
-  `include "idu_decode.v"
+  `include "single_cpu/define.v" 
+  `include "single_cpu/idu_decode.v"
   /* verilator lint_off DECLFILENAME */
 module ysyx_22051013_idu(
 	//system input

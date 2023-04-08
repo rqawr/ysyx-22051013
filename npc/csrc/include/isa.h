@@ -6,7 +6,9 @@ typedef struct
 {
   uint64_t gpr[32];
   uint64_t pc;
+  #ifdef HAS_CSR
   uint64_t csr[4] ;
+  #endif
 } NPC_reg;
 
 
@@ -27,4 +29,7 @@ void cpu_exec(uint64_t n);
 void isa_exec_once();
 
 bool isa_difftest_checkregs(NPC_reg *ref_r, uint64_t pc);
+
+void difftest_attach();
+void difftest_detach();
 #endif

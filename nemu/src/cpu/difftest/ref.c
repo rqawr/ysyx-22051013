@@ -44,6 +44,7 @@ void difftest_regcpy(void *dut, bool direction) {
     for(int j = 0; j < 4; ++j) {
       ((CPU_state *)dut)->csr[j] = cpu.csr[j] ;
     }
+    
  }
 }
 

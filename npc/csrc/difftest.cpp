@@ -5,6 +5,8 @@
 #ifdef CONFIG_DIFFTEST
 
 static bool is_skip_ref = false;
+bool is_diff_on = true;
+static size_t diff_img_size = 0;
 
 void difftest_skip_ref() {
   is_skip_ref = true;
@@ -40,6 +42,9 @@ void init_difftest(char *ref_so_file, long img_size)
   ref_difftest_memcpy(CONFIG_MEM_BASE, gi_to_hi(CONFIG_MEM_BASE), img_size, DIFFTEST_TO_REF);
   ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF);
   //printf("%lx\n",cpu.pc);
+   diff_img_size = img_size;
+   
+   //cpu.csr[0] =  0x00000005;
   Log("Differential testing: %s", ANSI_FMT("ON", ANSI_FG_GREEN));
 }
 
@@ -53,6 +58,7 @@ static void checkregs(NPC_reg *ref, uint64_t pc) {
 
 
 void difftest_step(uint64_t pc, uint64_t npc ) {
+  if(is_diff_on){
   NPC_reg ref_r;
   int t;
   if (is_skip_ref) {
@@ -70,7 +76,21 @@ void difftest_step(uint64_t pc, uint64_t npc ) {
   
   ref_difftest_exec(1);
   ref_difftest_regcpy(&ref_r, DIFFTEST_TO_DUT);
-  //printf("%lx\n",ref_r.pc);
+  //printf("%lx\n",ref_r.csr[0]);
   checkregs(&ref_r, pc);
   }
+}
+  
+void difftest_attach(){
+  if(is_diff_on) return;
+	ref_difftest_memcpy(CONFIG_MEM_BASE, gi_to_hi(CONFIG_MEM_BASE), diff_img_size, DIFFTEST_TO_REF);
+  ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF);
+	is_diff_on = true;
+	printf("difftest attached\n");
+}
+
+void difftest_detach(){
+  is_diff_on = false;
+	printf("difftest detached\n");
+}
 #endif

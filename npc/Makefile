@@ -5,7 +5,7 @@ endif
 include /usr/local/share/verilator/include/verilated.mk
 
 OBJ_PATH=./obj_dir/
-VERILOG= ./vsrc/
+VERILOG= ./vsrc/pip_cpu/
 CC=g++
 SIM_DIR= ./csrc/build
 VERILAGS= -Wall --trace --cc --exe --build --top-module ysyx_22051013_rvcpu

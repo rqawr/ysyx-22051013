@@ -3,7 +3,7 @@
 * Function : write back data to regs
 */
 
- `include "define.v"
+ `include "single_cpu/define.v"
  module ysyx_22051013_wbu(
  	
  	input	    wire            		rst  ,

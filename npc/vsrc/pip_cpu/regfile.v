@@ -2,23 +2,28 @@
 * Last modify date: 2022/2/6
 * Function : riscv64 register
 */
- `include "single_cpu/define.v"
+ `include "pip_cpu/define.v"
  /* verilator lint_off DECLFILENAME */
 module ysyx_22051013_regfile(
  input wire							clk			,
  input wire							rst			,
 
- input wire	[`ysyx_22051013_REGADDR]	waddr		,
+ input wire	[`ysyx_22051013_REGADDR]		waddr		,
  input wire [`ysyx_22051013_REG]			wdata		,
- input wire														wen			,
+ input wire						wen			,
 
- input wire	[`ysyx_22051013_REGADDR]	raddr1		,
+ input wire	[`ysyx_22051013_REGADDR]		raddr1		,
  output wire	[`ysyx_22051013_REG]			rdata1		,
- input wire														ren1			,
+ input wire						ren1			,
 
- input wire	[`ysyx_22051013_REGADDR]	raddr2		,
+ input wire	[`ysyx_22051013_REGADDR]		raddr2		,
  output wire [`ysyx_22051013_REG]			rdata2		,
- input wire														ren2			
+ input wire						ren2		,
+ 
+ input wire	[`ysyx_22051013_REGADDR]		bpu_addr		,
+ output wire [`ysyx_22051013_REG]			bpu_data		,
+ input wire						bpu_en	
+ 
  );
 
  reg[`ysyx_22051013_REG] regs [0:31];
@@ -112,6 +117,8 @@ module ysyx_22051013_regfile(
 
  assign rdata1 = ((rst != `ysyx_22051013_RSTABLE) && (ren1 == `ysyx_22051013_RENABLE)) ? regs[raddr1] : `ysyx_22051013_ZERO64;
  assign rdata2 = ((rst != `ysyx_22051013_RSTABLE) && (ren2 == `ysyx_22051013_RENABLE)) ? regs[raddr2] : `ysyx_22051013_ZERO64;
+ 
+ assign bpu_data = ((rst != `ysyx_22051013_RSTABLE) && (bpu_en == `ysyx_22051013_RENABLE)) ? ((wen & (bpu_addr == waddr)) ? wdata : regs[bpu_addr]) : `ysyx_22051013_ZERO64;
 
  endmodule
 

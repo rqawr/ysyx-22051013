@@ -3,7 +3,7 @@
 * Function : load & store data
 */
  
- `include "single_cpu/define.v"
+ `include "pip_cpu/define.v"
  /* verilator lint_off DECLFILENAME */
  module ysyx_22051013_lsu(
   	input     wire                    		rst       ,
@@ -12,6 +12,7 @@
  	input     wire [`ysyx_22051013_DATA]            store_data ,
  	input     wire [3:0]               		ls_ctl ,
  	
+ 	output    wire [`ysyx_22051013_DATA]      	ls_data_forward,
  	output    wire [`ysyx_22051013_DATA]      	ls_data_o
  );
  
@@ -218,6 +219,7 @@ always @(negedge clk) begin
 end
 
 //------------------------output----------------------------------------------------------------------//
- assign ls_data_o  = re ? load_data : `ysyx_22051013_ZERO64 ;
+assign ls_data_o  = re ? load_data : `ysyx_22051013_ZERO64 ;
+assign ls_data_forward  = re ? load_data : alu_res ;
 wire _unused_ok = &{alu_res[2:0]};
 endmodule

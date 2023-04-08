@@ -130,6 +130,43 @@ static int cmd_q(char *args) {
   return -1;
 }
 
+#ifdef CONFIG_DIFFTEST
+static int cmd_attach(char *args){
+	difftest_attach();
+  return 0;	
+}
+
+static int cmd_detach(char * args){
+	difftest_detach();
+	return 0;
+}
+
+#endif
+
+static int cmd_load(char *args){
+  char *arg=strtok(NULL," ");
+//	printf("%s\n",args);
+	FILE *fp = fopen(arg, "r");
+	assert(fp);
+	int temp = 0;
+	temp +=fread(&cpu,sizeof(cpu),1,fp);
+	temp +=fread(gi_to_hi(CONFIG_MEM_BASE),1,CONFIG_MSIZE,fp);
+	fclose(fp);
+	if(temp > 0) return 0;
+	else return 1;
+}
+
+static int cmd_save(char *args){
+  char *arg=strtok(NULL," ");
+	FILE *fp = fopen(arg, "w");
+	assert(fp);
+
+	fwrite(&cpu,sizeof(cpu),1,fp);
+	fwrite(gi_to_hi(CONFIG_MEM_BASE),1,CONFIG_MSIZE,fp);
+	fclose(fp);
+	return 0;
+}
+
 static int cmd_help(char *args);
 
 static struct {
@@ -147,7 +184,12 @@ static struct {
   { "w", "Set the watchpoint", cmd_w },
   { "d", "Delete the watchpoint whose id is N", cmd_d },
   /* TODO: Add more commands */
-
+#ifdef CONFIG_DIFFTEST
+	{ "attach", "Difftest Enable", cmd_attach },
+	{ "detach", "Difftest Disable", cmd_detach},
+#endif
+	{ "save", "Save NEMU state to [path] file", cmd_save},
+	{ "load", "load [path] file state to NEMU", cmd_load},
 };
 
 #define NR_CMD ARRLEN(cmd_table)

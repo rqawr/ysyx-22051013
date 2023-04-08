@@ -2,7 +2,7 @@
 * Last modify date: 2022/2/9
 * Function : pc generation , support jal
 */
- `include "define.v"
+ `include "single_cpu/define.v"
  /* verilator lint_off DECLFILENAME */
 module ysyx_22051013_ifu(
  input  wire			clk		,
@@ -38,14 +38,14 @@ always @(posedge clk) begin
     pmem_read(pc_next,rinst,rlen);
 end
 
-import "DPI-C" function void if_id_thepc(input longint thepc_data, input bit[31:0] the_inst);
+import "DPI-C" function void pc_inst_end(input longint thepc_data, input bit[31:0] the_inst);
 
  always @(posedge clk) begin
    if(rst ==`ysyx_22051013_RSTABLE) begin
-     if_id_thepc(`ysyx_22051013_STARTPC, inst_o);
+     pc_inst_end(`ysyx_22051013_STARTPC, inst_o);
    end
    else begin
-     if_id_thepc(pc_o, inst_o);
+     pc_inst_end(pc_o, inst_o);
    end
  end
  

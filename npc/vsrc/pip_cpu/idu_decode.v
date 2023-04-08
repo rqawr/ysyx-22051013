@@ -3,7 +3,7 @@
 * Function : decode inst to control signal
 */
 
- `include "single_cpu/define.v"
+ `include "pip_cpu/define.v"
  /* verilator lint_off DECLFILENAME */
 module ysyx_22051013_idu_decode(
 	input wire                 		rst  ,
@@ -11,13 +11,12 @@ module ysyx_22051013_idu_decode(
   
 	output wire						rs1_ena	,
 	output wire						rs2_ena	,
-	output wire						jump	,
 	output wire  [1:0]          				wb_ctl  ,
 	output reg  [3:0]          				mem_ctl ,
 	output wire                 				branch  ,
 	output reg [`ysyx_22051013_IMM] 			ext_imm ,
 	output wire						imm_ena	,
-
+	output wire						load	,
 	output wire	[7:0]					alu_ctl	
 );
 
@@ -52,7 +51,7 @@ assign inst_type[5] = (rst == `ysyx_22051013_RSTABLE) ? 0 : (opcode[6:2] == `ysy
 assign inst_type[4] = (rst == `ysyx_22051013_RSTABLE) ? 0 : (opcode[6:2] == `ysyx_22051013_OPIMM)    ;
 assign inst_type[3] = (rst == `ysyx_22051013_RSTABLE) ? 0 : (opcode[6:2] == `ysyx_22051013_OP)    ;
 assign inst_type[2] = (rst == `ysyx_22051013_RSTABLE) ? 0 : (opcode[6:2] == `ysyx_22051013_BRANCH)    ;
-assign inst_type[1] = (rst == `ysyx_22051013_RSTABLE) ? 0 : (opcode[6:2] == `ysyx_22051013_LOAD) & (opcode[1:0] == 2'b11)     ;
+assign inst_type[1] = (rst == `ysyx_22051013_RSTABLE) ? 0 : (opcode[6:2] == `ysyx_22051013_LOAD)  & (opcode[1:0] == 2'b11)    ;
 assign inst_type[0] = (rst == `ysyx_22051013_RSTABLE) ? 0 : (opcode[6:2] == `ysyx_22051013_STORE)     ;
 
 wire inst_lui   = (rst == `ysyx_22051013_RSTABLE) ? 0 : (opcode[6:2] == `ysyx_22051013_LUI)    ;
@@ -165,7 +164,10 @@ assign rs2_ena =  inst_type[6] | inst_type[3] | inst_type[2] | inst_type[0] ;
 
 //output to ifu singal
 assign branch = inst_type[2];
+wire jump;
 assign jump = inst_jal | inst_jalr;
+
+assign load = inst_type[1];
 
 //Extend IMM
 always @(*) begin
@@ -177,7 +179,7 @@ always @(*) begin
   else                                                       begin ext_imm = `ysyx_22051013_ZERO64; end
 end 
 
-assign imm_ena =  inst_type[0] | inst_type[1] | inst_type[2] | inst_type[4] | inst_type[5] | inst_type[7] |  inst_lui | inst_auipc  ;
+assign imm_ena =  inst_type[0] | inst_type[1]  | inst_type[4] | inst_type[5] | inst_type[7] |  inst_lui | inst_auipc  ;
 
 //output to mem signal
 always @(*) begin
@@ -202,13 +204,6 @@ end
 assign wb_ctl = (inst_type[1] ) ? 2'b01 : (( inst_type[7] | inst_type[6] | inst_type[5] |inst_type[4] | inst_type[3] | inst_lui | inst_auipc | jump) ? 2'b10 : 2'b00 ) ;
 
 
-//--------------------------------DPI-C----------------------------//
-
- import "DPI-C" function void ebreak (input bit ebreak_ena);
- 
-always@(*) begin
-  ebreak(inst_ebreak);
-  end
 
 wire _unused_ok = &{opcode[1:0],funct7[6],funct7[4:1]};
 endmodule
