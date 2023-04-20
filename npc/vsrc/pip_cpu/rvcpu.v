@@ -16,12 +16,49 @@
 	`include "pip_cpu/wbu.v"
 	`include "pip_cpu/regfile.v"
 	`include "pip_cpu/hzd_ctl.v"
+//----------------out core-----------//
+	`include "pip_cpu/axi_ifu_master.v"
+	`include "pip_cpu/axi_ifu_slave.v"
 	/* verilator lint_off DECLFILENAME */
 module ysyx_22051013_rvcpu(
 	input wire              clk		,
 	input wire              rst		
 		
 );
+
+
+//-----------------------------------------------out core------------------------//
+
+//ifu axi_lite
+wire 				inst_not_ready	;
+wire [`ysyx_22051013_DATA]	axi_if_inst	;
+//wire [`ysyx_22051013_PC]	axi_if_pc	;
+
+
+wire	[`ysyx_22051013_ADDR]	ifu_ar_addr	;	
+wire				ifu_ar_valid	;
+wire				ifu_ar_ready	;
+	
+wire [`ysyx_22051013_DATA]	ifu_r_data	;
+wire [`ysyx_22051013_RESP]	ifu_r_resp	;
+wire				ifu_r_valid	;
+wire				ifu_r_ready	;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//-------------------------------------------in core------------------------------------//
 
 //bpu
 wire [`ysyx_22051013_REGADDR]   bpu_reg_addr ;
@@ -145,6 +182,40 @@ wire	h_ifid_flush;
 wire	h_idex_flush;
 wire	h_if_pcstall;
 
+//-------------------------------------out core--------------------------------//
+
+//ifu axi_lite
+ysyx_22051013_axi_ifu_master axi_ifu_master0(
+		.clk(clk)	,
+		.rst(rst)	,
+		.inst_pc(ifid_if_pc)	,
+		.inst_64(axi_if_inst)	,
+		.inst_not_ready(inst_not_ready)	,
+		.ifu_ar_addr(ifu_ar_addr)	,
+		.ifu_ar_valid(ifu_ar_valid)	,
+		.ifu_ar_ready(ifu_ar_ready)	,
+		.ifu_r_data(ifu_r_data)		,
+		.ifu_r_resp(ifu_r_resp)		,
+		.ifu_r_valid(ifu_r_valid)	,
+		.ifu_r_ready(ifu_r_ready)
+);
+
+ysyx_22051013_axi_ifu_slave axi_ifu_slave1(
+		.clk(clk)	,
+		.rst(rst)	,
+		.ifu_ar_addr(ifu_ar_addr)	,
+		.ifu_ar_valid(ifu_ar_valid)	,
+		.ifu_ar_ready(ifu_ar_ready)	,
+		.ifu_r_data(ifu_r_data)		,
+		.ifu_r_resp(ifu_r_resp)		,
+		.ifu_r_valid(ifu_r_valid)	,
+		.ifu_r_ready(ifu_r_ready)
+);
+
+
+
+//--------------------------------------in core ---------------------------------//
+
 ysyx_22051013_bpu_static bpu_static(
 		.rst(rst)	,
 		.inst(ifid_if_inst)	,
@@ -167,6 +238,8 @@ ysyx_22051013_ifu ifu0(
 		.ex_pc_jump(ex_if_pc_sel)  ,
  		.ex_pc_i(ex_if_pc)	,
  		.bpu_pc_i(bpu_if_pc)	,
+ 		.inst_i(axi_if_inst)	,
+ 		//.inst_pc(axi_if_pc)	,
  		.inst_o(ifid_if_inst)	,		
 		.pc_o(ifid_if_pc)
 );
@@ -381,10 +454,12 @@ ysyx_22051013_regfile reg9(
 );
 
 ysyx_22051013_hzd_ctl hzd_ctl10(
+	.clk(clk)	,
 	.rst(rst)	,
 	.id_stall_ena(id_h_stall_ena),
 	.id_jump_ena(id_ifid_jumpflush)	,
 	.ex_jump_ena(ex_h_jump_ena)	,
+	.inst_not_ready(inst_not_ready)	,
 	
 	.if_pc_stall(h_if_pcstall)	,
 	.ifid_stall(h_ifid_stall)	,
