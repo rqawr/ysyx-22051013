@@ -7,7 +7,7 @@
 module ysyx_22051013_reg_lswb(
     input	wire                                     clk                ,
     input	wire                                     rst                ,
-    input       wire					 lswb_stall	,
+   // input       wire					 lswb_stall	,
 
     input	wire       [`ysyx_22051013_INST]         ls_inst            ,
     input	wire       [`ysyx_22051013_PC]           ls_pc              ,
@@ -17,6 +17,9 @@ module ysyx_22051013_reg_lswb(
     input	wire                                     ls_rd_ena          ,
     input	wire       [`ysyx_22051013_REGADDR]      ls_rd_addr         ,   
     input	wire 	[`ysyx_22051013_DATA]      	 ls_data_forward	,
+    
+    input	wire					 ls_valid		,
+    input	wire					 wb_ready		,	
      
     
     output	reg       [`ysyx_22051013_INST]          wb_inst            ,
@@ -31,7 +34,7 @@ module ysyx_22051013_reg_lswb(
 );
 
 always@(posedge clk) begin
-  if(rst == `ysyx_22051013_RSTABLE)begin 
+  if(rst == `ysyx_22051013_RSTABLE | ls_valid)begin 
     wb_inst <= 32'd0;
     wb_pc   <= `ysyx_22051013_ZERO64;
     wb_wbctl <= 2'b0;
@@ -40,7 +43,7 @@ always@(posedge clk) begin
     wb_rd_ena <= 1'b0;
     wb_rd_addr <= 5'd0;    
   end
-  else if(lswb_stall) begin
+  else if(wb_ready) begin
     wb_inst <= wb_inst;
     wb_pc   <= wb_pc ;
     wb_wbctl <= wb_wbctl;

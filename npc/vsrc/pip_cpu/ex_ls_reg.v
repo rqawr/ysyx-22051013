@@ -7,7 +7,7 @@
 module ysyx_22051013_reg_exls(
     input	wire                                     clk                ,
     input	wire                                     rst                ,
-    input       wire					 exls_stall	,
+    //input       wire					 exls_stall	,
 
     input	wire       [`ysyx_22051013_INST]         ex_inst            ,
     input	wire       [`ysyx_22051013_PC]           ex_pc              ,
@@ -17,6 +17,10 @@ module ysyx_22051013_reg_exls(
     input	wire 	[1:0]     			ex_wbctl    ,	
     input     wire                                     ex_rd_ena          ,
     input     wire       [`ysyx_22051013_REGADDR]      ex_rd_addr         ,
+    
+    input	wire					ex_valid	,	
+    input	wire					ls_ready	,
+    
 
     output	reg       [`ysyx_22051013_INST]         ls_inst            ,
     output	reg       [`ysyx_22051013_PC]           ls_pc              ,
@@ -43,7 +47,7 @@ always@(posedge clk) begin
     ls_rd_ena <= 1'b0;
     ls_rd_addr <= 5'd0;
   end
-  else if(exls_stall) begin 
+  else if(ls_ready | ex_valid) begin 
     ls_inst <= ls_inst;
     ls_pc   <= ls_pc;
     ls_store_data <= ls_store_data;		

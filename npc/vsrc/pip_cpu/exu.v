@@ -16,12 +16,23 @@ module ysyx_22051013_exu(
 	input wire [ 7:0]     alu_sel   ,
 	input wire [3:0]      csr_ctl  ,
 	
+	input  wire			 ls_ready,
+	input  wire			 id_valid,
+	output wire			 ex_valid,
+	output wire			 ex_ready,
+	output wire			 ex_flush,
+	
 	output wire [`ysyx_22051013_REG] store_data ,
-	output wire			 ex_jump_flush,
 	output wire			 ex_jump_ena,
 	output wire [`ysyx_22051013_PC]  ex_jump_pc,
 	output reg [`ysyx_22051013_DATA] exu_res
 );
+
+//hzd_ctl
+assign ex_valid = id_valid;
+assign ex_ready = ls_ready ; 
+assign ex_flush = ex_jump_ena;
+
 // addxx
 wire     [`ysyx_22051013_DATA]  op1_add_op2   = op1 + op2 ;
 wire     [`ysyx_22051013_DATA]  op1_addw_op2  = {{32{op1_add_op2[31]}},op1_add_op2[31:0]} ;
@@ -162,7 +173,6 @@ end
 
 assign ex_jump_ena = rst == `ysyx_22051013_RSTABLE ? 1'b0 : csr_ctl[1] | csr_ctl[0];
 assign ex_jump_pc = rst == `ysyx_22051013_RSTABLE ? `ysyx_22051013_ZERO64 : read_csr_data;
-assign ex_jump_flush = rst == `ysyx_22051013_RSTABLE ? 1'b0 : ex_jump_ena;
 
 //out to wbu
 assign exu_res = (csr_ctl != 4'd0) ? read_csr_data : alu_res ;

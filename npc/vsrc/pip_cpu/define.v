@@ -1,5 +1,9 @@
 // system 
 	`define ysyx_22051013_RSTABLE		1'b1
+	`define ysyx_22051013_READY		1'b0
+	`define ysyx_22051013_NOTREADY		1'b1
+	`define ysyx_22051013_VALID		1'b0
+	`define ysyx_22051013_NOTVALID		1'b1
 
 // ifu
 	`define ysyx_22051013_PC 63:0

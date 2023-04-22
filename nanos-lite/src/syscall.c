@@ -5,7 +5,7 @@
 static void strace(Context *c);
 
 #define STRACE 1
-//#undef STRACE
+#undef STRACE
 
 
 static void strace(Context *c){

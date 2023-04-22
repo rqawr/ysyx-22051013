@@ -11,7 +11,7 @@
 
 
 //-------------------------------autoconf.h----------------------------------------//
-//#define PIP_CPU 1
+#define PIP_CPU 1
 #define HAS_CSR 1
 
 #define CONFIG_ISA "riscv64"
@@ -23,7 +23,7 @@
 #define CONFIG_TIMER_GETTIMEOFDAY 1
 
 
-#define CONFIG_TRACE 1
+//#define CONFIG_TRACE 1
 
 #ifdef CONFIG_TRACE
 #define CONFIG_ITRACE 1

@@ -15,7 +15,7 @@ module ysyx_22051013_idu(
 	input	  wire [`ysyx_22051013_PC]	pc_i	,
 	
 	//bpu
-	input  wire	[`ysyx_22051013_REGADDR]	jalr_addr,
+	//input  wire	[`ysyx_22051013_REGADDR]	jalr_addr,
 	input  wire					bpu_jump,
 	
 	//data forward
@@ -54,14 +54,26 @@ module ysyx_22051013_idu(
 	output	  wire [`ysyx_22051013_PC]	pc_o,	
 	
 	
-	//to hzd
-	output	wire				jump_flush,
-	output	wire				id_stall_ena,
+	//hzd
+	input	wire				ex_ready,
+	input	wire				if_valid,
+	output	wire				id_flush,
+	output	wire				id_ex_flush,
+	output	wire				id_ready,
+	output	wire				id_valid,
 	//to ifu
 	output	wire				jump_ena,
 	output	wire [`ysyx_22051013_PC]	jump_pc
 	
 );
+
+//hzd_ctl
+assign id_flush = jump_ena ;
+assign id_ready = ex_ready | id_stall_ena ;
+assign id_valid = if_valid; 
+
+assign id_ex_flush = id_stall_ena;
+
 
 //----------------------------------decode---------------------------//
 wire   [ 4:0]   rd     ;
@@ -72,6 +84,7 @@ assign  rs1      =  inst_i [19:15]  ;
 assign  rs2      =  inst_i [24:20]  ;
 
 wire imm_ena ;
+//wire jump;
 wire branch;
 
 ysyx_22051013_idu_decode decode(
@@ -82,6 +95,7 @@ ysyx_22051013_idu_decode decode(
 	.ext_imm(imm)	,
 	.imm_ena(imm_ena),
 	.wb_ctl (wbctl_o) ,
+	//.jump(jump)	,
  	.mem_ctl(lsctl_o) ,
  	.branch(branch) ,
  	.load(load_flag),
@@ -99,10 +113,10 @@ assign rd_addr = rd_ena ? rd : 5'd0 ;
 //stall
 wire op1_relate ;//load inst
 wire op2_relate ;
+wire id_stall_ena;
 assign op1_relate = (rst == `ysyx_22051013_RSTABLE) ? 1'b0 : rs1_ena & ex_load_ena & (rs1_addr == ex_addr_forward) ;
 assign op2_relate = (rst == `ysyx_22051013_RSTABLE) ? 1'b0 : rs2_ena & ex_load_ena & (rs2_addr == ex_addr_forward) ;
 assign id_stall_ena = (rst == `ysyx_22051013_RSTABLE) ? 1'b0 : op1_relate | op2_relate ;
-
 
 //forward
 wire ex_op1_forward ;
@@ -179,18 +193,16 @@ end
 
 //out to ifu
 
-wire jalr_depend = (jalr_addr != 5'd0) & ((jalr_addr == ex_addr_forward) | (jalr_addr == ls_addr_forward) | (jalr_addr == wb_addr_forward));
+//wire jalr_depend = (jalr_addr != 5'd0) & ((jalr_addr == ex_addr_forward) | (jalr_addr == ls_addr_forward) | (jalr_addr == wb_addr_forward));
 
 
-assign jump_ena = jalr_depend | (ex_branch ^ bpu_jump) ;
+assign jump_ena =id_ready ? 1'b0 : /* jump | */(alusrc_o == `INST_JALR) | (ex_branch ^ bpu_jump) ; //jalr_depend 
 assign jump_pc = jump_ena ? (
 		 (alusrc_o == `INST_JALR) ? op1 + imm :
 		 bpu_jump  ? pc_i + `ysyx_22051013_PLUS4 :
 		 pc_i + imm) :
 		 `ysyx_22051013_ZERO64;
 		 
-		 
-assign jump_flush = rst == `ysyx_22051013_RSTABLE ? 1'b0 : jump_ena | ecall_ena | mret_ena;
 
 //csr
 reg csr_wr_ena;

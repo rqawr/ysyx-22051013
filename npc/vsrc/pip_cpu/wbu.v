@@ -14,6 +14,9 @@
         input       wire [`ysyx_22051013_PC]    pc_i      ,
         input	wire                                     rd_ena          ,
     	input	wire       [`ysyx_22051013_REGADDR]      rd_addr         , 
+    	
+    	//input	wire					ls_valid	,
+    	output	wire					wb_ready	,
         
         output	wire	[`ysyx_22051013_REGADDR]	wb_rd_addr_forward	,
         output	wire	[`ysyx_22051013_DATA]		wb_rd_data_forward	,
@@ -22,6 +25,10 @@
  	output      reg  [`ysyx_22051013_DATA]  wb_data   
  	
 );
+
+
+//hzd_ctl
+assign wb_ready = `ysyx_22051013_READY;
 
 always @(*) begin
     if(rst == `ysyx_22051013_RSTABLE) begin
@@ -55,7 +62,9 @@ assign ebreak_ena = inst_i == `EBREAK_TRAP ? 1'b1 : 1'b0;
 
 
  always @(posedge clk) begin
-   pc_inst_end(pc_i, inst_i);
+  // if(ls_valid) begin
+   	pc_inst_end(pc_i, inst_i);
+  // end
    ebreak(ebreak_ena);
  end
  

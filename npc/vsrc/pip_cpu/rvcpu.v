@@ -15,7 +15,7 @@
 	`include "pip_cpu/ls_wb_reg.v"
 	`include "pip_cpu/wbu.v"
 	`include "pip_cpu/regfile.v"
-	`include "pip_cpu/hzd_ctl.v"
+	//`include "pip_cpu/hzd_ctl.v"
 //----------------out core-----------//
 	`include "pip_cpu/axi_ifu_master.v"
 	`include "pip_cpu/axi_ifu_slave.v"
@@ -61,8 +61,8 @@ wire				ifu_r_ready	;
 //-------------------------------------------in core------------------------------------//
 
 //bpu
-wire [`ysyx_22051013_REGADDR]   bpu_reg_addr ;
-wire				bpu_reg_ena; 
+//wire [`ysyx_22051013_REGADDR]   bpu_reg_addr ;
+//wire				bpu_reg_ena; 
 wire				bpu_ifid_jump;
 wire [`ysyx_22051013_PC]    	bpu_if_pc    	;
 
@@ -72,7 +72,9 @@ wire [`ysyx_22051013_PC]    	bpu_if_pc    	;
  wire [`ysyx_22051013_PC]    	ifid_if_pc    	   ;
  wire [`ysyx_22051013_INST]  	ifid_id_inst 	   ;
  wire [`ysyx_22051013_PC]    	ifid_id_pc    	   ;
- wire [`ysyx_22051013_REGADDR]  ifid_id_addr ;
+ 
+ 
+ //wire [`ysyx_22051013_REGADDR]  ifid_id_addr ;
  wire				ifid_id_jump;
 //idu
 wire [`ysyx_22051013_REGADDR] id_reg_rs1_addr ;
@@ -84,7 +86,7 @@ wire  [`ysyx_22051013_PC]  	     id_if_pc 	   ;
 wire           			     id_if_pc_sel  ;
 wire           			     id_ifid_jumpflush;
 wire				id_load_flag;
-wire				id_h_stall_ena;
+//wire				id_h_stall_ena;
 
 //id_ex_reg
 wire [`ysyx_22051013_INST]  	idex_id_inst 	 ;
@@ -117,7 +119,7 @@ wire [7:0]			idex_ex_alu_sel	;
 wire [`ysyx_22051013_REGADDR] 	ex_id_addr_forward;
 wire [`ysyx_22051013_DATA] 	ex_id_data_forward;
 wire				ex_load_ena;
-wire				ex_h_jump_ena;
+//wire				ex_h_jump_ena;
 wire  [`ysyx_22051013_PC]  	     ex_if_pc 	   ;
 wire           			     ex_if_pc_sel  ;
 
@@ -170,9 +172,10 @@ wire [`ysyx_22051013_DATA] 	wb_id_data_forward;
 // regfile
 wire [`ysyx_22051013_REG] reg_id_rs1_data ;
 wire [`ysyx_22051013_REG] reg_id_rs2_data ;
-wire [`ysyx_22051013_REG] reg_bpu_data ;
+//wire [`ysyx_22051013_REG] reg_bpu_data ;
 
 //hzd_ctl
+/*
 wire	h_ifid_stall;
 wire	h_idex_stall;
 wire	h_exls_stall;
@@ -181,6 +184,21 @@ wire	h_lswb_stall;
 wire	h_ifid_flush;
 wire	h_idex_flush;
 wire	h_if_pcstall;
+*/
+wire if_valid;
+wire id_valid;
+wire ex_valid;
+wire ls_valid;
+
+wire wb_ready;
+wire ls_ready;
+wire ex_ready;
+wire id_ready;
+
+wire ex_flush;
+wire id_idex_flush;
+wire id_ifid_flush;
+
 
 //-------------------------------------out core--------------------------------//
 
@@ -220,9 +238,9 @@ ysyx_22051013_bpu_static bpu_static(
 		.rst(rst)	,
 		.inst(ifid_if_inst)	,
 		.pc_i(ifid_if_pc)	,
-		.rs1_data(reg_bpu_data)	,
-		.rs1_addr(bpu_reg_addr)	,
-		.rs1_ena(bpu_reg_ena)	,
+		//.rs1_data(reg_bpu_data)	,
+		//.rs1_addr(bpu_reg_addr)	,
+		//.rs1_ena(bpu_reg_ena)	,
 		.pc_o(bpu_if_pc)	,
 		.bpu_jump(bpu_ifid_jump)
 );
@@ -232,14 +250,16 @@ ysyx_22051013_bpu_static bpu_static(
 ysyx_22051013_ifu ifu0(
 		.clk(clk)	,
 		.rst(rst)	,
-		.pc_stall(h_if_pcstall)	,
+		//.pc_stall(h_if_pcstall)	,
 		.id_pc_jump(id_if_pc_sel)  ,
  		.id_pc_i(id_if_pc)	,
 		.ex_pc_jump(ex_if_pc_sel)  ,
  		.ex_pc_i(ex_if_pc)	,
  		.bpu_pc_i(bpu_if_pc)	,
+ 		.inst_not_ready(inst_not_ready),
+ 		.id_ready(id_ready)	,
+ 		.if_valid(if_valid)	,
  		.inst_i(axi_if_inst)	,
- 		//.inst_pc(axi_if_pc)	,
  		.inst_o(ifid_if_inst)	,		
 		.pc_o(ifid_if_pc)
 );
@@ -247,15 +267,20 @@ ysyx_22051013_ifu ifu0(
 ysyx_22051013_reg_ifid reg_ifid1(
 		.clk(clk)	,
 		.rst(rst)	,
-		.ifid_flush(h_ifid_flush),
-		.ifid_stall(h_ifid_stall),
+		//.ifid_flush(h_ifid_flush),
+		//.ifid_stall(h_ifid_stall),
 		.if_inst(ifid_if_inst),
 		.if_pc(ifid_if_pc)	,
 		.bpu_jump(bpu_ifid_jump),
-		.bpu_addr(bpu_reg_addr),
+		//.bpu_addr(bpu_reg_addr),
+		
+		.if_valid(if_valid),
+		.id_flush(id_ifid_flush),
+		.ex_flush(ex_flush),
+		.id_ready(id_ready),
 
 		.id_jump(ifid_id_jump),
-		.id_addr(ifid_id_addr),		
+		//.id_addr(ifid_id_addr),		
 		.id_inst(ifid_id_inst)	,
 		.id_pc(ifid_id_pc)	
 );
@@ -268,7 +293,7 @@ ysyx_22051013_idu idu2(
  	.inst_o(idex_id_inst)	,
  	
  	.bpu_jump(ifid_id_jump),
-	.jalr_addr(ifid_id_addr),
+	//.jalr_addr(ifid_id_addr),
  	
 	.rs1_addr(id_reg_rs1_addr)	,
 	.rs2_addr(id_reg_rs2_addr)	,
@@ -294,10 +319,17 @@ ysyx_22051013_idu idu2(
  	.csr_ctl(idex_id_csrctl)	,
  	.load_flag(id_load_flag)	,
  	
-	.jump_flush(id_ifid_jumpflush)	,
+ 	.if_valid(if_valid),
+ 	.id_valid(id_valid),
+	.id_flush(id_ifid_flush),
+	.id_ex_flush(id_idex_flush),
+	.ex_ready(ex_ready),
+	.id_ready(id_ready),
+ 	
+	//.jump_flush(id_ifid_jumpflush)	,
 	.jump_pc(id_if_pc)		,
 	.jump_ena(id_if_pc_sel)	,
-	.id_stall_ena(id_h_stall_ena)	,
+	//.id_stall_ena(id_h_stall_ena)	,
 	.imm(idex_id_imm)		,
 	.op1(idex_id_op1)		,
 	.op2(idex_id_op2)
@@ -307,8 +339,8 @@ ysyx_22051013_reg_idex reg_idex3(
 	.clk(clk)	,
 	.rst(rst)	,
 	.id_inst(idex_id_inst),
-	.idex_flush(h_idex_flush),
-	.idex_stall(h_idex_stall),
+	//.idex_flush(h_idex_flush),
+	//.idex_stall(h_idex_stall),
 	.id_pc(idex_id_pc)	,
 	.id_op1(idex_id_op1)	,
 	.id_op2(idex_id_op2)	,
@@ -320,6 +352,11 @@ ysyx_22051013_reg_idex reg_idex3(
 	.id_wbctl(idex_id_wbctl),
 	.id_csrctl(idex_id_csrctl),
 	.id_load_flag(id_load_flag),
+	
+	.id_valid(id_valid),
+	.id_flush(id_idex_flush),
+	.ex_flush(ex_flush),
+	.ex_ready(ex_ready),
 
 	.ex_inst(idex_ex_inst),
 	.ex_pc(idex_ex_pc)	,
@@ -346,8 +383,14 @@ ysyx_22051013_exu exu4(
 	.csr_ctl(idex_ex_csrctl),
 	.alu_sel(idex_ex_alu_sel)	,
 	
+	.id_valid(id_valid),
+	.ex_valid(ex_valid),
+	.ex_flush(ex_flush),
+	.ex_ready(ex_ready),
+	.ls_ready(ls_ready),
+	
 	.exu_res(exls_ex_aludata)	,
-	.ex_jump_flush(ex_h_jump_ena),
+	//.ex_jump_flush(ex_h_jump_ena),
 	.ex_jump_pc(ex_if_pc)		,
 	.ex_jump_ena(ex_if_pc_sel)	,	
 	.store_data(exls_ex_store_data) 
@@ -357,7 +400,7 @@ ysyx_22051013_exu exu4(
 ysyx_22051013_reg_exls reg_exls5(
 	.clk(clk)	,
 	.rst(rst)	,
-	.exls_stall(h_exls_stall),
+	//.exls_stall(h_exls_stall),
 	.ex_inst(idex_ex_inst),
 	.ex_pc(idex_ex_pc)	,
 	.ex_store_data(exls_ex_store_data),
@@ -369,6 +412,9 @@ ysyx_22051013_reg_exls reg_exls5(
 	
 	.ex_rd_addr_forward(ex_id_addr_forward),
 	.ex_rd_data_forward(ex_id_data_forward),
+	
+	.ex_valid(ex_valid),
+	.ls_ready(ls_ready),
 
 	.ls_inst(exls_ls_inst),
 	.ls_pc(exls_ls_pc),
@@ -386,6 +432,12 @@ ysyx_22051013_lsu lsu6(
  	.alu_res(exls_ls_aludata)	,
  	.store_data(exls_ls_store_data)	,
  	.ls_ctl	(exls_ls_lsctl) 	,
+ 	
+ 	.ex_valid(ex_valid),
+ 	.ls_valid(ls_valid),
+	.ls_ready(ls_ready),
+	.wb_ready(wb_ready),
+ 	
  	.ls_data_forward(ls_lswb_data_forward),
  	.ls_data_o(lswb_ls_wbdata)	
  );
@@ -393,7 +445,7 @@ ysyx_22051013_lsu lsu6(
  ysyx_22051013_reg_lswb reg_lswb7(
 	.clk(clk)	,
 	.rst(rst)	,
-	.lswb_stall(h_lswb_stall),
+	//.lswb_stall(h_lswb_stall),
 	.ls_inst(exls_ls_inst),
 	.ls_pc(exls_ls_pc)	,
 	.ls_rd_ena(exls_ls_rd_ena),
@@ -405,6 +457,9 @@ ysyx_22051013_lsu lsu6(
 	
 	.ls_rd_addr_forward(ls_id_addr_forward),
 	.ls_rd_data_forward(ls_id_data_forward),
+	
+	.wb_ready(wb_ready),
+	.ls_valid(ls_valid),
 	
 	.wb_inst(lswb_wb_inst),
 	.wb_pc(lswb_wb_pc)	,
@@ -430,6 +485,9 @@ ysyx_22051013_wbu wbu8(
  	.wb_rd_ena(wb_reg_rd_ena),
  	.wb_rd_addr(wb_reg_rd_addr),
  	
+	.wb_ready(wb_ready),
+	//.ls_valid(ls_valid), 	
+ 	
  	.ls_rd_data(lswb_wb_wbdata)	,
  	.wb_ctl(lswb_wb_wbctl)	,
  	.exu_res(lswb_wb_aludata)	,
@@ -447,12 +505,12 @@ ysyx_22051013_regfile reg9(
 	.rdata2(reg_id_rs2_data)	,
 	.wen(wb_reg_rd_ena)	,
 	.ren1(id_reg_rs1_ena)	,
-	.ren2(id_reg_rs2_ena)	,
-	.bpu_data(reg_bpu_data)	,
-	.bpu_en(bpu_reg_ena),
-	.bpu_addr(bpu_reg_addr)
+	.ren2(id_reg_rs2_ena)	
+	//.bpu_data(reg_bpu_data)	,
+	//.bpu_en(bpu_reg_ena),
+	//.bpu_addr(bpu_reg_addr)
 );
-
+/*
 ysyx_22051013_hzd_ctl hzd_ctl10(
 	.clk(clk)	,
 	.rst(rst)	,
@@ -469,5 +527,5 @@ ysyx_22051013_hzd_ctl hzd_ctl10(
 	
 	.ifid_flush(h_ifid_flush)	,
 	.idex_flush(h_idex_flush)
-);
+);*/
 endmodule

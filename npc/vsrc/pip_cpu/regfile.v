@@ -18,11 +18,11 @@ module ysyx_22051013_regfile(
 
  input wire	[`ysyx_22051013_REGADDR]		raddr2		,
  output wire [`ysyx_22051013_REG]			rdata2		,
- input wire						ren2		,
+ input wire						ren2		
  
- input wire	[`ysyx_22051013_REGADDR]		bpu_addr		,
- output wire [`ysyx_22051013_REG]			bpu_data		,
- input wire						bpu_en	
+ //input wire	[`ysyx_22051013_REGADDR]		bpu_addr		,
+// output wire [`ysyx_22051013_REG]			bpu_data		,
+// input wire						bpu_en	
  
  );
 
@@ -118,7 +118,7 @@ module ysyx_22051013_regfile(
  assign rdata1 = ((rst != `ysyx_22051013_RSTABLE) && (ren1 == `ysyx_22051013_RENABLE)) ? regs[raddr1] : `ysyx_22051013_ZERO64;
  assign rdata2 = ((rst != `ysyx_22051013_RSTABLE) && (ren2 == `ysyx_22051013_RENABLE)) ? regs[raddr2] : `ysyx_22051013_ZERO64;
  
- assign bpu_data = ((rst != `ysyx_22051013_RSTABLE) && (bpu_en == `ysyx_22051013_RENABLE)) ? ((wen & (bpu_addr == waddr)) ? wdata : regs[bpu_addr]) : `ysyx_22051013_ZERO64;
+ //assign bpu_data = ((rst != `ysyx_22051013_RSTABLE) && (bpu_en == `ysyx_22051013_RENABLE)) ? ((wen & (bpu_addr == waddr)) ? wdata : regs[bpu_addr]) : `ysyx_22051013_ZERO64;
 
  endmodule
 

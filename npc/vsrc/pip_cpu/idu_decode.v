@@ -14,6 +14,7 @@ module ysyx_22051013_idu_decode(
 	output wire  [1:0]          				wb_ctl  ,
 	output reg  [3:0]          				mem_ctl ,
 	output wire                 				branch  ,
+	//output wire						jump	,
 	output reg [`ysyx_22051013_IMM] 			ext_imm ,
 	output wire						imm_ena	,
 	output wire						load	,

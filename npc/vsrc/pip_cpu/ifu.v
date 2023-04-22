@@ -7,23 +7,38 @@
 module ysyx_22051013_ifu(
  input  wire			clk		,
  input  wire			rst		,
- inout  wire					pc_stall	,
+ //inout  wire					pc_stall	,
  input	wire					id_pc_jump	,
  input	wire [`ysyx_22051013_PC]		id_pc_i  ,
  input	wire					ex_pc_jump	,
  input	wire [`ysyx_22051013_PC]		ex_pc_i  ,
  input  wire [`ysyx_22051013_PC]		bpu_pc_i  ,
+ input	wire					inst_not_ready,
+ 
+ input	wire					id_ready,
+ output wire					if_valid,
  
  input	wire [`ysyx_22051013_DATA]		inst_i,
- 
  output	reg [`ysyx_22051013_INST]		inst_o,
  output reg	[`ysyx_22051013_PC]		pc_o	
  );
  
+ //hzd_ctl
+reg jump_sign;
 
+always@(posedge clk) begin 	
+	if(id_pc_jump | ex_pc_jump) begin 
+		jump_sign <= 1'b1;
+	end
+	else begin 
+		jump_sign <= 1'b0;
+	end
+end
+
+assign if_valid = inst_not_ready;
+
+ 
 assign inst_o = inst_i[31:0];
-
-
 
  always@(posedge clk) begin
    if(rst == `ysyx_22051013_RSTABLE)begin
@@ -35,7 +50,7 @@ assign inst_o = inst_i[31:0];
    else if(id_pc_jump) begin 
    	pc_o <= id_pc_i;
    end
-   else if(pc_stall) begin
+   else if(if_valid | id_ready | jump_sign) begin
    	pc_o <= pc_o; 
    end
    else begin

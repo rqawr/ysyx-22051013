@@ -11,10 +11,20 @@
  	input     wire [`ysyx_22051013_DATA]            alu_res   ,
  	input     wire [`ysyx_22051013_DATA]            store_data ,
  	input     wire [3:0]               		ls_ctl ,
+	
+	input	  wire					wb_ready,
+	input	  wire					ex_valid,
+ 	output    wire					ls_ready,
+ 	output	  wire					ls_valid,
  	
  	output    wire [`ysyx_22051013_DATA]      	ls_data_forward,
  	output    wire [`ysyx_22051013_DATA]      	ls_data_o
  );
+ 
+ //hzd_ctl
+ assign ls_ready = wb_ready;
+ assign ls_valid = ex_valid;
+ 
  
  wire [`ysyx_22051013_DATAADDR] raddr ;
  wire [`ysyx_22051013_DATAADDR] waddr ; 
@@ -210,12 +220,13 @@ end
   
   
 always @(negedge clk) begin
+ if(ls_valid) begin
   if(re) begin
   pmem_read(raddr, data_i, rlen);end
   //else begin data_i = `ysyx_22051013_ZERO64;end
   if(we)begin
   pmem_write(waddr, data_o , wlen);end
-
+ end
 end
 
 //------------------------output----------------------------------------------------------------------//
