@@ -11,7 +11,7 @@ module ysyx_22051013_axi_lsu_master(
 	//to lsu
 	input wire [`ysyx_22051013_PC]	inst_pc	,
 	output reg [`ysyx_22051013_DATA]	inst_64,
-	output reg			inst_not_ready,
+	output reg			data_not_ready,
 
 	//read address channel
 	output wire	[`ysyx_22051013_ADDR]	lsu_ar_addr	,	
@@ -39,7 +39,7 @@ always@(*) begin
 	end
 	else begin 
 		inst_64 = `ysyx_22051013_ZERO64;
-		inst_not_ready = 1'b1;
+		data_not_ready = 1'b1;
 	end
 end
 

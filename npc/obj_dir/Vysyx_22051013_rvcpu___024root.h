@@ -179,6 +179,7 @@ VL_MODULE(Vysyx_22051013_rvcpu___024root) {
         QData/*63:0*/ ysyx_22051013_rvcpu__DOT__lswb_wb_wbdata;
         QData/*63:0*/ ysyx_22051013_rvcpu__DOT__lswb_wb_aludata;
         QData/*63:0*/ ysyx_22051013_rvcpu__DOT__wb_reg_rd_data;
+        QData/*63:0*/ ysyx_22051013_rvcpu__DOT__reg_bpu_data;
         QData/*63:0*/ ysyx_22051013_rvcpu__DOT__axi_ifu_slave1__DOT__dpic_inst_i;
         QData/*63:0*/ ysyx_22051013_rvcpu__DOT__bpu_static__DOT__pr_pc;
         QData/*63:0*/ ysyx_22051013_rvcpu__DOT__idu2__DOT__op1_sub_op2;

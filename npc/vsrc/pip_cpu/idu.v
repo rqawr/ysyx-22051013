@@ -196,7 +196,7 @@ end
 //wire jalr_depend = (jalr_addr != 5'd0) & ((jalr_addr == ex_addr_forward) | (jalr_addr == ls_addr_forward) | (jalr_addr == wb_addr_forward));
 
 
-assign jump_ena =id_ready ? 1'b0 : /* jump | */(alusrc_o == `INST_JALR) | (ex_branch ^ bpu_jump) ; //jalr_depend 
+assign jump_ena =id_ready ? 1'b0 : (alusrc_o == `INST_JALR) | (ex_branch ^ bpu_jump) /*| jalr_depend */;
 assign jump_pc = jump_ena ? (
 		 (alusrc_o == `INST_JALR) ? op1 + imm :
 		 bpu_jump  ? pc_i + `ysyx_22051013_PLUS4 :

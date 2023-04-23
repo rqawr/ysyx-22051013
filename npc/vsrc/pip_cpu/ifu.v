@@ -38,7 +38,7 @@ end
 assign if_valid = inst_not_ready;
 
  
-assign inst_o = inst_i[31:0];
+assign inst_o = /*jump_sign ? 32'd0 : */inst_i[31:0];
 
  always@(posedge clk) begin
    if(rst == `ysyx_22051013_RSTABLE)begin

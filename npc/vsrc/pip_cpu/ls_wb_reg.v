@@ -34,7 +34,7 @@ module ysyx_22051013_reg_lswb(
 );
 
 always@(posedge clk) begin
-  if(rst == `ysyx_22051013_RSTABLE | ls_valid)begin 
+  if(rst == `ysyx_22051013_RSTABLE )begin 
     wb_inst <= 32'd0;
     wb_pc   <= `ysyx_22051013_ZERO64;
     wb_wbctl <= 2'b0;
@@ -43,7 +43,7 @@ always@(posedge clk) begin
     wb_rd_ena <= 1'b0;
     wb_rd_addr <= 5'd0;    
   end
-  else if(wb_ready) begin
+  else if(wb_ready | ls_valid) begin
     wb_inst <= wb_inst;
     wb_pc   <= wb_pc ;
     wb_wbctl <= wb_wbctl;

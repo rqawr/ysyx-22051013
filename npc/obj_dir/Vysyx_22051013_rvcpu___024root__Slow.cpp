@@ -37,9 +37,9 @@ void Vysyx_22051013_rvcpu___024root___settle__TOP__3(Vysyx_22051013_rvcpu___024r
     // Variables
     CData/*7:0*/ __Vtableidx1;
     CData/*3:0*/ __Vtableidx2;
-    VlWide<4>/*127:0*/ __Vtemp23;
-    VlWide<4>/*127:0*/ __Vtemp24;
-    VlWide<4>/*127:0*/ __Vtemp25;
+    VlWide<4>/*127:0*/ __Vtemp32;
+    VlWide<4>/*127:0*/ __Vtemp33;
+    VlWide<4>/*127:0*/ __Vtemp34;
     // Body
     vlSelf->ysyx_22051013_rvcpu__DOT__exu4__DOT__mcause_value = 0ULL;
     if ((0x2aU == (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__idex_ex_alu_sel))) {
@@ -176,17 +176,17 @@ void Vysyx_22051013_rvcpu___024root___settle__TOP__3(Vysyx_22051013_rvcpu___024r
     vlSelf->ysyx_22051013_rvcpu__DOT__exu4__DOT__op1_sra_op2 
         = VL_SHIFTRS_QQI(64,64,6, vlSelf->ysyx_22051013_rvcpu__DOT__idex_ex_op1, 
                          (0x3fU & (IData)(vlSelf->ysyx_22051013_rvcpu__DOT__idex_ex_op2)));
-    VL_EXTEND_WQ(128,64, __Vtemp23, vlSelf->ysyx_22051013_rvcpu__DOT__idex_ex_op1);
-    VL_EXTEND_WQ(128,64, __Vtemp24, vlSelf->ysyx_22051013_rvcpu__DOT__idex_ex_op2);
-    VL_MUL_W(4, __Vtemp25, __Vtemp23, __Vtemp24);
+    VL_EXTEND_WQ(128,64, __Vtemp32, vlSelf->ysyx_22051013_rvcpu__DOT__idex_ex_op1);
+    VL_EXTEND_WQ(128,64, __Vtemp33, vlSelf->ysyx_22051013_rvcpu__DOT__idex_ex_op2);
+    VL_MUL_W(4, __Vtemp34, __Vtemp32, __Vtemp33);
     vlSelf->ysyx_22051013_rvcpu__DOT__exu4__DOT__mul[0U] 
-        = __Vtemp25[0U];
+        = __Vtemp34[0U];
     vlSelf->ysyx_22051013_rvcpu__DOT__exu4__DOT__mul[1U] 
-        = __Vtemp25[1U];
+        = __Vtemp34[1U];
     vlSelf->ysyx_22051013_rvcpu__DOT__exu4__DOT__mul[2U] 
-        = __Vtemp25[2U];
+        = __Vtemp34[2U];
     vlSelf->ysyx_22051013_rvcpu__DOT__exu4__DOT__mul[3U] 
-        = __Vtemp25[3U];
+        = __Vtemp34[3U];
     vlSelf->ysyx_22051013_rvcpu__DOT__exu4__DOT__div 
         = VL_DIV_QQQ(64, vlSelf->ysyx_22051013_rvcpu__DOT__idex_ex_op1, vlSelf->ysyx_22051013_rvcpu__DOT__idex_ex_op2);
     vlSelf->ysyx_22051013_rvcpu__DOT__exu4__DOT__divw 
@@ -1976,6 +1976,7 @@ void Vysyx_22051013_rvcpu___024root___ctor_var_reset(Vysyx_22051013_rvcpu___024r
     vlSelf->ysyx_22051013_rvcpu__DOT__lswb_wb_rd_ena = VL_RAND_RESET_I(1);
     vlSelf->ysyx_22051013_rvcpu__DOT__lswb_wb_rd_addr = VL_RAND_RESET_I(5);
     vlSelf->ysyx_22051013_rvcpu__DOT__wb_reg_rd_data = VL_RAND_RESET_Q(64);
+    vlSelf->ysyx_22051013_rvcpu__DOT__reg_bpu_data = VL_RAND_RESET_Q(64);
     vlSelf->ysyx_22051013_rvcpu__DOT__axi_ifu_slave1__DOT__s_read_state = VL_RAND_RESET_I(2);
     vlSelf->ysyx_22051013_rvcpu__DOT__axi_ifu_slave1__DOT__s_read_state_next = VL_RAND_RESET_I(2);
     vlSelf->ysyx_22051013_rvcpu__DOT__axi_ifu_slave1__DOT__dpic_inst_i = VL_RAND_RESET_Q(64);

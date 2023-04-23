@@ -15,7 +15,7 @@
         input	wire                                     rd_ena          ,
     	input	wire       [`ysyx_22051013_REGADDR]      rd_addr         , 
     	
-    	//input	wire					ls_valid	,
+    	input	wire					ls_valid	,
     	output	wire					wb_ready	,
         
         output	wire	[`ysyx_22051013_REGADDR]	wb_rd_addr_forward	,
@@ -60,11 +60,16 @@ import "DPI-C" function void ebreak (input bit ebreak_ena);
 wire ebreak_ena;
 assign ebreak_ena = inst_i == `EBREAK_TRAP ? 1'b1 : 1'b0;
 
+wire [`ysyx_22051013_PC] pc_zero = `ysyx_22051013_ZERO64;
+wire [`ysyx_22051013_INST] inst_zero = 32'd0;
 
  always @(posedge clk) begin
-  // if(ls_valid) begin
+   if(~ls_valid) begin
+   	pc_inst_end(pc_zero, inst_zero);
+   end
+   else begin
    	pc_inst_end(pc_i, inst_i);
-  // end
+   end
    ebreak(ebreak_ena);
  end
  

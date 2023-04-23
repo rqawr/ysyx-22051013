@@ -21,8 +21,8 @@ module ysyx_22051013_regfile(
  input wire						ren2		
  
  //input wire	[`ysyx_22051013_REGADDR]		bpu_addr		,
-// output wire [`ysyx_22051013_REG]			bpu_data		,
-// input wire						bpu_en	
+ //output wire [`ysyx_22051013_REG]			bpu_data		,
+ //input wire						bpu_en	
  
  );
 

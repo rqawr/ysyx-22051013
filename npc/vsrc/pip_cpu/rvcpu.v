@@ -172,7 +172,7 @@ wire [`ysyx_22051013_DATA] 	wb_id_data_forward;
 // regfile
 wire [`ysyx_22051013_REG] reg_id_rs1_data ;
 wire [`ysyx_22051013_REG] reg_id_rs2_data ;
-//wire [`ysyx_22051013_REG] reg_bpu_data ;
+wire [`ysyx_22051013_REG] reg_bpu_data ;
 
 //hzd_ctl
 /*
@@ -486,7 +486,7 @@ ysyx_22051013_wbu wbu8(
  	.wb_rd_addr(wb_reg_rd_addr),
  	
 	.wb_ready(wb_ready),
-	//.ls_valid(ls_valid), 	
+	.ls_valid(ls_valid), 	
  	
  	.ls_rd_data(lswb_wb_wbdata)	,
  	.wb_ctl(lswb_wb_wbctl)	,
