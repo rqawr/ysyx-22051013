@@ -147,7 +147,7 @@ always @(*) begin
   write_csr_data = `ysyx_22051013_ZERO64;
   mcause_value = `ysyx_22051013_ZERO64;
   case(alu_sel)
-  	`INST_ECALL : begin  write_csr_data = pc_i; mcause_value = op1;end
+  	`INST_ECALL : begin  write_csr_data = pc_i; mcause_value = 64'd11;end
 				
 	`INST_CSRRW, `INST_CSRRWI :  begin write_csr_data = op1        ;end
 		 

@@ -25,6 +25,10 @@ VL_MODULE(Vysyx_22051013_rvcpu___024root) {
     // LOCAL SIGNALS
     // Anonymous structures to workaround compiler member-count bugs
     struct {
+        CData/*0:0*/ ysyx_22051013_rvcpu__DOT__data_not_ready;
+        CData/*0:0*/ ysyx_22051013_rvcpu__DOT__lsu_axi_we;
+        CData/*0:0*/ ysyx_22051013_rvcpu__DOT__lsu_axi_re;
+        CData/*7:0*/ ysyx_22051013_rvcpu__DOT__lsu_axi_wmask;
         CData/*0:0*/ ysyx_22051013_rvcpu__DOT__ifid_id_jump;
         CData/*4:0*/ ysyx_22051013_rvcpu__DOT__id_reg_rs1_addr;
         CData/*4:0*/ ysyx_22051013_rvcpu__DOT__id_reg_rs2_addr;
@@ -51,8 +55,15 @@ VL_MODULE(Vysyx_22051013_rvcpu___024root) {
         CData/*1:0*/ ysyx_22051013_rvcpu__DOT__lswb_wb_wbctl;
         CData/*0:0*/ ysyx_22051013_rvcpu__DOT__lswb_wb_rd_ena;
         CData/*4:0*/ ysyx_22051013_rvcpu__DOT__lswb_wb_rd_addr;
+        CData/*0:0*/ ysyx_22051013_rvcpu__DOT__id_ready;
+        CData/*0:0*/ ysyx_22051013_rvcpu__DOT__ls_lswb_flush;
         CData/*1:0*/ ysyx_22051013_rvcpu__DOT__axi_ifu_slave1__DOT__s_read_state;
         CData/*1:0*/ ysyx_22051013_rvcpu__DOT__axi_ifu_slave1__DOT__s_read_state_next;
+        CData/*1:0*/ ysyx_22051013_rvcpu__DOT__axi_lsu_slave3__DOT__s_write_state;
+        CData/*1:0*/ ysyx_22051013_rvcpu__DOT__axi_lsu_slave3__DOT__s_write_state_next;
+        CData/*0:0*/ ysyx_22051013_rvcpu__DOT__axi_lsu_slave3__DOT__arc_shakehand;
+        CData/*1:0*/ ysyx_22051013_rvcpu__DOT__axi_lsu_slave3__DOT__s_read_state;
+        CData/*1:0*/ ysyx_22051013_rvcpu__DOT__axi_lsu_slave3__DOT__s_read_state_next;
         CData/*0:0*/ ysyx_22051013_rvcpu__DOT__bpu_static__DOT__inst_bxx;
         CData/*0:0*/ ysyx_22051013_rvcpu__DOT__ifu0__DOT__jump_sign;
         CData/*0:0*/ ysyx_22051013_rvcpu__DOT__idu2__DOT__id_stall_ena;
@@ -78,6 +89,8 @@ VL_MODULE(Vysyx_22051013_rvcpu___024root) {
         CData/*0:0*/ ysyx_22051013_rvcpu__DOT__idu2__DOT__decode__DOT__inst_lhu;
         CData/*0:0*/ ysyx_22051013_rvcpu__DOT__idu2__DOT__decode__DOT__inst_lwu;
         CData/*0:0*/ ysyx_22051013_rvcpu__DOT__idu2__DOT__decode__DOT__inst_beq;
+    };
+    struct {
         CData/*0:0*/ ysyx_22051013_rvcpu__DOT__idu2__DOT__decode__DOT__inst_bne;
         CData/*0:0*/ ysyx_22051013_rvcpu__DOT__idu2__DOT__decode__DOT__inst_blt;
         CData/*0:0*/ ysyx_22051013_rvcpu__DOT__idu2__DOT__decode__DOT__inst_bge;
@@ -89,8 +102,6 @@ VL_MODULE(Vysyx_22051013_rvcpu___024root) {
         CData/*0:0*/ ysyx_22051013_rvcpu__DOT__idu2__DOT__decode__DOT__inst_slt;
         CData/*0:0*/ ysyx_22051013_rvcpu__DOT__idu2__DOT__decode__DOT__inst_sltu;
         CData/*0:0*/ ysyx_22051013_rvcpu__DOT__idu2__DOT__decode__DOT__inst_xor;
-    };
-    struct {
         CData/*0:0*/ ysyx_22051013_rvcpu__DOT__idu2__DOT__decode__DOT__inst_srl;
         CData/*0:0*/ ysyx_22051013_rvcpu__DOT__idu2__DOT__decode__DOT__inst_sra;
         CData/*0:0*/ ysyx_22051013_rvcpu__DOT__idu2__DOT__decode__DOT__inst_or;
@@ -136,7 +147,6 @@ VL_MODULE(Vysyx_22051013_rvcpu___024root) {
         CData/*0:0*/ ysyx_22051013_rvcpu__DOT__exu4__DOT__csr_operate__DOT__mie_set;
         CData/*0:0*/ ysyx_22051013_rvcpu__DOT__exu4__DOT__csr_operate__DOT__mpie_set;
         CData/*1:0*/ ysyx_22051013_rvcpu__DOT__exu4__DOT__csr_operate__DOT__mpp_set;
-        CData/*0:0*/ ysyx_22051013_rvcpu__DOT__lsu6__DOT__re;
         CData/*7:0*/ ysyx_22051013_rvcpu__DOT__lsu6__DOT__data_byte;
         CData/*7:0*/ ysyx_22051013_rvcpu__DOT__lsu6__DOT__sb_mask;
         SData/*11:0*/ ysyx_22051013_rvcpu__DOT__bpu_static__DOT__b_imm;
@@ -145,6 +155,8 @@ VL_MODULE(Vysyx_22051013_rvcpu___024root) {
         SData/*11:0*/ ysyx_22051013_rvcpu__DOT__exu4__DOT__csr_addr;
         SData/*15:0*/ ysyx_22051013_rvcpu__DOT__lsu6__DOT__data_half;
         IData/*31:0*/ ysyx_22051013_rvcpu__DOT__ifid_id_inst;
+    };
+    struct {
         IData/*31:0*/ ysyx_22051013_rvcpu__DOT__idex_ex_inst;
         IData/*31:0*/ ysyx_22051013_rvcpu__DOT__exls_ls_inst;
         IData/*31:0*/ ysyx_22051013_rvcpu__DOT__lswb_wb_inst;
@@ -155,12 +167,13 @@ VL_MODULE(Vysyx_22051013_rvcpu___024root) {
         IData/*31:0*/ ysyx_22051013_rvcpu__DOT__exu4__DOT__sraw;
         VlWide<4>/*127:0*/ ysyx_22051013_rvcpu__DOT__exu4__DOT__mul;
         IData/*31:0*/ ysyx_22051013_rvcpu__DOT__exu4__DOT__divw;
-    };
-    struct {
         IData/*31:0*/ ysyx_22051013_rvcpu__DOT__exu4__DOT__remw;
         IData/*31:0*/ ysyx_22051013_rvcpu__DOT__lsu6__DOT__data_word;
         IData/*31:0*/ ysyx_22051013_rvcpu__DOT__reg9__DOT__i;
         QData/*63:0*/ ysyx_22051013_rvcpu__DOT__axi_if_inst;
+        QData/*63:0*/ ysyx_22051013_rvcpu__DOT__lsu_axi_datapc;
+        QData/*63:0*/ ysyx_22051013_rvcpu__DOT__lsu_axi_read_data;
+        QData/*63:0*/ ysyx_22051013_rvcpu__DOT__lsu_axi_write_data;
         QData/*63:0*/ ysyx_22051013_rvcpu__DOT__ifid_if_pc;
         QData/*63:0*/ ysyx_22051013_rvcpu__DOT__ifid_id_pc;
         QData/*63:0*/ ysyx_22051013_rvcpu__DOT__idex_id_op1;
@@ -181,6 +194,7 @@ VL_MODULE(Vysyx_22051013_rvcpu___024root) {
         QData/*63:0*/ ysyx_22051013_rvcpu__DOT__wb_reg_rd_data;
         QData/*63:0*/ ysyx_22051013_rvcpu__DOT__reg_bpu_data;
         QData/*63:0*/ ysyx_22051013_rvcpu__DOT__axi_ifu_slave1__DOT__dpic_inst_i;
+        QData/*63:0*/ ysyx_22051013_rvcpu__DOT__axi_lsu_slave3__DOT__dpic_read_data;
         QData/*63:0*/ ysyx_22051013_rvcpu__DOT__bpu_static__DOT__pr_pc;
         QData/*63:0*/ ysyx_22051013_rvcpu__DOT__idu2__DOT__op1_sub_op2;
         QData/*63:0*/ ysyx_22051013_rvcpu__DOT__exu4__DOT__op1_add_op2;
@@ -200,8 +214,6 @@ VL_MODULE(Vysyx_22051013_rvcpu___024root) {
         QData/*61:0*/ ysyx_22051013_rvcpu__DOT__exu4__DOT__csr_operate__DOT__mtvec_base;
         QData/*63:0*/ ysyx_22051013_rvcpu__DOT__exu4__DOT__csr_operate__DOT__mepc;
         QData/*63:0*/ ysyx_22051013_rvcpu__DOT__exu4__DOT__csr_operate__DOT__mcause;
-        QData/*63:0*/ ysyx_22051013_rvcpu__DOT__lsu6__DOT__data_i;
-        QData/*63:0*/ ysyx_22051013_rvcpu__DOT__lsu6__DOT__data_o;
         QData/*63:0*/ ysyx_22051013_rvcpu__DOT__lsu6__DOT__load_data;
         VlUnpacked<QData/*63:0*/, 32> ysyx_22051013_rvcpu__DOT__reg9__DOT__regs;
     };

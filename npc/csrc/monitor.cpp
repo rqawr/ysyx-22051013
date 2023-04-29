@@ -3,6 +3,7 @@
 #include "include/common.h"
 #include "include/memory.h"
 
+void init_log(const char *log_file);
 void init_ftrace(const char *elf_file);
 void init_mem();
 void init_difftest(char *ref_so_file, long img_size);
@@ -26,6 +27,7 @@ void sdb_set_batch_mode();
 static char *diff_so_file = (char *)"/home/hxy/ysyx-workbench/nemu/build/riscv64-nemu-interpreter-so";;
 static char *img_file = NULL;
 static char *elf_file =NULL;
+static char *log_file = NULL;
 
 static long load_img() {
   if (img_file == NULL) {
@@ -52,6 +54,7 @@ static long load_img() {
 static int parse_args(int argc, char *argv[]) {
   const struct option table[] = {
     {"batch"    , no_argument      , NULL, 'b'},
+    {"log"      , required_argument, NULL, 'l'},
     {"diff"     , required_argument, NULL, 'd'},
     {"port"     , required_argument, NULL, 'p'},
     {"elf"      , required_argument, NULL, 'e'},
@@ -63,11 +66,13 @@ static int parse_args(int argc, char *argv[]) {
     switch (o) {
       case 'b': sdb_set_batch_mode(); break;
       //case 'd': diff_so_file = optarg; break;
+      case 'l': log_file = optarg; break;
       case 'e': elf_file = optarg; break;
       case 1: img_file = optarg; return 0;
       default:
         printf("Usage: %s [OPTION...] IMAGE [args]\n\n", argv[0]);
         printf("\t-b,--batch              run with batch mode\n");
+        printf("\t-l,--log=FILE           output log to FILE\n");
         printf("\t-e,--elf=FILE           open elf from FILE\n");
         printf("\t-d,--diff=REF_SO        run DiffTest with reference REF_SO\n");
         printf("\n");
@@ -82,6 +87,9 @@ void init_monitor(int argc, char *argv[]) {
 
   /* Parse arguments. */
   parse_args(argc, argv);
+  
+  /* init log*/
+  init_log(log_file);
 
   #ifdef CONFIG_FTRACE
   /* Open the elf file. */

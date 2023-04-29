@@ -68,7 +68,7 @@ ysyx_22051013_idu_decode decode(
 //-------------------------------output--------------------------//
 
 //output to regfile
-assign rs1_addr = rs1_ena ? ((alusrc_o == `INST_ECALL) ? 5'd17 :rs1) : 5'd0 ;
+assign rs1_addr = rs1_ena ? rs1 : 5'd0 ;
 assign rs2_addr = rs2_ena ? rs2 : 5'd0 ;
 assign rd_ena  = (rd == 5'd0) ? 1'b0 : (wbctl_o == 2'b00) ? 1'b0 : 1'b1 ;
 assign rd_addr = rd_ena ? rd : 5'd0 ;

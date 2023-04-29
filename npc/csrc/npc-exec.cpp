@@ -36,6 +36,9 @@ void ftrace_print();
 #endif
 
 static void trace_and_difftest(Decode *_this, uint64_t dnpc) {
+#ifdef CONFIG_ITRACE
+  log_write("%s\n", _this->logbuf); 
+#endif
 #ifdef CONFIG_ITRACE_IRINGBUF
   ringbufnum = (ringbufnum + 1)%16;
   strcpy(iringbuf[ringbufnum] , _this->logbuf);

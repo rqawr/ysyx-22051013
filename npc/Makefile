@@ -12,7 +12,7 @@ VERILAGS= -Wall --trace --cc --exe --build --top-module ysyx_22051013_rvcpu
 VERILAGS+= -y ./vsrc/
 GTKFLAG = -CFLAGS -g
 NPC_IMG?= 
-NPC_FLAGS?= 
+NPC_FLAGS?= -l $(OBJ_PATH)/npc-log.txt
 LINK= -LDFLAGS "-lreadline  --no-pie  -ldl -lLLVM-14 -lSDL2" 
 LLVM= -CFLAGS "-I/usr/lib/llvm-14/include -std=c++14   -fno-exceptions -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS   -D__STDC_LIMIT_MACROS -fPIE"
 

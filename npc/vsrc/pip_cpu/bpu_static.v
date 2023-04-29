@@ -55,4 +55,4 @@ assign pc_o = (rst == `ysyx_22051013_RSTABLE) ? `ysyx_22051013_ZERO64 : pr_pc;
 assign bpu_jump = (rst == `ysyx_22051013_RSTABLE) ? 1'b0 : (inst_bxx & b_imm[12]);
 
 endmodule
-
+//inst_jalr 取到非地址数据，在idu中需在idu_stall_ena前判断是否成功

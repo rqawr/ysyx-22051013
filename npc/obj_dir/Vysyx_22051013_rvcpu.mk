@@ -49,6 +49,7 @@ VM_USER_CLASSES = \
 	expr \
 	ftrace \
 	isa \
+	log \
 	main \
 	memory \
 	mmio \
@@ -84,6 +85,8 @@ expr.o: ./csrc/expr.cpp
 ftrace.o: ./csrc/ftrace.cpp
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 isa.o: ./csrc/isa.cpp
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
+log.o: ./csrc/log.cpp
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 main.o: ./csrc/main.cpp
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<

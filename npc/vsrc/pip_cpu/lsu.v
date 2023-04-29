@@ -16,32 +16,38 @@
 	input	  wire					ex_valid,
  	output    wire					ls_ready,
  	output	  wire					ls_valid,
+ 	//output	  wire					ls_flush,
+ 	
+ 	//axi
+ 	output	wire					we,
+ 	output	wire					re,
+ 	output	wire [`ysyx_22051013_PC]		data_pc,
+ 	input	wire [`ysyx_22051013_DATA]		data_i,
+ 	output	reg [`ysyx_22051013_DATA]		data_o,
+ 	output	reg [7:0]				wlen,
+ 	input	wire					data_not_ready,
  	
  	output    wire [`ysyx_22051013_DATA]      	ls_data_forward,
  	output    wire [`ysyx_22051013_DATA]      	ls_data_o
  );
  
  //hzd_ctl
- assign ls_ready = wb_ready;
+ assign ls_ready = wb_ready | data_not_ready;
  assign ls_valid = ex_valid;
- 
+ //assign ls_flush = data_not_ready;
  
  wire [`ysyx_22051013_DATAADDR] raddr ;
  wire [`ysyx_22051013_DATAADDR] waddr ; 
- reg [7:0] rlen = 8'd8;
- reg [7:0] wlen;
- reg [`ysyx_22051013_DATA] data_i ;
- reg [`ysyx_22051013_DATA] data_o ;
- wire re ;
- wire we ;
  reg [`ysyx_22051013_DATA] load_data ;
  
  
- assign re    = (rst == `ysyx_22051013_RSTABLE | ls_ctl == 4'b0000) ? 1'b0 : ls_ctl[3];
- assign we    = (rst == `ysyx_22051013_RSTABLE | ls_ctl == 4'b0000) ? 1'b0 : ~ls_ctl[3] ;
+ assign re    = (rst == `ysyx_22051013_RSTABLE | ls_ctl == 4'b0000 ) ? 1'b0 : ls_ctl[3];
+ assign we    = (rst == `ysyx_22051013_RSTABLE | ls_ctl == 4'b0000 ) ? 1'b0 : ~ls_ctl[3] ;
  assign waddr    = (rst == `ysyx_22051013_RSTABLE) ? `ysyx_22051013_ZERO64 : alu_res ;
  assign raddr    = (rst == `ysyx_22051013_RSTABLE) ? `ysyx_22051013_ZERO64 : {alu_res[63:3],3'b000} ;
 
+
+assign data_pc = re ? raddr : we ? waddr : `ysyx_22051013_ZERO64;
  
  //--------------------------load-----------------------------------------------------------------//
 wire [ 2:0] byte_sel = alu_res[2:0] ;
@@ -213,6 +219,7 @@ always @(*) begin
         endcase
     end
 end
+/*
 //--------------------------dpi-c--------------------------------------------------------------------//
  import "DPI-C" function void pmem_read(input longint raddr, output longint rdata, input byte rlen);
  
@@ -228,9 +235,9 @@ always @(negedge clk) begin
   pmem_write(waddr, data_o , wlen);end
  end
 end
-
+*/
 //------------------------output----------------------------------------------------------------------//
-assign ls_data_o  = re ? load_data : `ysyx_22051013_ZERO64 ;
-assign ls_data_forward  = re ? load_data : alu_res ;
+assign ls_data_o  = re & ~data_not_ready ? load_data : `ysyx_22051013_ZERO64 ;
+assign ls_data_forward  = re & ~data_not_ready ? load_data : alu_res ;
 wire _unused_ok = &{alu_res[2:0]};
 endmodule

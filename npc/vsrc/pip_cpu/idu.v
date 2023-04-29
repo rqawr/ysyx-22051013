@@ -15,7 +15,7 @@ module ysyx_22051013_idu(
 	input	  wire [`ysyx_22051013_PC]	pc_i	,
 	
 	//bpu
-	//input  wire	[`ysyx_22051013_REGADDR]	jalr_addr,
+
 	input  wire					bpu_jump,
 	
 	//data forward
@@ -84,7 +84,6 @@ assign  rs1      =  inst_i [19:15]  ;
 assign  rs2      =  inst_i [24:20]  ;
 
 wire imm_ena ;
-//wire jump;
 wire branch;
 
 ysyx_22051013_idu_decode decode(
@@ -95,7 +94,6 @@ ysyx_22051013_idu_decode decode(
 	.ext_imm(imm)	,
 	.imm_ena(imm_ena),
 	.wb_ctl (wbctl_o) ,
-	//.jump(jump)	,
  	.mem_ctl(lsctl_o) ,
  	.branch(branch) ,
  	.load(load_flag),
@@ -105,7 +103,7 @@ ysyx_22051013_idu_decode decode(
 //-------------------------------output--------------------------//
 
 //output to regfile
-assign rs1_addr = rs1_ena ? ((alusrc_o == `INST_ECALL) ? 5'd17 :rs1) : 5'd0 ;
+assign rs1_addr = rs1_ena ? rs1 : 5'd0 ;
 assign rs2_addr = rs2_ena ? rs2 : 5'd0 ;
 assign rd_ena  = (rd == 5'd0) ? 1'b0 : (wbctl_o == 2'b00) ? 1'b0 : 1'b1 ;
 assign rd_addr = rd_ena ? rd : 5'd0 ;
@@ -193,10 +191,10 @@ end
 
 //out to ifu
 
-//wire jalr_depend = (jalr_addr != 5'd0) & ((jalr_addr == ex_addr_forward) | (jalr_addr == ls_addr_forward) | (jalr_addr == wb_addr_forward));
+//wire jalr_depend = ex_op1_forward | ls_op1_forward | wb_op1_forward;
 
 
-assign jump_ena =id_ready ? 1'b0 : (alusrc_o == `INST_JALR) | (ex_branch ^ bpu_jump) /*| jalr_depend */;
+assign jump_ena =id_ready ? 1'b0 : ((alusrc_o == `INST_JALR) /*& jalr_depend*/) | (ex_branch ^ bpu_jump);
 assign jump_pc = jump_ena ? (
 		 (alusrc_o == `INST_JALR) ? op1 + imm :
 		 bpu_jump  ? pc_i + `ysyx_22051013_PLUS4 :

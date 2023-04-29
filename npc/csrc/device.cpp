@@ -2,7 +2,7 @@
 #include "include/memory.h"
 #include "include/isa.h"
 #include "include/mmio.h"
-
+#include "include/device.h"
 
 //--------------------------------------------------device----------------------------------------------//
 void init_map();
@@ -10,6 +10,7 @@ void init_serial();
 void init_timer();
 void init_vga();
 void init_i8042();
+void init_alarm();
 
 void send_key(uint8_t, bool);
 void vga_update_screen();
@@ -17,7 +18,7 @@ void vga_update_screen();
 void device_update() {
   static uint64_t last = 0;
   uint64_t now = get_time();
-  if (now - last < 1000000 / 60) {
+  if (now - last < 1000000 / TIMER_HZ) {
     return;
   }
   last = now;
@@ -57,6 +58,8 @@ void init_device() {
   IFDEF(CONFIG_HAS_TIMER, init_timer());
   IFDEF(CONFIG_HAS_VGA, init_vga());
   IFDEF(CONFIG_HAS_KEYBOARD, init_i8042());
+  
+  init_alarm();
  
 }
 
@@ -91,6 +94,43 @@ void init_serial() {
 
 }
 
+//---------------------------------------------alarm-----------------------------------------------------//
+
+#define MAX_HANDLER 8
+
+static alarm_handler_t handler[MAX_HANDLER] = {};
+static int idx = 0;
+
+void add_alarm_handle(alarm_handler_t h) {
+  assert(idx < MAX_HANDLER);
+  handler[idx ++] = h;
+}
+
+static void alarm_sig_handler(int signum) {
+  int i;
+  for (i = 0; i < idx; i ++) {
+    handler[i]();
+  }
+}
+
+void init_alarm() {
+  struct sigaction s;
+  memset(&s, 0, sizeof(s));
+  s.sa_handler = alarm_sig_handler;
+  int ret = sigaction(SIGVTALRM, &s, NULL);
+  Assert(ret == 0, "Can not set signal handler");
+
+  struct itimerval it = {};
+  it.it_value.tv_sec = 0;
+  it.it_value.tv_usec = 1000000 / TIMER_HZ;
+  it.it_interval = it.it_value;
+  ret = setitimer(ITIMER_VIRTUAL, &it, NULL);
+  Assert(ret == 0, "Can not set timer");
+}
+
+//--------------------------------------------intr----------------------------------------------------//
+void dev_raise_intr() {
+}
 
 //---------------------------------------------rtc-----------------------------------------------------//
 
@@ -106,9 +146,16 @@ static void rtc_io_handler(uint32_t offset, int len, bool is_write) {
   }
 }
 
+static void timer_intr() {
+  if (npc_state.state == NPC_RUNNING) {
+    dev_raise_intr();
+  }
+}
+
 void init_timer() {
   rtc_port_base = (uint32_t *)new_space(8);
   add_mmio_map("rtc", CONFIG_RTC_MMIO, rtc_port_base, 8, rtc_io_handler);
+  add_alarm_handle(timer_intr);
 }
 
 

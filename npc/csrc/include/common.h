@@ -34,9 +34,9 @@
 //#define CONFIG_DTRACE
 #endif
 
-//#define CONFIG_DIFFTEST 1
+#define CONFIG_DIFFTEST 1
 
-//#define CONFIG_GTK
+#define CONFIG_GTK
 
 
 #define CONFIG_DEVICE 1
@@ -180,9 +180,21 @@ uint64_t get_time();
 
 #define ANSI_FMT(str, fmt) fmt str ANSI_NONE
 
+#define log_write(...)  \
+  do { \
+    extern FILE* log_fp; \
+    extern bool log_enable(); \
+    if (log_enable()) { \
+      fprintf(log_fp, __VA_ARGS__); \
+      fflush(log_fp); \
+    } \
+  } while (0) 
+
+
 #define _Log(...) \
   do { \
     printf(__VA_ARGS__); \
+    log_write(__VA_ARGS__); \
   } while (0)
 
 
