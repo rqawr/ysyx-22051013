@@ -21,9 +21,9 @@ extern "C" {
     extern void ebreak(svBit ebreak_ena);
     // DPI import at vsrc//pip_cpu/wbu.v:57:30
     extern void pc_inst_end(long long thepc_data, const svBitVecVal* the_inst);
-    // DPI import at vsrc//pip_cpu/axi_ifu_slave.v:70:30
+    // DPI import at vsrc//pip_cpu/axi_slave.v:141:30
     extern void pmem_read(long long raddr, long long* rdata, char rlen);
-    // DPI import at vsrc//pip_cpu/axi_lsu_slave.v:134:30
+    // DPI import at vsrc//pip_cpu/axi_slave.v:142:30
     extern void pmem_write(long long waddr, long long wdata, char wlen);
 
 #ifdef __cplusplus

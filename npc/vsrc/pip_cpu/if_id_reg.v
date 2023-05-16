@@ -12,6 +12,7 @@
 	input wire				bpu_jump,
 	
 	input	wire			if_valid,
+	input	wire			id_stall,
 	input	wire			id_flush,
 	input	wire			ex_flush,
 	input	wire			id_ready,
@@ -28,7 +29,7 @@
 		 id_pc <= `ysyx_22051013_ZERO64;
 		 id_jump <= 1'd0;
 	 end
-	 else if(if_valid | id_ready) begin
+	 else if(if_valid | id_ready | id_stall) begin
 	 	 id_inst <= id_inst;
 		 id_pc <= id_pc;
 		 id_jump <= id_jump;

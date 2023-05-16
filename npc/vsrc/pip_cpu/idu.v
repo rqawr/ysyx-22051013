@@ -61,6 +61,7 @@ module ysyx_22051013_idu(
 	output	wire				id_ex_flush,
 	output	wire				id_ready,
 	output	wire				id_valid,
+	output	wire				id_stall,
 	//to ifu
 	output	wire				jump_ena,
 	output	wire [`ysyx_22051013_PC]	jump_pc
@@ -69,8 +70,9 @@ module ysyx_22051013_idu(
 
 //hzd_ctl
 assign id_flush = jump_ena ;
-assign id_ready = ex_ready | id_stall_ena ;
+assign id_ready = ex_ready ;
 assign id_valid = if_valid; 
+assign id_stall = id_stall_ena;
 
 assign id_ex_flush = id_stall_ena;
 
@@ -194,7 +196,7 @@ end
 //wire jalr_depend = ex_op1_forward | ls_op1_forward | wb_op1_forward;
 
 
-assign jump_ena =id_ready ? 1'b0 : ((alusrc_o == `INST_JALR) /*& jalr_depend*/) | (ex_branch ^ bpu_jump);
+assign jump_ena =/*id_ready ? 1'b0 : */((alusrc_o == `INST_JALR) /*& jalr_depend*/) | (ex_branch ^ bpu_jump);
 assign jump_pc = jump_ena ? (
 		 (alusrc_o == `INST_JALR) ? op1 + imm :
 		 bpu_jump  ? pc_i + `ysyx_22051013_PLUS4 :

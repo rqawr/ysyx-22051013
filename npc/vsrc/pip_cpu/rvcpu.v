@@ -17,10 +17,9 @@
 	`include "pip_cpu/regfile.v"
 	//`include "pip_cpu/hzd_ctl.v"
 //----------------out core-----------//
-	`include "pip_cpu/axi_ifu_master.v"
-	`include "pip_cpu/axi_ifu_slave.v"
-	`include "pip_cpu/axi_lsu_master.v"
-	`include "pip_cpu/axi_lsu_slave.v"
+	`include "pip_cpu/axi_master_arbitrator.v"
+	`include "pip_cpu/axi_slave.v"
+	`include "pip_cpu/i_cache.v"
 	/* verilator lint_off DECLFILENAME */
 module ysyx_22051013_rvcpu(
 	input wire              clk		,
@@ -32,21 +31,9 @@ module ysyx_22051013_rvcpu(
 //-----------------------------------------------out core------------------------//
 
 //ifu axi_lite
-wire 				inst_not_ready	;
-wire [`ysyx_22051013_DATA]	axi_if_inst	;
-//wire [`ysyx_22051013_PC]	axi_if_pc	;
+wire 				axi_cache_valid	;
+wire [`ysyx_22051013_DATA]	axi_cache_inst	;
 
-
-wire	[`ysyx_22051013_ADDR]	ifu_ar_addr	;	
-wire				ifu_ar_valid	;
-wire				ifu_ar_ready	;
-	
-wire [`ysyx_22051013_DATA]	ifu_r_data	;
-wire [`ysyx_22051013_RESP]	ifu_r_resp	;
-wire				ifu_r_valid	;
-wire				ifu_r_ready	;
-
-//lsu axi_lite
 wire				data_not_ready	;
 wire				lsu_axi_we	;
 wire				lsu_axi_re	;
@@ -56,29 +43,37 @@ wire	[`ysyx_22051013_DATA]	lsu_axi_read_data;
 wire	[`ysyx_22051013_DATA]	lsu_axi_write_data;
 
 
+wire	[`ysyx_22051013_ID]	axi_aw_id	;
+wire	[`ysyx_22051013_ADDR]	axi_aw_addr	;
+wire				axi_aw_valid	;
+wire				axi_aw_ready	;
 
-wire	[`ysyx_22051013_ADDR]	lsu_aw_addr	;
-wire				lsu_aw_valid	;
-wire				lsu_aw_ready	;
+wire	[`ysyx_22051013_DATA]	axi_w_data	;
+wire	[`ysyx_22051013_STRB]	axi_w_strb	;
+wire				axi_w_valid	;
+wire				axi_w_ready	;
 
-wire	[`ysyx_22051013_DATA]	lsu_w_data	;
-wire	[`ysyx_22051013_STRB]	lsu_w_strb	;
-wire				lsu_w_valid	;
-wire				lsu_w_ready	;
+wire	[`ysyx_22051013_ID]	axi_b_id	;
+wire	[`ysyx_22051013_RESP]	axi_b_resp	;
+wire				axi_b_valid	;
+wire				axi_b_ready	;
 
-wire	[`ysyx_22051013_RESP]	lsu_b_resp	;
-wire				lsu_b_valid	;
-wire				lsu_b_ready	;
+wire	[`ysyx_22051013_ID]	axi_ar_id	;
+wire	[`ysyx_22051013_ADDR]	axi_ar_addr	;	
+wire				axi_ar_valid	;
+wire				axi_ar_ready	;
 
+wire	[`ysyx_22051013_ID]	axi_r_id	;
+wire [`ysyx_22051013_DATA]	axi_r_data	;
+wire [`ysyx_22051013_RESP]	axi_r_resp	;
+wire				axi_r_valid	;
+wire				axi_r_ready	;
 
-wire	[`ysyx_22051013_ADDR]	lsu_ar_addr	;	
-wire				lsu_ar_valid	;
-wire				lsu_ar_ready	;
-	
-wire [`ysyx_22051013_DATA]	lsu_r_data	;
-wire [`ysyx_22051013_RESP]	lsu_r_resp	;
-wire				lsu_r_valid	;
-wire				lsu_r_ready	;
+//cache
+wire	[`ysyx_22051013_PC]	cache_axi_pc	;
+wire				cache_axi_ena	;
+wire				cache_if_valid	;
+wire	[`ysyx_22051013_INST]	cache_if_inst	;
 
 
 
@@ -90,6 +85,8 @@ wire				lsu_r_ready	;
 wire				bpu_ifid_jump;
 wire [`ysyx_22051013_PC]    	bpu_if_pc    	;
 
+//ifu
+wire				if_cache_ready	;
  
 //if_id_reg
  wire [`ysyx_22051013_INST]  	ifid_if_inst 	   ;
@@ -110,7 +107,7 @@ wire  [`ysyx_22051013_PC]  	     id_if_pc 	   ;
 wire           			     id_if_pc_sel  ;
 wire           			     id_ifid_jumpflush;
 wire				id_load_flag;
-//wire				id_h_stall_ena;
+wire				id_if_stall_ena;
 
 //id_ex_reg
 wire [`ysyx_22051013_INST]  	idex_id_inst 	 ;
@@ -167,6 +164,8 @@ wire [`ysyx_22051013_DATA]         ls_wb_data        ;
 wire [`ysyx_22051013_DATA] 	ls_lswb_data_forward;
 wire [`ysyx_22051013_REGADDR] 	ls_id_addr_forward;
 wire [`ysyx_22051013_DATA] 	ls_id_data_forward;
+wire				data_ok;
+
 
 //is_wb_reg
 //wire [`ysyx_22051013_INST]  	lswb_ls_inst 	   ;
@@ -225,100 +224,100 @@ wire id_ifid_flush;
 wire ls_lswb_flush;
 
 
+
+
 //-------------------------------------out core--------------------------------//
 
 //ifu axi_lite
-ysyx_22051013_axi_ifu_master axi_ifu_master0(
+ysyx_22051013_axi_master_arbitrator axi_master_arbitrator0(
 		.clk(clk)	,
 		.rst(rst)	,
-		.inst_pc(ifid_if_pc)	,
-		.inst_64(axi_if_inst)	,
-		.inst_not_ready(inst_not_ready)	,
-		.ifu_ar_addr(ifu_ar_addr)	,
-		.ifu_ar_valid(ifu_ar_valid)	,
-		.ifu_ar_ready(ifu_ar_ready)	,
-		.ifu_r_data(ifu_r_data)		,
-		.ifu_r_resp(ifu_r_resp)		,
-		.ifu_r_valid(ifu_r_valid)	,
-		.ifu_r_ready(ifu_r_ready)
-);
-
-ysyx_22051013_axi_ifu_slave axi_ifu_slave1(
-		.clk(clk)	,
-		.rst(rst)	,
-		.ifu_ar_addr(ifu_ar_addr)	,
-		.ifu_ar_valid(ifu_ar_valid)	,
-		.ifu_ar_ready(ifu_ar_ready)	,
-		.ifu_r_data(ifu_r_data)		,
-		.ifu_r_resp(ifu_r_resp)		,
-		.ifu_r_valid(ifu_r_valid)	,
-		.ifu_r_ready(ifu_r_ready)
-);
-
-
-//ifu axi_lite
-ysyx_22051013_axi_lsu_master axi_lsu_master2(
-		.clk(clk)	,
-		.rst(rst)	,
+		.icache_pc(cache_axi_pc)	,
+		.icache_ena(cache_axi_ena)	,
+		.axi_inst(axi_cache_inst)	,
+		.axi_inst_valid(axi_cache_valid)	,
 		.data_pc(lsu_axi_datapc)	,
 		.data_o(lsu_axi_read_data)	,
 		.data_i(lsu_axi_write_data)	,
 		.data_not_ready(data_not_ready)	,
 		.we(lsu_axi_we),
 		.re(lsu_axi_re),
+		.data_ok(data_ok),
 		.wmask(lsu_axi_wmask),
 		
-		.lsu_aw_addr(lsu_aw_addr)	,
-		.lsu_aw_valid(lsu_aw_valid)	,
-		.lsu_aw_ready(lsu_aw_ready)	,
+		.axi_aw_id(axi_aw_id)		,
+		.axi_aw_addr(axi_aw_addr)	,
+		.axi_aw_valid(axi_aw_valid)	,
+		.axi_aw_ready(axi_aw_ready)	,
 		
-		.lsu_w_data(lsu_w_data)		,
-		.lsu_w_strb(lsu_w_strb)		,
-		.lsu_w_valid(lsu_w_valid)	,
-		.lsu_w_ready(lsu_w_ready)	,
+		.axi_w_data(axi_w_data)		,
+		.axi_w_strb(axi_w_strb)		,
+		.axi_w_valid(axi_w_valid)	,
+		.axi_w_ready(axi_w_ready)	,
 		
-		.lsu_b_resp(lsu_b_resp)		,
-		.lsu_b_valid(lsu_b_valid)	,
-		.lsu_b_ready(lsu_b_ready)	,
+		.axi_b_id(axi_b_id)		,
+		.axi_b_resp(axi_b_resp)		,
+		.axi_b_valid(axi_b_valid)	,
+		.axi_b_ready(axi_b_ready)	,
 		
-		.lsu_ar_addr(lsu_ar_addr)	,
-		.lsu_ar_valid(lsu_ar_valid)	,
-		.lsu_ar_ready(lsu_ar_ready)	,
+		.axi_ar_id(axi_ar_id)		,
+		.axi_ar_addr(axi_ar_addr)	,
+		.axi_ar_valid(axi_ar_valid)	,
+		.axi_ar_ready(axi_ar_ready)	,
 		
-		.lsu_r_data(lsu_r_data)		,
-		.lsu_r_resp(lsu_r_resp)		,
-		.lsu_r_valid(lsu_r_valid)	,
-		.lsu_r_ready(lsu_r_ready)
+		.axi_r_id(axi_r_id)		,
+		.axi_r_data(axi_r_data)		,
+		.axi_r_resp(axi_r_resp)		,
+		.axi_r_valid(axi_r_valid)	,
+		.axi_r_ready(axi_r_ready)
 );
 
-ysyx_22051013_axi_lsu_slave axi_lsu_slave3(
+ysyx_22051013_axi_slave axi_slave1(
 		.clk(clk)	,
 		.rst(rst)	,
 		
-		.lsu_aw_addr(lsu_aw_addr)	,
-		.lsu_aw_valid(lsu_aw_valid)	,
-		.lsu_aw_ready(lsu_aw_ready)	,
+		.axi_aw_id(axi_aw_id)		,
+		.axi_aw_addr(axi_aw_addr)	,
+		.axi_aw_valid(axi_aw_valid)	,
+		.axi_aw_ready(axi_aw_ready)	,
 		
-		.lsu_w_data(lsu_w_data)		,
-		.lsu_w_strb(lsu_w_strb)		,
-		.lsu_w_valid(lsu_w_valid)	,
-		.lsu_w_ready(lsu_w_ready)	,
+		.axi_w_data(axi_w_data)		,
+		.axi_w_strb(axi_w_strb)		,
+		.axi_w_valid(axi_w_valid)	,
+		.axi_w_ready(axi_w_ready)	,
 		
-		.lsu_b_resp(lsu_b_resp)		,
-		.lsu_b_valid(lsu_b_valid)	,
-		.lsu_b_ready(lsu_b_ready)	,
+		.axi_b_id(axi_b_id)		,
+		.axi_b_resp(axi_b_resp)		,
+		.axi_b_valid(axi_b_valid)	,
+		.axi_b_ready(axi_b_ready)	,
 		
-		.lsu_ar_addr(lsu_ar_addr)	,
-		.lsu_ar_valid(lsu_ar_valid)	,
-		.lsu_ar_ready(lsu_ar_ready)	,
+		.axi_ar_id(axi_ar_id)		,
+		.axi_ar_addr(axi_ar_addr)	,
+		.axi_ar_valid(axi_ar_valid)	,
+		.axi_ar_ready(axi_ar_ready)	,
 		
-		.lsu_r_data(lsu_r_data)		,
-		.lsu_r_resp(lsu_r_resp)		,
-		.lsu_r_valid(lsu_r_valid)	,
-		.lsu_r_ready(lsu_r_ready)
+		.axi_r_id(axi_r_id)		,
+		.axi_r_data(axi_r_data)		,
+		.axi_r_resp(axi_r_resp)		,
+		.axi_r_valid(axi_r_valid)	,
+		.axi_r_ready(axi_r_ready)
 );
 
-
+ysyx_22051013_i_cache i_cache2(
+		.clk(clk),
+		.rst(rst),
+		
+		.inst_pc(ifid_if_pc)	,
+		.pc_ready(if_cache_ready)	,
+		.inst(cache_if_inst)	,
+		.inst_valid(cache_if_valid)	,
+		
+		.axi_pc(cache_axi_pc)	,
+		.axi_ena(cache_axi_ena)	,
+		.axi_inst(axi_cache_inst),
+		.axi_valid(axi_cache_valid)
+		
+);
 
 //--------------------------------------in core ---------------------------------//
 
@@ -344,10 +343,12 @@ ysyx_22051013_ifu ifu0(
 		.ex_pc_jump(ex_if_pc_sel)  ,
  		.ex_pc_i(ex_if_pc)	,
  		.bpu_pc_i(bpu_if_pc)	,
- 		.inst_not_ready(inst_not_ready),
+ 		.inst_valid(cache_if_valid),
  		.id_ready(id_ready)	,
+ 		.id_stall(id_if_stall_ena),
  		.if_valid(if_valid)	,
- 		.inst_i(axi_if_inst)	,
+ 		.core_ready(if_cache_ready),
+ 		.inst_i(cache_if_inst)	,
  		.inst_o(ifid_if_inst)	,		
 		.pc_o(ifid_if_pc)
 );
@@ -363,6 +364,7 @@ ysyx_22051013_reg_ifid reg_ifid1(
 		//.bpu_addr(bpu_reg_addr),
 		
 		.if_valid(if_valid),
+		.id_stall(id_if_stall_ena),
 		.id_flush(id_ifid_flush),
 		.ex_flush(ex_flush),
 		.id_ready(id_ready),
@@ -413,6 +415,7 @@ ysyx_22051013_idu idu2(
 	.id_ex_flush(id_idex_flush),
 	.ex_ready(ex_ready),
 	.id_ready(id_ready),
+	.id_stall(id_if_stall_ena),
  	
 	//.jump_flush(id_ifid_jumpflush)	,
 	.jump_pc(id_if_pc)		,
@@ -534,6 +537,7 @@ ysyx_22051013_lsu lsu6(
 	.data_not_ready(data_not_ready)	,
 	.we(lsu_axi_we),
 	.re(lsu_axi_re),
+	.data_ok(data_ok),
 	.wlen(lsu_axi_wmask),
  	
  	.ls_data_forward(ls_lswb_data_forward),

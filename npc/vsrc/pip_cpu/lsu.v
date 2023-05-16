@@ -21,6 +21,7 @@
  	//axi
  	output	wire					we,
  	output	wire					re,
+ 	output	reg					data_ok,
  	output	wire [`ysyx_22051013_PC]		data_pc,
  	input	wire [`ysyx_22051013_DATA]		data_i,
  	output	reg [`ysyx_22051013_DATA]		data_o,
@@ -33,16 +34,32 @@
  
  //hzd_ctl
  assign ls_ready = wb_ready | data_not_ready;
- assign ls_valid = ex_valid;
+ assign ls_valid = ex_valid | data_not_ready;
  //assign ls_flush = data_not_ready;
  
  wire [`ysyx_22051013_DATAADDR] raddr ;
  wire [`ysyx_22051013_DATAADDR] waddr ; 
  reg [`ysyx_22051013_DATA] load_data ;
  
+always@(posedge clk) begin
+	if(rst == `ysyx_22051013_RSTABLE) begin
+		data_ok <= 1'b0;
+	end
+	else if(~(ls_ready | ex_valid)) begin 
+		data_ok <= 1'b1;
+	end
+	else if(~data_not_ready)begin
+		data_ok <= 1'b0;
+	end
+	else begin
+		data_ok <= 1'b0;
+	end
+end
+ 
+ 
  
  assign re    = (rst == `ysyx_22051013_RSTABLE | ls_ctl == 4'b0000 ) ? 1'b0 : ls_ctl[3];
- assign we    = (rst == `ysyx_22051013_RSTABLE | ls_ctl == 4'b0000 ) ? 1'b0 : ~ls_ctl[3] ;
+ assign we    = (rst == `ysyx_22051013_RSTABLE | ls_ctl == 4'b0000 ) ? 1'b0 : ~ls_ctl[3];
  assign waddr    = (rst == `ysyx_22051013_RSTABLE) ? `ysyx_22051013_ZERO64 : alu_res ;
  assign raddr    = (rst == `ysyx_22051013_RSTABLE) ? `ysyx_22051013_ZERO64 : {alu_res[63:3],3'b000} ;
 
@@ -237,7 +254,9 @@ always @(negedge clk) begin
 end
 */
 //------------------------output----------------------------------------------------------------------//
+
+
 assign ls_data_o  = re & ~data_not_ready ? load_data : `ysyx_22051013_ZERO64 ;
-assign ls_data_forward  = re & ~data_not_ready ? load_data : alu_res ;
+assign ls_data_forward  = re /*& ~data_not_ready */? load_data : alu_res ;
 wire _unused_ok = &{alu_res[2:0]};
 endmodule

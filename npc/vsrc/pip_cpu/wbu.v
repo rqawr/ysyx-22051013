@@ -62,12 +62,15 @@ assign ebreak_ena = inst_i == `EBREAK_TRAP ? 1'b1 : 1'b0;
 
 wire [`ysyx_22051013_PC] pc_zero = `ysyx_22051013_ZERO64;
 wire [`ysyx_22051013_INST] inst_zero = 32'd0;
-
+reg flag;
  always @(posedge clk) begin
    if(~ls_valid) begin
-   	pc_inst_end(pc_zero, inst_zero);
+   	flag <= 1'b1;
    end
-   else begin
+   else if(ls_valid) begin
+   	flag <= 1'b0;
+   end
+   if(flag == 1'b1) begin
    	pc_inst_end(pc_i, inst_i);
    end
    ebreak(ebreak_ena);

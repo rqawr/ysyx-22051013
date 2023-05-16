@@ -7,23 +7,25 @@
 module ysyx_22051013_ifu(
  input  wire			clk		,
  input  wire			rst		,
- //inout  wire					pc_stall	,
  input	wire					id_pc_jump	,
  input	wire [`ysyx_22051013_PC]		id_pc_i  ,
  input	wire					ex_pc_jump	,
  input	wire [`ysyx_22051013_PC]		ex_pc_i  ,
  input  wire [`ysyx_22051013_PC]		bpu_pc_i  ,
- input	wire					inst_not_ready,
+ input	wire					inst_valid,
  
  input	wire					id_ready,
+ input	wire					id_stall,
  output wire					if_valid,
  
- input	wire [`ysyx_22051013_DATA]		inst_i,
+ output wire					core_ready,
+ 
+ input	wire [`ysyx_22051013_INST]		inst_i,
  output	reg [`ysyx_22051013_INST]		inst_o,
  output reg	[`ysyx_22051013_PC]		pc_o	
  );
  
- //hzd_ctl
+ /*//hzd_ctl
 reg jump_sign;
 
 always@(posedge clk) begin 	
@@ -34,28 +36,28 @@ always@(posedge clk) begin
 		jump_sign <= 1'b0;
 	end
 end
-
-assign if_valid = inst_not_ready;
-
+*/
+assign if_valid = ~inst_valid;
+assign core_ready = id_ready;
  
-assign inst_o = /*jump_sign ? 32'd0 : */inst_i[31:0];
+assign inst_o = /*jump_sign ? 32'd0 : */inst_i;
 
  always@(posedge clk) begin
    if(rst == `ysyx_22051013_RSTABLE)begin
 	pc_o <= `ysyx_22051013_STARTPC;
    end
+   else if(if_valid | id_ready | id_stall) begin
+   	pc_o <= pc_o; 
+   end
    else if(ex_pc_jump) begin 
-   	pc_o <= ex_pc_i;
+   		pc_o <= ex_pc_i;
    end   
    else if(id_pc_jump) begin 
    	pc_o <= id_pc_i;
    end
-   else if(if_valid | id_ready | jump_sign) begin
-   	pc_o <= pc_o; 
-   end
    else begin
 	  pc_o<=bpu_pc_i;
-	end
+   end
 end
 /*
 //--------------------------------------dpi-c--------------------------------------------//
@@ -70,6 +72,6 @@ end
 */
  //assign inst_o = rinst[31:0];
  
- wire _unused_ok = &{inst_i[63:32]};
+ //wire _unused_ok = &{inst_i[63:32]};
   
 endmodule
