@@ -623,7 +623,7 @@ ysyx_22051013_lsu lsu6(
 	.data_pc(lsu_ddsel_data_pc)	,
 	.data_o(lsu_ddsel_write_data)	,
 	.device_data_o(lsu_ddsel_device_data),
-	.data_i(lsu_ddsel_read_data)	,
+	.data_temp(lsu_ddsel_read_data)	,
 	.data_valid(lsu_ddsel_valid)	,
 	.core_ready(lsu_ddsel_ready),
 	.we(lsu_ddsel_we),

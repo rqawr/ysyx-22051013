@@ -43,7 +43,7 @@ module ysyx_22051013_dcache_device_sel(
 
 wire device_ena;
 
-assign device_ena =/*1'b1;*/ ((core_addr >= `ysyx_22051013_UART_START) & (core_addr <= `ysyx_22051013_UART_END)) | 
+assign device_ena =/*1'b1; */((core_addr >= `ysyx_22051013_UART_START) & (core_addr <= `ysyx_22051013_UART_END)) | 
 		((core_addr >= `ysyx_22051013_RTC_START) & (core_addr <= `ysyx_22051013_RTC_END)) | 
 		((core_addr >= `ysyx_22051013_VGAC_START) & (core_addr <= `ysyx_22051013_VGAC_END)) | 
 		((core_addr >= `ysyx_22051013_VMEM_START) & (core_addr <= `ysyx_22051013_VMEM_END)) | 

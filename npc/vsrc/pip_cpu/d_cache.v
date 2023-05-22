@@ -139,35 +139,30 @@ end
 //-------hit--------//
 
 reg data_r_valid;
-reg dirtyr_way1_clean;
-reg dirtyr_way2_clean;
+
 
 always@(*) begin
 	if(dread_state == `ysyx_22051013_D_HIT) begin
 	  if(way1_r_hit) begin
 			data_o = cache_data[63:0];
 			data_r_valid = `ysyx_22051013_ENABLE;
-			dirtyr_way1_clean = `ysyx_22051013_ENABLE;
-			dirtyr_way2_clean = `ysyx_22051013_DISABLE;
+			
 		end
 		else if(way2_r_hit) begin
 			data_o = cache_data[127:64];
 			data_r_valid = `ysyx_22051013_ENABLE;
-			dirtyr_way1_clean = `ysyx_22051013_DISABLE;
-			dirtyr_way2_clean = `ysyx_22051013_ENABLE;
+			
 		end
 		else begin
 			data_o = `ysyx_22051013_ZERO64;
 			data_r_valid = `ysyx_22051013_DISABLE;
-			dirtyr_way1_clean = `ysyx_22051013_DISABLE;
-			dirtyr_way2_clean = `ysyx_22051013_DISABLE;
+
 		end
 	end
 	else begin
 		data_o = `ysyx_22051013_ZERO64;
 		data_r_valid = `ysyx_22051013_DISABLE;
-		dirtyr_way1_clean = `ysyx_22051013_DISABLE;
-		dirtyr_way2_clean = `ysyx_22051013_DISABLE;
+
 	end
 end
 
@@ -180,6 +175,9 @@ reg			missr_ena;
 reg [`ysyx_22051013_CACHE] missr_data;
 reg [`ysyx_22051013_CACHE] cache_r_strb;
 
+reg dirtyr_way1_clean;
+reg dirtyr_way2_clean;
+
 always@(*) begin
 	if(dread_state == `ysyx_22051013_D_MISSR & ~axi_valid) begin 
 		missr_ena = `ysyx_22051013_ENABLE;
@@ -189,6 +187,8 @@ always@(*) begin
 		way1_r_ena = `ysyx_22051013_DISABLE;
 		way2_r_ena = `ysyx_22051013_DISABLE;
 		write_r_valid = `ysyx_22051013_DISABLE;
+		dirtyr_way1_clean = `ysyx_22051013_DISABLE;
+		dirtyr_way2_clean = `ysyx_22051013_DISABLE;
 	end
 	else if(dread_state == `ysyx_22051013_D_MISSR & axi_valid) begin
 		missr_ena = `ysyx_22051013_DISABLE;
@@ -196,34 +196,28 @@ always@(*) begin
 		missr_data = {axi_data_i,axi_data_i};
 		write_r_valid = `ysyx_22051013_ENABLE;
 		
-		if(d_tag_valid1 == `ysyx_22051013_DISABLE) begin
+		if(d_tag_valid1 == `ysyx_22051013_DISABLE | way2_recent_use[dcache_index]) begin
 			way1_r_ena = `ysyx_22051013_ENABLE;
 			way2_r_ena = `ysyx_22051013_DISABLE;
 			cache_r_strb = `ysyx_22051013_STRB128_L;
+			dirtyr_way1_clean = `ysyx_22051013_ENABLE;
+			dirtyr_way2_clean = `ysyx_22051013_DISABLE;
 		end
 		
-		else if(d_tag_valid2 == `ysyx_22051013_DISABLE) begin
+		else if(d_tag_valid2 == `ysyx_22051013_DISABLE | way1_recent_use[dcache_index]) begin
 			way1_r_ena = `ysyx_22051013_DISABLE;
 			way2_r_ena = `ysyx_22051013_ENABLE;
 			cache_r_strb = `ysyx_22051013_STRB128_H;
-		end
-		
-		else if(way1_recent_use[dcache_index]) begin
-			way1_r_ena = `ysyx_22051013_DISABLE;
-			way2_r_ena = `ysyx_22051013_ENABLE;
-			cache_r_strb = `ysyx_22051013_STRB128_H;
-		end
-		
-		else if(way2_recent_use[dcache_index]) begin
-			way1_r_ena = `ysyx_22051013_ENABLE;
-			way2_r_ena = `ysyx_22051013_DISABLE;
-			cache_r_strb = `ysyx_22051013_STRB128_L;
+			dirtyr_way1_clean = `ysyx_22051013_DISABLE;
+			dirtyr_way2_clean = `ysyx_22051013_ENABLE;
 		end
 		
 		else begin
 			way1_r_ena = `ysyx_22051013_DISABLE;
 			way2_r_ena = `ysyx_22051013_DISABLE;
 			cache_r_strb = 128'd0;
+			dirtyr_way1_clean = `ysyx_22051013_DISABLE;
+			dirtyr_way2_clean = `ysyx_22051013_DISABLE;
 		end
 	end
 	else begin
@@ -234,6 +228,8 @@ always@(*) begin
 		way1_r_ena = `ysyx_22051013_DISABLE;
 		way2_r_ena = `ysyx_22051013_DISABLE;
 		write_r_valid = `ysyx_22051013_DISABLE;
+		dirtyr_way1_clean = `ysyx_22051013_DISABLE;
+		dirtyr_way2_clean = `ysyx_22051013_DISABLE;
 	end
 end
 
@@ -404,28 +400,24 @@ always@(*) begin
 	  	if(way1_w_hit) begin
 			hit_w_strb = {64'd0, strb_w_64};
 			data_w_valid = `ysyx_22051013_ENABLE;
-			dirtyw_way1_clean = `ysyx_22051013_ENABLE;
-			dirtyw_way2_clean = `ysyx_22051013_DISABLE;
+
 		end
 		else if(way2_w_hit) begin
 			hit_w_strb = {strb_w_64, 64'd0};
 			data_w_valid = `ysyx_22051013_ENABLE;
-			dirtyw_way1_clean = `ysyx_22051013_DISABLE;
-			dirtyw_way2_clean = `ysyx_22051013_ENABLE;
+
 		end
 		else begin
 			hit_w_strb = 128'd0;
 			data_w_valid = `ysyx_22051013_DISABLE;
-			dirtyw_way1_clean = `ysyx_22051013_DISABLE;
-			dirtyw_way2_clean = `ysyx_22051013_DISABLE;
+
 		end
 	end
 	else begin
 		data_write_o = 128'd0;
 		hit_w_strb = 128'd0;
 		data_w_valid = `ysyx_22051013_DISABLE;
-		dirtyw_way1_clean = `ysyx_22051013_DISABLE;
-		dirtyw_way2_clean = `ysyx_22051013_DISABLE;
+
 	end
 end
 
@@ -567,14 +559,14 @@ always@(posedge clk) begin
 	if(((dwrite_state == `ysyx_22051013_D_HIT) & (dcache_tag == d_tag_way1))) begin
 		way1_dirty[dcache_index] <= `ysyx_22051013_ENABLE;
 	end
-	else if(dirtyr_way1_clean | dirtyw_way1_clean) begin
+	else if(dirtyr_way1_clean ) begin
 		way1_dirty[dcache_index] <= `ysyx_22051013_DISABLE;
 	end
 	
 	if(((dwrite_state == `ysyx_22051013_D_HIT) & (dcache_tag == d_tag_way2))) begin
 		way2_dirty[dcache_index] <= `ysyx_22051013_ENABLE;
 	end
-	else if(dirtyr_way2_clean | dirtyw_way2_clean) begin
+	else if(dirtyr_way2_clean ) begin
 		way2_dirty[dcache_index] <= `ysyx_22051013_DISABLE;
 	end
 end

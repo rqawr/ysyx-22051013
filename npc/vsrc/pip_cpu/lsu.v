@@ -23,7 +23,7 @@
  	output	wire					re,
  	output	wire					core_ready,
  	output	wire [`ysyx_22051013_PC]		data_pc,
- 	input	wire [`ysyx_22051013_DATA]		data_i,
+ 	input	wire [`ysyx_22051013_DATA]		data_temp,
  	output	reg [`ysyx_22051013_DATA]		data_o,
  	output	reg [`ysyx_22051013_DATA]		device_data_o,
  	output	reg [7:0]				wlen,
@@ -62,7 +62,7 @@ always@(posedge clk) begin
 		data_ok <= data_ok;
 	end
 end
- /*
+ 
  reg [`ysyx_22051013_DATA] data_i;
  
  always@(posedge clk) begin
@@ -79,11 +79,11 @@ end
 		data_i <= data_i;
 	end
 end
- */
+ 
  
  assign re    = (rst == `ysyx_22051013_RSTABLE | ls_ctl == 4'b0000 ) ? 1'b0 : ls_ctl[3];
  assign we    = (rst == `ysyx_22051013_RSTABLE | ls_ctl == 4'b0000 ) ? 1'b0 : ~ls_ctl[3];
- assign waddr    = (rst == `ysyx_22051013_RSTABLE) ? `ysyx_22051013_ZERO64 : {alu_res[63:3],3'b000} ;
+ assign waddr    = (rst == `ysyx_22051013_RSTABLE) ? `ysyx_22051013_ZERO64 : alu_res ;
  assign raddr    = (rst == `ysyx_22051013_RSTABLE) ? `ysyx_22051013_ZERO64 : {alu_res[63:3],3'b000} ;
 
 

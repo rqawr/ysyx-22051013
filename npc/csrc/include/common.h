@@ -11,7 +11,7 @@
 
 
 //-------------------------------autoconf.h----------------------------------------//
-//#define PIP_CPU 1
+#define PIP_CPU 1
 #define HAS_CSR 1
 
 #define CONFIG_ISA "riscv64"
