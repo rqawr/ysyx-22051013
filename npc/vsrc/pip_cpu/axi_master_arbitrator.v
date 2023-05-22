@@ -20,10 +20,10 @@ module ysyx_22051013_axi_master_arbitrator(
 	input wire [`ysyx_22051013_DATA] data_i,
 	input wire			we,
 	input wire			re,
-	input wire			data_ok,
+	//input wire			data_ok,
 	input wire [7:0]			wmask,
 	output reg [`ysyx_22051013_DATA]	data_o,
-	output reg			data_not_ready,
+	output reg			axi_data_valid,
 
 
 
@@ -64,9 +64,9 @@ wire if_chosen;
 wire ls_chosen_read;
 wire ls_chosen_write;
 
-assign if_chosen = icache_ena; 
-assign ls_chosen_read = ~if_chosen & re & data_ok;
-assign ls_chosen_write = ~if_chosen & we & data_ok;
+assign if_chosen = (~ ( ls_chosen_read | ls_chosen_write)) & icache_ena ; 
+assign ls_chosen_read =  re ;
+assign ls_chosen_write =  we ;
 
 reg [2:0] arb_state;
 reg [2:0] arb_state_next;
@@ -133,11 +133,11 @@ assign axi_aw_id =  5'd2 ;
 assign axi_aw_addr =  data_pc ;
 assign axi_aw_valid = (arb_state == `ysyx_22051013_ARB_DWRITE) ;
 assign axi_w_data =  data_i ;
-assign axi_w_strb = wmask ;
+assign axi_w_strb = wmask;
 assign axi_w_valid = (arb_state == `ysyx_22051013_ARB_DWRITE);
 assign axi_b_ready = `ysyx_22051013_ENABLE;
 
-wire data_w_not_ready = ~dwrite_shakehand ;
+wire data_w_not_ready = dwrite_shakehand ;
 
 //read
 
@@ -165,7 +165,7 @@ assign axi_r_ready = `ysyx_22051013_ENABLE;
 
 always@(*) begin
 	if(iread_shakehand) begin
-		data_o = data_temp;
+		data_o = `ysyx_22051013_ZERO64;
 		axi_inst = axi_r_data;
 	end
 	else if(dread_shakehand) begin 
@@ -173,11 +173,11 @@ always@(*) begin
 		axi_inst = `ysyx_22051013_ZERO64;
 	end
 	else begin
-		data_o = data_temp;
+		data_o = `ysyx_22051013_ZERO64;
 		axi_inst = `ysyx_22051013_ZERO64;
 	end
 end
-
+/*
 reg [`ysyx_22051013_DATA] data_temp;
 
 
@@ -189,13 +189,13 @@ always@(posedge clk) begin
 		data_temp <= data_temp;
 	end
 end
+*/
 
 
-
-wire data_r_not_ready = ~dread_shakehand;
+wire data_r_not_ready = dread_shakehand;
 assign axi_inst_valid =  iread_shakehand;
 
-assign data_not_ready = (arb_state == `ysyx_22051013_ARB_DREAD) ? data_r_not_ready : (arb_state == `ysyx_22051013_ARB_DWRITE) ? data_w_not_ready : 1'b0;
+assign axi_data_valid = (arb_state == `ysyx_22051013_ARB_DREAD) ? data_r_not_ready : (arb_state == `ysyx_22051013_ARB_DWRITE) ? data_w_not_ready : 1'b0;
 
 
 

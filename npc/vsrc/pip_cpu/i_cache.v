@@ -24,12 +24,15 @@
 	 input wire				axi_valid	
 );
 
-wire [23:0] 	icache_tag = inst_pc[31:8];
-wire [4:0]	icache_index = inst_pc[7:3];
+wire [22:0] 	icache_tag = inst_pc[31:9];
+wire [5:0]	icache_index = inst_pc[8:3];
 
 
 reg [3:0] icache_state;
 reg [3:0] icache_state_next;
+
+wire way1_hit = ((icache_tag == i_tag_way1) & (i_tag_valid1 == `ysyx_22051013_ENABLE));
+wire way2_hit = ((icache_tag == i_tag_way2) & (i_tag_valid2 == `ysyx_22051013_ENABLE));
 
 always@(posedge clk) begin 
 	if(rst == `ysyx_22051013_RSTABLE) begin
@@ -52,7 +55,7 @@ always@(*) begin
 		end
 
 		`ysyx_22051013_I_READ : begin
-			if((~pc_ready & tag_update) & (((icache_tag == i_tag_way1) & (i_tag_valid1 == `ysyx_22051013_ENABLE)) | ((icache_tag == i_tag_way2) & (i_tag_valid2 == `ysyx_22051013_ENABLE)))) begin
+			if((~pc_ready & tag_update) & (way1_hit | way2_hit)) begin
 				icache_state_next = `ysyx_22051013_I_HIT;
 			end
 			else if(~pc_ready & tag_update) begin
@@ -119,20 +122,20 @@ always@(*) begin
 			inst = 32'b0;
 			inst_valid = `ysyx_22051013_DISABLE;
 		end
-		else if((icache_tag == i_tag_way1) & (i_tag_valid1 == `ysyx_22051013_ENABLE) & inst_pc[2]) begin
-			inst = cache_way1_data[63:32];
+		else if(way1_hit & inst_pc[2]) begin
+			inst = cache_data[63:32];
 			inst_valid = `ysyx_22051013_ENABLE;
 		end
-		else if((icache_tag == i_tag_way1) & (i_tag_valid1 == `ysyx_22051013_ENABLE) & ~inst_pc[2]) begin
-			inst = cache_way1_data[31:0];
+		else if(way1_hit & ~inst_pc[2]) begin
+			inst = cache_data[31:0];
 			inst_valid = `ysyx_22051013_ENABLE;
 		end
-		else if((icache_tag == i_tag_way2) & (i_tag_valid2 == `ysyx_22051013_ENABLE) & inst_pc[2]) begin
-			inst = cache_way2_data[63:32];
+		else if(way2_hit & (i_tag_valid2 == `ysyx_22051013_ENABLE) & inst_pc[2]) begin
+			inst = cache_data[127:96];
 			inst_valid = `ysyx_22051013_ENABLE;
 		end
-		else if((icache_tag == i_tag_way2) & (i_tag_valid2 == `ysyx_22051013_ENABLE) & ~inst_pc[2]) begin
-			inst = cache_way2_data[31:0];
+		else if(way2_hit & ~inst_pc[2]) begin
+			inst = cache_data[95:64];
 			inst_valid = `ysyx_22051013_ENABLE;
 		end
 		else begin
@@ -148,124 +151,119 @@ end
 
 //-------------miss-----------//
 
-reg [`ysyx_22051013_DATA] miss_data;
-reg	way1_ena;
-reg	way2_ena;
+reg [`ysyx_22051013_CACHE] miss_data;
+reg [`ysyx_22051013_CACHE] cache_strb;
+reg	cache_ena;
 reg	write_in_valid;
+
 
 always@(*) begin
 	if(icache_state == `ysyx_22051013_I_MISS & ~axi_valid) begin 
 		axi_ena = `ysyx_22051013_ENABLE;
 		axi_pc = {inst_pc[63:3],3'b000};
-		miss_data = `ysyx_22051013_ZERO64;
-		way1_ena = `ysyx_22051013_DISABLE;
-		way2_ena = `ysyx_22051013_DISABLE;
+		miss_data = 128'd0;
+		cache_strb = 128'd0;
+		cache_ena = `ysyx_22051013_DISABLE;
 		write_in_valid = `ysyx_22051013_DISABLE;
 	end
 	else if(icache_state == `ysyx_22051013_I_MISS & axi_valid) begin
 		axi_ena = `ysyx_22051013_DISABLE;
 		axi_pc = `ysyx_22051013_ZERO64;
-		miss_data = axi_inst;
+		miss_data = {axi_inst,axi_inst};
 		write_in_valid = `ysyx_22051013_ENABLE;
 		
 		if(i_tag_valid1 == `ysyx_22051013_DISABLE) begin
-			way1_ena = `ysyx_22051013_ENABLE;
-			way2_ena = `ysyx_22051013_DISABLE;
+			cache_ena = `ysyx_22051013_ENABLE;
+			cache_strb = `ysyx_22051013_STRB128_L;
 		end
 		
 		else if(i_tag_valid2 == `ysyx_22051013_DISABLE) begin
-			way1_ena = `ysyx_22051013_DISABLE;
-			way2_ena = `ysyx_22051013_ENABLE;
+			cache_ena = `ysyx_22051013_ENABLE;
+			cache_strb = `ysyx_22051013_STRB128_H;
 		end
 		
 		else if(way1_recent_use[icache_index]) begin
-			way1_ena = `ysyx_22051013_DISABLE;
-			way2_ena = `ysyx_22051013_ENABLE;
+			cache_ena = `ysyx_22051013_ENABLE;
+			cache_strb = `ysyx_22051013_STRB128_H;
 		end
 		
 		else if(way2_recent_use[icache_index]) begin
-			way1_ena = `ysyx_22051013_ENABLE;
-			way2_ena = `ysyx_22051013_DISABLE;
+			cache_ena = `ysyx_22051013_ENABLE;
+			cache_strb = `ysyx_22051013_STRB128_L;
 		end
 		
 		else begin
-			way1_ena = `ysyx_22051013_DISABLE;
-			way2_ena = `ysyx_22051013_DISABLE;
+			cache_ena = `ysyx_22051013_DISABLE;
+			cache_strb = 128'd0;
 		end
 	end
 	else begin
 		axi_ena = `ysyx_22051013_DISABLE;
-		miss_data = `ysyx_22051013_ZERO64;
+		miss_data = 128'd0;
 		axi_pc = `ysyx_22051013_ZERO64;
-		way1_ena = `ysyx_22051013_DISABLE;
-		way2_ena = `ysyx_22051013_DISABLE;
+		cache_ena = `ysyx_22051013_DISABLE;
+		cache_strb = 128'd0;
 		write_in_valid = `ysyx_22051013_DISABLE;
 	end
 end
 
 //-----------cache---------------------//
 //---tag---//
-wire [24:0] tag_with_valid = {1'b1,icache_tag};
+wire [23:0] tag_with_valid = {1'b1,icache_tag};
 
-wire [23:0] 	i_tag_way1;
+wire [22:0] 	i_tag_way1;
 wire		i_tag_valid1;
 
+wire way1_tag_ena = (icache_state == `ysyx_22051013_I_MISS) & (cache_strb == `ysyx_22051013_STRB128_L);
 
  ysyx_22051013_cache_tag_ram tag_ram0(
  	.clk(clk),
  	.addr(icache_index),
  	.tag_data_i(tag_with_valid),
- 	.write_ena(way1_ena),
+ 	.write_ena(way1_tag_ena),
  	.tag_data_o(i_tag_way1),
  	.tag_valid(i_tag_valid1)
  );
  
- wire [23:0] 	i_tag_way2;
+ wire [22:0] 	i_tag_way2;
  wire		i_tag_valid2;
 
+wire way2_tag_ena = (icache_state == `ysyx_22051013_I_MISS) & (cache_strb == `ysyx_22051013_STRB128_H);
 
  ysyx_22051013_cache_tag_ram tag_ram1(
  	.clk(clk),
  	.addr(icache_index),
  	.tag_data_i(tag_with_valid),
- 	.write_ena(way2_ena),
+ 	.write_ena(way2_tag_ena),
  	.tag_data_o(i_tag_way2),
  	.tag_valid(i_tag_valid2)
  );
  
 //---data---//
 
-wire [`ysyx_22051013_DATA] cache_way1_data;
+wire [`ysyx_22051013_CACHE] cache_data;
+wire ce = 1'b0;
 
  ysyx_22051013_cache_data_ram data_ram0(
- 	.clk(clk),
- 	.addr(icache_index),
- 	.data_i(miss_data),
- 	.write_ena(way1_ena),
- 	.data_o(cache_way1_data)
+	.Q(cache_data),
+ 	.CLK(clk),
+	.CEN(ce),
+	.WEN(~cache_ena),
+	.BWEN(~cache_strb),
+ 	.A(icache_index),
+ 	.D(miss_data)
  );
- 
- wire [`ysyx_22051013_DATA] cache_way2_data;
-
- ysyx_22051013_cache_data_ram data_ram1(
- 	.clk(clk),
- 	.addr(icache_index),
- 	.data_i(miss_data),
- 	.write_ena(way2_ena),
- 	.data_o(cache_way2_data)
- );
-
-		
+ 		
 //------------replace logic------------//
-reg way1_recent_use [31:0];
-reg way2_recent_use [31:0];
+reg way1_recent_use [63:0];
+reg way2_recent_use [63:0];
 
 always@(posedge clk) begin
-	if(((icache_state == `ysyx_22051013_I_HIT) & (icache_tag == i_tag_way1) & (i_tag_valid1 == `ysyx_22051013_ENABLE)) | way1_ena) begin
+	if(((icache_state == `ysyx_22051013_I_HIT) & (icache_tag == i_tag_way1) & (i_tag_valid1 == `ysyx_22051013_ENABLE))) begin
 		way1_recent_use[icache_index] <= `ysyx_22051013_ENABLE;
 		way2_recent_use[icache_index] <= `ysyx_22051013_DISABLE;
 	end
-	if(((icache_state == `ysyx_22051013_I_HIT) & (icache_tag == i_tag_way2) & (i_tag_valid2 == `ysyx_22051013_ENABLE)) | way2_ena) begin
+	if(((icache_state == `ysyx_22051013_I_HIT) & (icache_tag == i_tag_way2) & (i_tag_valid2 == `ysyx_22051013_ENABLE))) begin
 		way1_recent_use[icache_index] <= `ysyx_22051013_DISABLE;
 		way2_recent_use[icache_index] <= `ysyx_22051013_ENABLE;
 	end

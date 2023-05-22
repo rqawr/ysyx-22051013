@@ -20,6 +20,8 @@
 	`include "pip_cpu/axi_master_arbitrator.v"
 	`include "pip_cpu/axi_slave.v"
 	`include "pip_cpu/i_cache.v"
+	`include "pip_cpu/dcache_device_sel.v"
+	`include "pip_cpu/d_cache.v"
 	/* verilator lint_off DECLFILENAME */
 module ysyx_22051013_rvcpu(
 	input wire              clk		,
@@ -31,16 +33,7 @@ module ysyx_22051013_rvcpu(
 //-----------------------------------------------out core------------------------//
 
 //ifu axi_lite
-wire 				axi_cache_valid	;
-wire [`ysyx_22051013_DATA]	axi_cache_inst	;
 
-wire				data_not_ready	;
-wire				lsu_axi_we	;
-wire				lsu_axi_re	;
-wire	[7:0]			lsu_axi_wmask	;
-wire	[`ysyx_22051013_PC]	lsu_axi_datapc	;
-wire	[`ysyx_22051013_DATA]	lsu_axi_read_data;
-wire	[`ysyx_22051013_DATA]	lsu_axi_write_data;
 
 
 wire	[`ysyx_22051013_ID]	axi_aw_id	;
@@ -69,12 +62,50 @@ wire [`ysyx_22051013_RESP]	axi_r_resp	;
 wire				axi_r_valid	;
 wire				axi_r_ready	;
 
-//cache
-wire	[`ysyx_22051013_PC]	cache_axi_pc	;
-wire				cache_axi_ena	;
-wire				cache_if_valid	;
-wire	[`ysyx_22051013_INST]	cache_if_inst	;
+//icache
+wire 				axi_icache_valid	;
+wire [`ysyx_22051013_DATA]	axi_icache_inst	;
+wire	[`ysyx_22051013_PC]	icache_axi_pc	;
+wire				icache_axi_ena	;
+wire				icache_if_valid	;
+wire	[`ysyx_22051013_INST]	icache_if_inst	;
 
+//dcache
+wire				lsu_ddsel_we	;
+wire				lsu_ddsel_re	;
+wire	[7:0]			lsu_ddsel_wmask	;
+wire	[`ysyx_22051013_PC]	lsu_ddsel_data_pc	;
+wire	[`ysyx_22051013_DATA]	lsu_ddsel_read_data;
+wire	[`ysyx_22051013_DATA]	lsu_ddsel_write_data;
+wire				lsu_ddsel_ready;
+wire				lsu_ddsel_valid;
+
+wire	[`ysyx_22051013_DATA]	lsu_ddsel_device_data;
+
+
+wire 		ddsel_axi_re;
+wire 		ddsel_axi_we;
+wire [7:0]	ddsel_axi_mask;
+wire [`ysyx_22051013_DATA]	ddsel_axi_data_o;
+wire [`ysyx_22051013_DATA]	axi_ddsel_data_i;
+wire [`ysyx_22051013_PC]	ddsel_axi_pc;
+wire 		axi_ddsel_valid;
+		
+wire 		ddsel_dcache_re;
+wire 		ddsel_dcache_we;
+wire [7:0]	ddsel_dcache_mask;
+wire [`ysyx_22051013_DATA]	ddsel_dcache_data;
+wire [`ysyx_22051013_DATA]	dcache_ddsel_data;
+wire [`ysyx_22051013_PC]	ddsel_dcache_pc;
+wire 		dcache_ddsel_valid;
+wire 		ddsel_dcache_ready;
+		
+wire 		dcache_ddsel_axi_re;
+wire 		dcache_ddsel_axi_we;
+wire [`ysyx_22051013_DATA]	axi_ddsel_dcache_data;
+wire [`ysyx_22051013_DATA]	dcache_ddsel_axi_data;
+wire [`ysyx_22051013_PC]	dcache_ddsel_axi_pc;
+wire 		axi_ddsel_dcache_valid;
 
 
 //-------------------------------------------in core------------------------------------//
@@ -86,7 +117,7 @@ wire				bpu_ifid_jump;
 wire [`ysyx_22051013_PC]    	bpu_if_pc    	;
 
 //ifu
-wire				if_cache_ready	;
+wire				if_icache_ready	;
  
 //if_id_reg
  wire [`ysyx_22051013_INST]  	ifid_if_inst 	   ;
@@ -164,7 +195,7 @@ wire [`ysyx_22051013_DATA]         ls_wb_data        ;
 wire [`ysyx_22051013_DATA] 	ls_lswb_data_forward;
 wire [`ysyx_22051013_REGADDR] 	ls_id_addr_forward;
 wire [`ysyx_22051013_DATA] 	ls_id_data_forward;
-wire				data_ok;
+//wire				data_ok;
 
 
 //is_wb_reg
@@ -232,18 +263,19 @@ wire ls_lswb_flush;
 ysyx_22051013_axi_master_arbitrator axi_master_arbitrator0(
 		.clk(clk)	,
 		.rst(rst)	,
-		.icache_pc(cache_axi_pc)	,
-		.icache_ena(cache_axi_ena)	,
-		.axi_inst(axi_cache_inst)	,
-		.axi_inst_valid(axi_cache_valid)	,
-		.data_pc(lsu_axi_datapc)	,
-		.data_o(lsu_axi_read_data)	,
-		.data_i(lsu_axi_write_data)	,
-		.data_not_ready(data_not_ready)	,
-		.we(lsu_axi_we),
-		.re(lsu_axi_re),
-		.data_ok(data_ok),
-		.wmask(lsu_axi_wmask),
+		.icache_pc(icache_axi_pc)	,
+		.icache_ena(icache_axi_ena)	,
+		.axi_inst(axi_icache_inst)	,
+		.axi_inst_valid(axi_icache_valid)	,
+		
+		.data_pc(ddsel_axi_pc)	,
+		.data_o(axi_ddsel_data_i)	,
+		.data_i(ddsel_axi_data_o)	,
+		.axi_data_valid(axi_ddsel_valid)	,
+		.we(ddsel_axi_we),
+		.re(ddsel_axi_re),
+		.wmask(ddsel_axi_mask),
+		//.data_ok(data_ok),
 		
 		.axi_aw_id(axi_aw_id)		,
 		.axi_aw_addr(axi_aw_addr)	,
@@ -308,17 +340,74 @@ ysyx_22051013_i_cache i_cache2(
 		.rst(rst),
 		
 		.inst_pc(ifid_if_pc)	,
-		.pc_ready(if_cache_ready)	,
-		.inst(cache_if_inst)	,
-		.inst_valid(cache_if_valid)	,
+		.pc_ready(if_icache_ready)	,
+		.inst(icache_if_inst)	,
+		.inst_valid(icache_if_valid)	,
 		
-		.axi_pc(cache_axi_pc)	,
-		.axi_ena(cache_axi_ena)	,
-		.axi_inst(axi_cache_inst),
-		.axi_valid(axi_cache_valid)
+		.axi_pc(icache_axi_pc)	,
+		.axi_ena(icache_axi_ena)	,
+		.axi_inst(axi_icache_inst),
+		.axi_valid(axi_icache_valid)
 		
 );
 
+ysyx_22051013_dcache_device_sel dcache_device_sel3(
+		.core_re(lsu_ddsel_re),
+		.core_we(lsu_ddsel_we),
+		.core_mask(lsu_ddsel_wmask),
+		.core_data_i(lsu_ddsel_write_data),
+		.device_data_i(lsu_ddsel_device_data),
+		.core_addr(lsu_ddsel_data_pc),
+		.core_ready(lsu_ddsel_ready),
+		.data_valid(lsu_ddsel_valid),
+		.data_to_core(lsu_ddsel_read_data),
+		
+		.axi_re(ddsel_axi_re),
+		.axi_we(ddsel_axi_we),
+		.axi_mask(ddsel_axi_mask),
+		.axi_data_o(ddsel_axi_data_o),
+		.axi_data_i(axi_ddsel_data_i),
+		.axi_data_pc(ddsel_axi_pc),
+		.axi_valid(axi_ddsel_valid),
+		
+		.dcache_re(ddsel_dcache_re),
+		.dcache_we(ddsel_dcache_we),
+		.dcache_mask(ddsel_dcache_mask),
+		.dcache_data_o(ddsel_dcache_data),
+		.dcache_data_i(dcache_ddsel_data),
+		.dcache_data_pc(ddsel_dcache_pc),
+		.dcache_valid(dcache_ddsel_valid),
+		.dcache_ready(ddsel_dcache_ready),
+		
+		.dcache_axi_re(dcache_ddsel_axi_re),
+		.dcache_axi_we(dcache_ddsel_axi_we),
+		.axi_dcache_data(axi_ddsel_dcache_data),
+		.dcache_axi_data(dcache_ddsel_axi_data),
+		.dcache_axi_pc(dcache_ddsel_axi_pc),
+		.axi_dcache_valid(axi_ddsel_dcache_valid)
+);
+
+ysyx_22051013_d_cache d_cache4(
+		.clk(clk),
+		.rst(rst),
+		
+		.data_pc(ddsel_dcache_pc)	,
+		.data_i(ddsel_dcache_data)	,
+		.data_o(dcache_ddsel_data)	,
+		.core_ready(ddsel_dcache_ready)	,
+		.wmask(ddsel_dcache_mask),
+		.we(ddsel_dcache_we),
+		.re(ddsel_dcache_re),
+		.data_valid(dcache_ddsel_valid)	,
+		
+		.axi_pc(dcache_ddsel_axi_pc)	,
+		.axi_r_ena(dcache_ddsel_axi_re)	,
+		.axi_w_ena(dcache_ddsel_axi_we)	,
+		.axi_data_i(axi_ddsel_dcache_data),
+		.axi_data_o(dcache_ddsel_axi_data),
+		.axi_valid(axi_ddsel_dcache_valid)
+		
+);
 //--------------------------------------in core ---------------------------------//
 
 ysyx_22051013_bpu_static bpu_static(
@@ -343,12 +432,12 @@ ysyx_22051013_ifu ifu0(
 		.ex_pc_jump(ex_if_pc_sel)  ,
  		.ex_pc_i(ex_if_pc)	,
  		.bpu_pc_i(bpu_if_pc)	,
- 		.inst_valid(cache_if_valid),
+ 		.inst_valid(icache_if_valid),
  		.id_ready(id_ready)	,
  		.id_stall(id_if_stall_ena),
  		.if_valid(if_valid)	,
- 		.core_ready(if_cache_ready),
- 		.inst_i(cache_if_inst)	,
+ 		.core_ready(if_icache_ready),
+ 		.inst_i(icache_if_inst)	,
  		.inst_o(ifid_if_inst)	,		
 		.pc_o(ifid_if_pc)
 );
@@ -531,14 +620,16 @@ ysyx_22051013_lsu lsu6(
 	//.ls_flush(ls_lswb_flush),
 	
 	//axi
-	.data_pc(lsu_axi_datapc)	,
-	.data_o(lsu_axi_write_data)	,
-	.data_i(lsu_axi_read_data)	,
-	.data_not_ready(data_not_ready)	,
-	.we(lsu_axi_we),
-	.re(lsu_axi_re),
-	.data_ok(data_ok),
-	.wlen(lsu_axi_wmask),
+	.data_pc(lsu_ddsel_data_pc)	,
+	.data_o(lsu_ddsel_write_data)	,
+	.device_data_o(lsu_ddsel_device_data),
+	.data_i(lsu_ddsel_read_data)	,
+	.data_valid(lsu_ddsel_valid)	,
+	.core_ready(lsu_ddsel_ready),
+	.we(lsu_ddsel_we),
+	.re(lsu_ddsel_re),
+	//.data_ok(data_ok),
+	.wlen(lsu_ddsel_wmask),
  	
  	.ls_data_forward(ls_lswb_data_forward),
  	.ls_data_o(lswb_ls_wbdata)	

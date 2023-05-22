@@ -11,7 +11,7 @@
 
 
 //-------------------------------autoconf.h----------------------------------------//
-#define PIP_CPU 1
+//#define PIP_CPU 1
 #define HAS_CSR 1
 
 #define CONFIG_ISA "riscv64"
@@ -26,17 +26,17 @@
 //#define CONFIG_TRACE 1
 
 #ifdef CONFIG_TRACE
-#define CONFIG_ITRACE 1
+//#define CONFIG_ITRACE 1
 //#define CONFIG_ITRACE_IRINGBUF "true"
 //#define CONFIG_WATCHPOINT 1
 //#define CONFIG_FTRACE 1
 //#define CONFIG_MTRACE 1
-//#define CONFIG_DTRACE
+#define CONFIG_DTRACE
 #endif
 
-#define CONFIG_DIFFTEST 1
+//#define CONFIG_DIFFTEST 1
 
-#define CONFIG_GTK
+//#define CONFIG_GTK
 
 
 #define CONFIG_DEVICE 1

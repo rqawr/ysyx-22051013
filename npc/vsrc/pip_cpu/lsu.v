@@ -21,25 +21,32 @@
  	//axi
  	output	wire					we,
  	output	wire					re,
- 	output	reg					data_ok,
+ 	output	wire					core_ready,
  	output	wire [`ysyx_22051013_PC]		data_pc,
  	input	wire [`ysyx_22051013_DATA]		data_i,
  	output	reg [`ysyx_22051013_DATA]		data_o,
+ 	output	reg [`ysyx_22051013_DATA]		device_data_o,
  	output	reg [7:0]				wlen,
- 	input	wire					data_not_ready,
+ 	input	wire					data_valid,
  	
  	output    wire [`ysyx_22051013_DATA]      	ls_data_forward,
  	output    wire [`ysyx_22051013_DATA]      	ls_data_o
  );
  
  //hzd_ctl
- assign ls_ready = wb_ready | data_not_ready;
- assign ls_valid = ex_valid | data_not_ready;
+ assign ls_ready = wb_ready | (data_ok & (re | we));
+ assign ls_valid = ex_valid | (data_ok & (re | we));
  //assign ls_flush = data_not_ready;
+ 
+ assign core_ready = wb_ready | ~data_ok;
+ 
+ assign device_data_o = store_data;
  
  wire [`ysyx_22051013_DATAADDR] raddr ;
  wire [`ysyx_22051013_DATAADDR] waddr ; 
  reg [`ysyx_22051013_DATA] load_data ;
+ 
+ reg data_ok;
  
 always@(posedge clk) begin
 	if(rst == `ysyx_22051013_RSTABLE) begin
@@ -48,19 +55,35 @@ always@(posedge clk) begin
 	else if(~(ls_ready | ex_valid)) begin 
 		data_ok <= 1'b1;
 	end
-	else if(~data_not_ready)begin
+	else if(~data_valid)begin
 		data_ok <= 1'b0;
 	end
 	else begin
-		data_ok <= 1'b0;
+		data_ok <= data_ok;
 	end
 end
+ /*
+ reg [`ysyx_22051013_DATA] data_i;
  
- 
+ always@(posedge clk) begin
+	if(rst == `ysyx_22051013_RSTABLE) begin
+		data_i <= 64'b0;
+	end
+	else if(~(ls_ready | ex_valid)) begin 
+		data_i <= 64'd0;
+	end
+	else if(~data_valid)begin
+		data_i <= data_temp;
+	end
+	else begin
+		data_i <= data_i;
+	end
+end
+ */
  
  assign re    = (rst == `ysyx_22051013_RSTABLE | ls_ctl == 4'b0000 ) ? 1'b0 : ls_ctl[3];
  assign we    = (rst == `ysyx_22051013_RSTABLE | ls_ctl == 4'b0000 ) ? 1'b0 : ~ls_ctl[3];
- assign waddr    = (rst == `ysyx_22051013_RSTABLE) ? `ysyx_22051013_ZERO64 : alu_res ;
+ assign waddr    = (rst == `ysyx_22051013_RSTABLE) ? `ysyx_22051013_ZERO64 : {alu_res[63:3],3'b000} ;
  assign raddr    = (rst == `ysyx_22051013_RSTABLE) ? `ysyx_22051013_ZERO64 : {alu_res[63:3],3'b000} ;
 
 
@@ -134,34 +157,47 @@ reg [ 7:0]      sb_mask    ;
 reg [ 7:0]      sh_mask    ;
 reg [ 7:0]      sw_mask    ;
 
+reg [`ysyx_22051013_DATA] sb_data;
+reg [`ysyx_22051013_DATA] sw_data;
+reg [`ysyx_22051013_DATA] sh_data;
+
 always @(*) begin
     if(rst == `ysyx_22051013_RSTABLE) begin
         sb_mask = 8'd0  ;
+        sb_data = 64'd0;
     end
     else begin
         case (byte_sel)
             3'b000:    begin
+            	sb_data = {56'd0,store_data[7:0]};
                 sb_mask = 8'b00000001 ;
             end 
             3'b001:    begin
+            	sb_data = {48'd0,store_data[7:0],8'd0};
                 sb_mask = 8'b00000010 ;
             end 
             3'b010:    begin 
+            	sb_data = {40'd0,store_data[7:0],16'd0};
                 sb_mask = 8'b00000100 ;
             end 
             3'b011:    begin
+            	sb_data = {32'd0,store_data[7:0],24'd0};
                 sb_mask = 8'b00001000 ;
             end 
             3'b100:    begin 
+            	sb_data = {24'd0,store_data[7:0],32'd0};
                 sb_mask = 8'b00010000 ;
             end 
-            3'b101:    begin 
+            3'b101:    begin
+            	sb_data = {16'd0,store_data[7:0],40'd0}; 
                 sb_mask = 8'b00100000 ;
             end 
             3'b110:    begin
+            	sb_data = {8'd0,store_data[7:0],48'd0};
                 sb_mask = 8'b01000000 ;
             end  
             default:   begin 
+            	sb_data = {store_data[7:0],56'd0};
                 sb_mask = 8'b10000000 ;
             end
         endcase
@@ -171,20 +207,25 @@ end
 always @(*) begin
     if(rst == `ysyx_22051013_RSTABLE) begin
         sh_mask = 8'd0  ;
+        sh_data = 64'd0;
     end
     else begin
         case (half_sel)
             2'b00:     begin
                 sh_mask = 8'b00000011  ;
+                sh_data = {48'd0,store_data[15:0]};
             end 
             2'b01:     begin
                 sh_mask = 8'b00001100  ;
+                sh_data = {32'd0,store_data[15:0],16'd0};
             end
             2'b10:     begin
                 sh_mask = 8'b00110000  ;
+                sh_data = {16'd0,store_data[15:0],32'd0};
             end
             default:   begin
                 sh_mask = 8'b11000000  ;
+                sh_data = {store_data[15:0],48'd0};
             end 
         endcase
     end
@@ -193,14 +234,17 @@ end
 always @(*) begin
     if(rst == `ysyx_22051013_RSTABLE) begin
         sw_mask = 8'd0  ;
+        sw_data = 64'd0;
     end
     else begin
         case (word_sel)
             1'b0:    begin
                 sw_mask = 8'b00001111  ;
+                sw_data = {32'd0,store_data[31:0]};
             end 
             default: begin
                 sw_mask = 8'b11110000  ;
+                sw_data = {store_data[31:0],32'd0};
             end 
         endcase
     end
@@ -214,15 +258,15 @@ always @(*) begin
     else begin
         case (ls_ctl)
             4'b0001:   begin
-                data_o = store_data ;
+                data_o = sb_data ;
                 wlen = sb_mask ; 
             end
             4'b0010:   begin
-                data_o = store_data;
+                data_o = sh_data;
                 wlen = sh_mask ; 
             end
             4'b0100:   begin
-                data_o = store_data ;
+                data_o = sw_data ;
                 wlen = sw_mask ; 
             end
             4'b0101:   begin
@@ -256,7 +300,7 @@ end
 //------------------------output----------------------------------------------------------------------//
 
 
-assign ls_data_o  = re & ~data_not_ready ? load_data : `ysyx_22051013_ZERO64 ;
+assign ls_data_o  = re & ~data_ok ? load_data : `ysyx_22051013_ZERO64 ;
 assign ls_data_forward  = re /*& ~data_not_ready */? load_data : alu_res ;
 wire _unused_ok = &{alu_res[2:0]};
 endmodule

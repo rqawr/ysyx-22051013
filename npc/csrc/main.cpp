@@ -84,15 +84,15 @@ extern "C" void pmem_write(long long waddr, long long wdata, char wlen){
       host_write(gi_to_hi(addr+i),1,wdata);
       wdata >>= 8;
       }
+      
     wlen >>= 1;
     }
    return; 
   }
   else{
     len = maskToLen(wlen);
-   // printf("%u\n",len);
-  }
-  IFDEF(CONFIG_DEVICE, mmio_write(waddr, len, wdata); return);
+    }
+ IFDEF(CONFIG_DEVICE, mmio_write(waddr, len, wdata); return);
 }
 
 
