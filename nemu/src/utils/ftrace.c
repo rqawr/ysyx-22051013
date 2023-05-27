@@ -73,6 +73,9 @@ void ftrace_exec(uint64_t pc, uint64_t addr, bool call_ret){
     ftrace_res[num_cnt].call_ret = call_ret;
     num_cnt++;
   }
+  if(num_cnt == 1000){
+  	num_cnt = 0;
+  }
 }
 
 void ftrace_print() {
