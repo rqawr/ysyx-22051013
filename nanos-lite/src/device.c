@@ -47,7 +47,7 @@ size_t fb_write(const void *buf, size_t offset, size_t len) {
   
   AM_GPU_FBDRAW_T ctl;
   ctl.x = offset % cfg.width, ctl.y = offset / cfg.width;
-  ctl.h = 1, ctl.w = len;
+  ctl.h = (len>>16) & 0xffff, ctl.w = len & 0xffff;
   ctl.pixels = (void *)(buf);
   ctl.sync = true;
   

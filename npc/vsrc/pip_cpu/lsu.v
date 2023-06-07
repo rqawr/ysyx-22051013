@@ -302,5 +302,5 @@ end
 
 assign ls_data_o  = re & ~data_ok ? load_data : `ysyx_22051013_ZERO64 ;
 assign ls_data_forward  = re /*& ~data_not_ready */? load_data : alu_res ;
-wire _unused_ok = &{alu_res[2:0]};
+//wire _unused_ok = &{alu_res[2:0]};
 endmodule

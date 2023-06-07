@@ -5,7 +5,7 @@
  
  `include "pip_cpu/define.v"
  `include "pip_cpu/csr.v"
- `include "pip_cpu/multiply.v"
+ `include "pip_cpu/mul/booth_walloc.v"
  `include "pip_cpu/divide.v"
  /* verilator lint_off DECLFILENAME */
 module ysyx_22051013_exu(
@@ -135,20 +135,21 @@ end
 //mult
 reg mul;
 reg [1:0] mul_signed;
+reg mulw;
 
 always@(*) begin
 	case(alu_sel) 
 		`INST_MUL : begin
-			mul = 1'b1; mul_signed = 2'b11;  end
+			mul = 1'b1; mul_signed = 2'b11; mulw = 1'b0; end
 		`INST_MULH : begin
-			mul = 1'b1; mul_signed = 2'b11; end
+			mul = 1'b1; mul_signed = 2'b11; mulw = 1'b0; end
 		`INST_MULHU : begin
-			mul = 1'b1; mul_signed = 2'b00; end
+			mul = 1'b1; mul_signed = 2'b00; mulw = 1'b0; end
 		`INST_MULHSU : begin
-			mul = 1'b1; mul_signed = 2'b10; end
+			mul = 1'b1; mul_signed = 2'b10; mulw = 1'b0; end
 		`INST_MULW : begin
-			mul = 1'b1; mul_signed = 2'b11;end
-		default : begin mul = 1'b0; mul_signed = 2'b00;end
+			mul = 1'b1; mul_signed = 2'b11; mulw = 1'b1; end
+		default : begin mul = 1'b0; mul_signed = 2'b00; mulw = 1'b0; end
 	endcase
 end
 
@@ -168,21 +169,9 @@ always@(posedge clk) begin
 	end
 end
 
-reg mul_valid;
-always@(posedge clk) begin
-	if(rst == `ysyx_22051013_RSTABLE) begin
-		mul_valid <= 1'b0;
-	end
-	else if(delay1) begin
-		mul_valid <= 1'b0;
-	end
-	else if(mul) begin
-		mul_valid <= 1'b1;
-	end
-	else begin
-		mul_valid <= 1'b0;
-	end
-end
+wire mul_valid;
+
+assign mul_valid = mul & ~delay1;
 
 wire mul_out_valid;
 wire mul_ready;
@@ -192,12 +181,13 @@ wire [`ysyx_22051013_DATA] result_lo;
 
 wire flush = 1'b0;
 
-ysyx_22051013_multiply multiply0(
+ysyx_22051013_booth_walloc booth_walloc0(
 		.clk(clk),
 		.rst(rst),
 		.mul_valid(mul_valid),
 		.flush(flush),
 		.mul_signed(mul_signed),
+		.mulw(mulw),
 		.mult_op1(op1),
 		.mult_op2(op2),
 		.mul_ready(mul_ready),
@@ -288,21 +278,8 @@ always@(posedge clk) begin
 	end
 end
 
-reg div_valid;
-always@(posedge clk) begin
-	if(rst == `ysyx_22051013_RSTABLE) begin
-		div_valid <= 1'b0;
-	end
-	else if(delay2) begin
-		div_valid <= 1'b0;
-	end
-	else if(div) begin
-		div_valid <= 1'b1;
-	end
-	else begin
-		div_valid <= 1'b0;
-	end
-end
+wire div_valid;
+assign div_valid = div & ~delay2;
 
 wire div_out_valid;
 wire div_ready;

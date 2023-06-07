@@ -8,7 +8,8 @@
 	 input wire				rst	,
 	 input wire				mul_valid	,
 	 input wire				flush	,
-	 input wire [1:0]	mul_signed	,
+	 input wire [1:0]			mul_signed	,
+	 input wire				mulw	,
 	 input wire [`ysyx_22051013_DATA]	mult_op1	,
 	 input wire [`ysyx_22051013_DATA]	mult_op2	,
 	 output wire				mul_ready	,
@@ -34,17 +35,22 @@ always@(posedge clk) begin
 	end
 end
 
+wire [63:0] op1_temp;
+wire [63:0] op2_temp;
+
+assign op1_temp = mulw ? {{32{mult_op1[31]}},mult_op1[31:0]} : mult_op1 ;
+assign op2_temp = mulw ? {{32{mult_op2[31]}},mult_op2[31:0]} : mult_op2 ;
+
 wire [63:0] op1_abs;
 wire [63:0] op2_abs;
 wire op1_sign;
 wire op2_sign ;
 
-assign op1_sign = mul_signed[0] ? mult_op1[63] : 1'b0;
+assign op1_sign = mul_signed[0] ? op1_temp[63] : 1'b0;
+assign op2_sign = mul_signed[1] ? op1_temp[63] : 1'b0;
 
-assign op2_sign = mul_signed[1] ? mult_op2[63] : 1'b0;
-
-assign op1_abs = op1_sign ? (~mult_op1 + 1) : mult_op1;
-assign op2_abs = op2_sign ? (~mult_op2 + 1) : mult_op2;
+assign op1_abs = op1_sign ? (~op1_temp + 1) : op1_temp;
+assign op2_abs = op2_sign ? (~op2_temp + 1) : op2_temp;
 
 
 reg [127:0] multiplicand ;

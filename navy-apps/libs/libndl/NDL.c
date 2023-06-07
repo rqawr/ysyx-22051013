@@ -55,9 +55,15 @@ void NDL_OpenCanvas(int *w, int *h) {
 void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h) {
  int fd;
  fd = open("/dev/fb",0,0);
- for (int i = 0; i < h; ++i) {
-   lseek(fd, ((central_h + y + i) * screen_w + central_w + x) * 4, SEEK_SET);
-   write(fd, pixels + i * w, w);
+ if(__ISA__ == "native") {
+ 	for (int i = 0; i < h; ++i) {
+   		lseek(fd, ((central_h + y + i) * screen_w + central_w + x) * 4, SEEK_SET);
+   		write(fd, pixels + i * w, w);
+  	}
+  }
+  else {
+  	lseek(fd,((central_h + y) * screen_w + central_w + x) * 4, SEEK_SET);
+  	write(fd, pixels, (h<<16 | w));
   }
 }
 

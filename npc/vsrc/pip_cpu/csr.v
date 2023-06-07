@@ -12,6 +12,7 @@ module ysyx_22051013_csr(
 	input wire [11:0]		csr_addr,
 	input wire [`ysyx_22051013_REG]	mcause_value,
 	input wire [`ysyx_22051013_DATA]	write_csr_data,
+	//input wire			time_interrupt		,
 	output wire [`ysyx_22051013_DATA]	read_csr_data
 );
 
@@ -32,6 +33,46 @@ always@(*) begin
    );
    end
 end
+/*
+//0xb00 mcycle
+wire mcycle_rd = (csr_addr == 12'hb00) && csr_ctl[2] ;
+wire mcycle_wr = (csr_addr == 12'hb00) && csr_ctl[3] ;
+
+reg [`ysyx_22051013_REG] mcycle;
+
+always@(posedge clk) begin
+  if(rst == `ysyx_22051013_RSTABLE) begin mcycle <= `ysyx_22051013_ZERO64; end
+  else if(mcycle_wr) begin mcycle <= write_csr_data; end
+  else             begin mcycle <= mcycle + 64'd1 ;end
+end
+
+
+//0x304 mie 
+wire mie_rd = (csr_addr == 12'h304) && csr_ctl[2] ;
+wire mie_wr = (csr_addr == 12'h304) && csr_ctl[3] ;
+
+reg mtie;
+reg [`ysyx_22051013_REG] mie = {56'd0, mtie, 7'd0};
+
+
+always@(posedge clk) begin
+  if(rst == `ysyx_22051013_RSTABLE) begin mtie <= 1'b0; end
+  else if(mie_wr) begin mtie <= write_csr_data[7]; end
+  else             begin mtie <= mtie ;end
+end
+
+//0x344 mip
+wire mip_rd = (csr_addr == 12'h344) && csr_ctl[2] ;
+
+reg mtip;
+reg [`ysyx_22051013_REG] mip = {56'd0, mtip, 7'd0};
+
+
+always@(posedge clk) begin
+  if(rst == `ysyx_22051013_RSTABLE) begin mtip <= 1'b0; end
+  else             begin mtip <= time_interrupt ;end
+end
+*/
 
 //0X300 mstatus
 wire mstatus_rd = (csr_addr == 12'h300) && csr_ctl[2] ;
