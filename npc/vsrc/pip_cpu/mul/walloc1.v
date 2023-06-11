@@ -3,10 +3,10 @@ module ysyx_22051013_walloc1(
 	input wire [32:0]		part_add,
 	input wire [29:0]		cin,
 	
-	//output wire [2:0]		l4_s,
-	//output wire [7:0]		l_c,
-	//input wire [7:0]		l4_c_i,
-	//input wire [2:0]		l4_s_i,
+	output wire [2:0]		l4_s,
+	output wire [3:0]		l4_c,
+	input wire [3:0]		l4_c_i,
+	input wire [2:0]		l4_s_i,
 	
 	output wire [29:0]		cout,
 	output wire				s,
@@ -47,20 +47,21 @@ generate
 endgenerate
 
 //---------------------layer4-----------------------------//
-wire [2:0] l4_c;
-wire [2:0] l4_s;
+//wire [2:0] l4_c;
+//wire [2:0] l4_s;
+assign l4_c[0] = l3_c[4];
 wire [8:0] l4_add = {l3_s,cin[21:18]};
 
 generate 
 	for(genvar k=0; k<3; k=k+1) begin: layer4
-		ysyx_22051013_csa csa4(.in(l4_add[(k+1)*3-1 -: 3]), .cout(l4_c[k]), .s(l4_s[k]));
+		ysyx_22051013_csa csa4(.in(l4_add[(k+1)*3-1 -: 3]), .cout(l4_c[k+1]), .s(l4_s[k]));
 	end
 endgenerate
 
 //---------------------layer5-----------------------------//
 wire [1:0] l5_s;
 wire [1:0] l5_c;
-wire [5:0] l5_add = {l4_s,cin[24:22]};
+wire [5:0] l5_add = {l4_s_i,cin[24:22]};
 
 ysyx_22051013_csa csa51(.in(l5_add[2:0]), .cout(l5_c[0]), .s(l5_s[0]));
 ysyx_22051013_csa csa52(.in(l5_add[5:3]), .cout(l5_c[1]), .s(l5_s[1]));
@@ -88,6 +89,6 @@ ysyx_22051013_csa csa81(.in(l8_add), .cout(c), .s(s));
 
 //assign l_c = {l7_c,l6_c,l5_c,l4_c,l3_c[4]};
 
-assign cout = {l7_c,l6_c,l5_c,l4_c,l3_c,l2_c,l1_c};
+assign cout = {l7_c,l6_c,l5_c,l4_c,l3_c[3:0],l2_c,l1_c};
 
 endmodule

@@ -5,7 +5,7 @@
  
  `include "pip_cpu/define.v"
  `include "pip_cpu/csr.v"
- `include "pip_cpu/mul/booth_walloc.v"
+ `include "pip_cpu/mul/booth_mul.v"
  `include "pip_cpu/divide.v"
  /* verilator lint_off DECLFILENAME */
 module ysyx_22051013_exu(
@@ -181,7 +181,7 @@ wire [`ysyx_22051013_DATA] result_lo;
 
 wire flush = 1'b0;
 
-ysyx_22051013_booth_walloc booth_walloc0(
+ysyx_22051013_booth_mul booth_mul0(
 		.clk(clk),
 		.rst(rst),
 		.mul_valid(mul_valid),
@@ -342,40 +342,46 @@ end
 
 
 //stall_logic
-reg mul_stall;
+reg mul_reg;
 
 
 always@(posedge clk) begin
 	if(rst == `ysyx_22051013_RSTABLE) begin
-		mul_stall <= 1'b0;
+		mul_reg <= 1'b0;
 	end
 	else if(mul & mul_out_valid) begin
-		mul_stall <= 1'b0;
+		mul_reg <= 1'b1;
 	end
-	else if(mul & ~delay1) begin
-		mul_stall <= 1'b1;
+	else if(~(ex_valid | ex_ready)) begin
+		mul_reg <= 1'b0;
 	end
 	else begin
-		mul_stall <= mul_stall;
+		mul_reg <= mul_reg;
 	end
 end
 
-reg div_stall;
+wire mul_stall;
+assign mul_stall = mul & ~mul_reg;
+
+reg div_reg;
 
 always@(posedge clk) begin
 	if(rst == `ysyx_22051013_RSTABLE) begin
-		div_stall <= 1'b0;
+		div_reg <= 1'b0;
 	end
 	else if(div & div_out_valid) begin
-		div_stall <= 1'b0;
+		div_reg <= 1'b1;
 	end
-	else if(div & ~delay2) begin
-		div_stall <= 1'b1;
+	else if(~(ex_valid | ex_ready)) begin
+		div_reg <= 1'b0;
 	end
 	else begin
-		div_stall <= div_stall;
+		div_reg <= div_reg;
 	end
 end
+
+wire div_stall;
+assign div_stall = div & ~div_reg;
 
 //out to lsu		     
 assign store_data = op2 ;

@@ -17,7 +17,7 @@ module ysyx_22051013_booth_walloc(
 	 output wire [`ysyx_22051013_DATA]	result_lo
 );
 
-assign mul_ready = flush | (cnt == 2'd2);
+assign mul_ready = flush | (cnt == 2'd3);
 assign out_valid = flush | ~mul_doing ? 1'b0 : mul_ready;
 
 reg mul_doing;
@@ -72,8 +72,8 @@ assign op2_ext = mul_signed[1] ? {{2{op2_temp[63]}},op2_temp} : {2'd0,op2_temp} 
 wire [131:0] multiplicand ;
 wire [66:0] multiplier	;
 
-assign multiplicand = {66'd0,op1_ext};
-assign 	multiplier = {op2_ext,1'b0};
+assign multiplicand = (mul_valid | mul_doing) ? {66'd0,op1_ext} : 132'd0;
+assign 	multiplier = (mul_valid | mul_doing) ? {op2_ext,1'b0} : 67'd0;
 
 wire [4355:0] part_mul;
 wire [32:0] part_carry;

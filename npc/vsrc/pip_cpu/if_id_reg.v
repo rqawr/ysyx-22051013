@@ -29,7 +29,13 @@
 		 id_pc <= `ysyx_22051013_ZERO64;
 		 id_jump <= 1'd0;
 	 end
-	 else if(if_valid | id_ready | id_stall) begin
+	 else if(id_stall) begin
+	 	 id_inst <= id_inst;
+		 id_pc <= id_pc;
+		 id_jump <= id_jump;
+	 end
+	 
+	 else if(if_valid | id_ready) begin
 	 	 id_inst <= id_inst;
 		 id_pc <= id_pc;
 		 id_jump <= id_jump;

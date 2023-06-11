@@ -70,7 +70,7 @@ module ysyx_22051013_idu(
 
 //hzd_ctl
 assign id_flush = jump_ena ;
-assign id_ready = ex_ready ;
+assign id_ready = ex_ready;
 assign id_valid = if_valid; 
 assign id_stall = id_stall_ena;
 

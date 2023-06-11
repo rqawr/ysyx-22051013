@@ -14,7 +14,9 @@ module ysyx_22051013_bpu_static(
 	output wire [`ysyx_22051013_PC]		pc_o,
 	//output wire [`ysyx_22051013_REGADDR]	rs1_addr,
 	//output wire				rs1_ena,
+	input wire				bpu_pc_hold,
 	output wire				bpu_jump
+	
 );
 
 //wire [11:0] i_imm ;
@@ -51,8 +53,10 @@ assign op2 = inst_jal  			? {{44{j_imm[20]}} , j_imm[20:1] << 1} :
 wire [`ysyx_22051013_DATA] pr_pc;
 assign pr_pc = op1 + op2;
 
-assign pc_o = (rst == `ysyx_22051013_RSTABLE) ? `ysyx_22051013_ZERO64 : pr_pc;
+assign pc_o = ((rst == `ysyx_22051013_RSTABLE) | bpu_pc_hold) ? `ysyx_22051013_STARTPC : pr_pc;
 assign bpu_jump = (rst == `ysyx_22051013_RSTABLE) ? 1'b0 : (inst_bxx & b_imm[12]);
+
+//assign bpu_pc_jump = inst_jal | inst_bxx;
 
 endmodule
 //inst_jalr 取到非地址数据，在idu中需在idu_stall_ena前判断是否成功

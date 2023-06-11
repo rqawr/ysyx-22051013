@@ -63,6 +63,20 @@ always@(posedge clk) begin
     ex_csrctl <= 4'b0;
     ex_load_flag <= 1'b0;
      end
+     else if(ex_flush) begin 
+    ex_inst <= 32'd0;
+    ex_pc   <= `ysyx_22051013_ZERO64;
+    ex_op1  <= `ysyx_22051013_ZERO64;
+    ex_op2  <= `ysyx_22051013_ZERO64;
+    ex_imm  <= `ysyx_22051013_ZERO64;
+    ex_rd_ena <= 1'b0;
+    ex_rd_addr <= 5'd0;
+    ex_alusrc <= 8'd0;
+    ex_lsctl <= 4'd0;
+    ex_wbctl <= 2'b0;
+    ex_csrctl <= 4'b0;
+    ex_load_flag <= 1'b0;
+     end
   else if(id_valid | ex_ready) begin 
     ex_inst <= ex_inst;
     ex_pc   <= ex_pc;
@@ -77,7 +91,7 @@ always@(posedge clk) begin
     ex_csrctl <= ex_csrctl;
     ex_load_flag <= ex_load_flag;
      end
-  else if(ex_flush | id_flush) begin //judge after id_ex flow
+      else if( id_flush) begin 
     ex_inst <= 32'd0;
     ex_pc   <= `ysyx_22051013_ZERO64;
     ex_op1  <= `ysyx_22051013_ZERO64;

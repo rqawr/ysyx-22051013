@@ -69,6 +69,8 @@ wire	[`ysyx_22051013_PC]	icache_axi_pc	;
 wire				icache_axi_ena	;
 wire				icache_if_valid	;
 wire	[`ysyx_22051013_INST]	icache_if_inst	;
+wire [`ysyx_22051013_PC]    	if_icache_pc    	   ;
+//wire				if_icache_jump	;
 
 //dcache
 wire				lsu_ddsel_we	;
@@ -115,9 +117,12 @@ wire 		axi_ddsel_dcache_valid;
 //wire				bpu_reg_ena; 
 wire				bpu_ifid_jump;
 wire [`ysyx_22051013_PC]    	bpu_if_pc    	;
+wire				bpu_icache_hold;
 
 //ifu
 wire				if_icache_ready	;
+//wire [`ysyx_22051013_PC]    	if_bpu_pc    	   ;
+wire				update	;
  
 //if_id_reg
  wire [`ysyx_22051013_INST]  	ifid_if_inst 	   ;
@@ -339,9 +344,12 @@ ysyx_22051013_i_cache i_cache2(
 		.clk(clk),
 		.rst(rst),
 		
-		.inst_pc(ifid_if_pc)	,
+		.inst_pc(if_icache_pc)	,
 		.pc_ready(if_icache_ready)	,
 		.inst(icache_if_inst)	,
+		.pc(ifid_if_pc),
+		.hold(bpu_icache_hold),
+		//.jump(if_icache_jump),
 		.inst_valid(icache_if_valid)	,
 		
 		.axi_pc(icache_axi_pc)	,
@@ -418,28 +426,32 @@ ysyx_22051013_bpu_static bpu_static(
 		//.rs1_addr(bpu_reg_addr)	,
 		//.rs1_ena(bpu_reg_ena)	,
 		.pc_o(bpu_if_pc)	,
+		.bpu_pc_hold(bpu_icache_hold),
 		.bpu_jump(bpu_ifid_jump)
 );
 
 
 
 ysyx_22051013_ifu ifu0(
-		.clk(clk)	,
-		.rst(rst)	,
+		//.clk(clk)	,
+		//.rst(rst)	,
 		//.pc_stall(h_if_pcstall)	,
 		.id_pc_jump(id_if_pc_sel)  ,
  		.id_pc_i(id_if_pc)	,
 		.ex_pc_jump(ex_if_pc_sel)  ,
  		.ex_pc_i(ex_if_pc)	,
  		.bpu_pc_i(bpu_if_pc)	,
+ 		//.jump(if_icache_jump),
  		.inst_valid(icache_if_valid),
  		.id_ready(id_ready)	,
  		.id_stall(id_if_stall_ena),
+ 		//.update(update),
  		.if_valid(if_valid)	,
  		.core_ready(if_icache_ready),
  		.inst_i(icache_if_inst)	,
- 		.inst_o(ifid_if_inst)	,		
-		.pc_o(ifid_if_pc)
+ 		.inst_o(ifid_if_inst)	,
+ 		//.pc_o(if_bpu_pc),		
+		.pc_next(if_icache_pc)
 );
 
 ysyx_22051013_reg_ifid reg_ifid1(
