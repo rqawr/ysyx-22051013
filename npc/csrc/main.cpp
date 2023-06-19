@@ -51,7 +51,7 @@ extern "C" void pmem_read(long long raddr, long long* rdata, char rlen){
 #endif
     return;
     }
-   IFDEF(CONFIG_DEVICE, *rdata = mmio_read(raddr, rlen);return);
+   IFDEF(CONFIG_DEVICE, *rdata = mmio_read(raddr, rlen); /*printf("%lx\n",raddr);*/return);
    return;
 }
 
@@ -73,14 +73,12 @@ extern "C" void pmem_write(long long waddr, long long wdata, char wlen){
 #ifdef CONFIG_MTRACE
    Log("Write to memory at %#.8llx with mask %x,content is %#.8llx",waddr,wlen,wdata);
 #endif
-  int len=0;
-
+int len =0;
   //printf("%lx\n",addr);
   if (likely(in_pmem(waddr))) {
+  uint64_t addr = waddr & ~0x7ull;
   for (int i = 0; i < 8; ++i) {
     if (wlen & 0x01 & 1) {
-      //printf("%llx\n", (waddr & ~0x7ull)+i);
-      uint64_t addr = waddr & ~0x7ull;
       host_write(gi_to_hi(addr+i),1,wdata);
       wdata >>= 8;
       }
@@ -92,7 +90,7 @@ extern "C" void pmem_write(long long waddr, long long wdata, char wlen){
   else{
     len = maskToLen(wlen);
     }
- IFDEF(CONFIG_DEVICE, mmio_write(waddr, len, wdata); return);
+ IFDEF(CONFIG_DEVICE, mmio_write(waddr, len, wdata);/*printf("%lx\n",waddr); */return);
 }
 
 

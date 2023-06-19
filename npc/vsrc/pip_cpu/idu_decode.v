@@ -6,19 +6,20 @@
  `include "pip_cpu/define.v"
  /* verilator lint_off DECLFILENAME */
 module ysyx_22051013_idu_decode(
-	input wire                 		rst  ,
-	input wire [`ysyx_22051013_INST]	inst	,
+	input wire				rst  	,
+	input wire	[`ysyx_22051013_INST]	inst	,
   
-	output wire						rs1_ena	,
-	output wire						rs2_ena	,
-	output wire  [1:0]          				wb_ctl  ,
-	output reg  [3:0]          				mem_ctl ,
-	output wire                 				branch  ,
-	//output wire						jump	,
-	output reg [`ysyx_22051013_IMM] 			ext_imm ,
-	output wire						imm_ena	,
-	output wire						load	,
-	output wire	[7:0]					alu_ctl	
+	output wire				rs1_ena	,
+	output wire				rs2_ena	,
+	output wire	[1:0]			wb_ctl  ,
+	output reg	[3:0]			mem_ctl ,
+	output wire				branch  ,
+	output reg	[`ysyx_22051013_IMM]	ext_imm ,
+	//output wire				imm_ena	,
+	output wire				load	,
+	output wire	[1:0]			op1_sel	,
+	output wire	[2:0]			op2_sel	,
+	output wire	[7:0]			alu_ctl	
 );
 
 wire [6:0] opcode ;
@@ -180,8 +181,13 @@ always @(*) begin
   else                                                       begin ext_imm = `ysyx_22051013_ZERO64; end
 end 
 
+wire imm_ena;
 assign imm_ena =  inst_type[0] | inst_type[1]  | inst_type[4] | inst_type[5] | inst_type[7] |  inst_lui | inst_auipc  ;
 
+assign op1_sel = (jump | inst_auipc) ? 2'b10 : rs1_ena ? 2'b01 : 2'b00;
+			
+
+assign op2_sel = jump ? 3'b010 : imm_ena ? 3'b100 : rs2_ena ? 3'b001 : 3'b000;
 //output to mem signal
 always @(*) begin
   case(alu_ctl) 

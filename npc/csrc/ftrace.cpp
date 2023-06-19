@@ -66,7 +66,7 @@ char *search_func_name(uint64_t addr){
 
 void ftrace_exec(uint64_t pc, uint64_t addr, bool call_ret){
   char *name = search_func_name(addr);
-  if (name != NULL & (((pc != ftrace_res[num_cnt-2].pc) & (call_ret)) |((pc != ftrace_res[num_cnt-1].pc) & (~call_ret))) ) {
+  if ((name != NULL) & (((pc != ftrace_res[num_cnt-2].pc) & (call_ret)) |((pc != ftrace_res[num_cnt-1].pc) & (!call_ret))) ) {
     ftrace_res[num_cnt].pc = pc;
     ftrace_res[num_cnt].addr = addr;
     strcpy(ftrace_res[num_cnt].name,name);

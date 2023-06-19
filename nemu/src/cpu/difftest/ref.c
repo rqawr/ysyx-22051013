@@ -28,7 +28,9 @@ void difftest_memcpy(paddr_t addr, void *buf, size_t n, bool direction) {
 
 void difftest_regcpy(void *dut, bool direction) {
     if (direction == DIFFTEST_TO_REF) {
+    //printf("%lx\n",cpu.pc);
     cpu.pc = ((CPU_state *)dut)->pc;
+    //printf("%lx\n",cpu.pc);
     for (int i = 0; i < 32; ++i) {
       cpu.gpr[i] = ((CPU_state *)dut)->gpr[i];
     }
@@ -36,7 +38,8 @@ void difftest_regcpy(void *dut, bool direction) {
       cpu.csr[j] = ((CPU_state *)dut)->csr[j];
     }
 
-  } else {
+  } else if(direction == DIFFTEST_TO_DUT) {
+  	//printf("%lx\n",cpu.pc);
     ((CPU_state *)dut)->pc = s.pc;
     for (int i = 0; i < 32; ++i) {
       ((CPU_state *)dut)->gpr[i] = cpu.gpr[i];

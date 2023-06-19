@@ -8,9 +8,10 @@ static bool is_skip_ref = false;
 bool is_diff_on = true;
 static size_t diff_img_size = 0;
 
+int cnt = 0;
 void difftest_skip_ref() {
   is_skip_ref = true;
-  //printf("skip\n");
+  cnt += 1;
   }
   
 // Definations of Ref
@@ -55,29 +56,42 @@ static void checkregs(NPC_reg *ref, uint64_t pc) {
     isa_reg_display();
   }
 }
-
-
+int t=0;
 void difftest_step(uint64_t pc, uint64_t npc ) {
   if(is_diff_on){
   NPC_reg ref_r;
-  int t;
+
   if (is_skip_ref) {
-    if(t==1){
-    //printf("step skip\n");
+  //printf("%lx,%d\n",cpu.pc,cnt);
+  if(t==1 & cnt == 0) {
+   //printf("step skip\n");
+   cpu.pc+=4;
     // to skip the checking of an instruction, just copy the reg state to reference design
     ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF);
+    //ref_difftest_regcpy(&ref_r, DIFFTEST_TO_DUT);
+   // printf("%lx,%lx,%lx, %d\n", pc,ref_r.pc,cpu.pc,cnt);
     is_skip_ref = false;
     t=0;
-    }
-    t=1;
-    return;
+      return;
+      }
+   else if(t==1 & cnt != 0){
+      t=1;
+     // printf(" %d\n",cnt);
+      cnt--;
+      return;
+      }
+   else if(t==0 & cnt != 0){
+      t=1;
+      cnt--;
+   }
+     }
 
-  }
-  
+  //if (is_skip_ref) {printf("should not be here\n");}
+  //if(cpu.pc >= 0x80001260) { printf("%lx,%d,%d\n",cpu.pc,t,cnt);}
   ref_difftest_exec(1);
   ref_difftest_regcpy(&ref_r, DIFFTEST_TO_DUT);
-  //printf("%lx\n",ref_r.csr[0]);
-  checkregs(&ref_r, pc);
+   //printf("%lx,%lx,%lx\n", pc,ref_r.pc,cpu.pc);
+  checkregs(&ref_r, npc);
   }
 }
   

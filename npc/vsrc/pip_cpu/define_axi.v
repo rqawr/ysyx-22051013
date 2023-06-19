@@ -10,9 +10,14 @@
     `define ysyx_22051013_S_WRITE  2'b11
     //arbitrator
     `define ysyx_22051013_ARB_IDLE  3'b000
-    `define ysyx_22051013_ARB_DWRITE  3'b001
-    `define ysyx_22051013_ARB_DREAD  3'b010
-    `define ysyx_22051013_ARB_IREAD  3'b011
+    `define ysyx_22051013_ARB_ADDR  3'b100
+    `define ysyx_22051013_ARB_READ  3'b001
+    `define ysyx_22051013_ARB_WRITE  3'b010
+    `define ysyx_22051013_ARB_RESP  3'b011
+    
+    `define ysyx_22051013_AXI_BURST_FIXED 2'b00
+    `define ysyx_22051013_AXI_BURST_INCR 2'b01
+    `define ysyx_22051013_AXI_BURST_WRAP 2'b10
     
     //icache
     `define ysyx_22051013_CACHE  127:0
@@ -48,7 +53,7 @@
     `define ysyx_22051013_CLINT_END	64'h000000000200ffff
     
     //clint
-    `define ysyx_22051013_MTIME		64'h0000000002001000
-    `define ysyx_22051013_MTIMECMP	64'h0000000002002000
+    `define ysyx_22051013_MTIME		64'h000000000200bff8
+    `define ysyx_22051013_MTIMECMP	64'h0000000002004000
     
     

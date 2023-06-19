@@ -23,12 +23,19 @@ const char *regs[] = {
   "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"
 };
 
+const char *csrs[] = {
+  "mstatus", "mtvec", "mepc", "mcause"
+ };
+
 int reg_num = (sizeof(regs))/(sizeof(regs[0]));
 
 void isa_reg_display() {
 	for( int i=0; i<reg_num;i++){
 		printf("%s :  %lu       %lx \n", regs[i],gpr(i),gpr(i));
 	}
+	for (int j = 0 ; j<4 ; j++){
+		printf("%s :  %lu       %lx \n", csrs[j],cpu.csr[j],cpu.csr[j]);
+		}
 	printf("pc is %lu       %lx \n",cpu.pc,cpu.pc);
 }
 

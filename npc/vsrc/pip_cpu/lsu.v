@@ -22,10 +22,11 @@
  	output	wire					we,
  	output	wire					re,
  	output	wire					core_ready,
- 	output	wire [`ysyx_22051013_PC]		data_pc,
- 	input	wire [`ysyx_22051013_DATA]		data_temp,
- 	output	reg [`ysyx_22051013_DATA]		data_o,
- 	output	reg [`ysyx_22051013_DATA]		device_data_o,
+ 	output	wire	[`ysyx_22051013_PC]		data_pc,
+ 	input	wire	[`ysyx_22051013_DATA]		data_temp,
+ 	output	reg	[`ysyx_22051013_DATA]		data_o,
+ 	output 	wire	[2:0]				data_size	,
+ 	output	wire [`ysyx_22051013_DATA]		device_data_o,
  	output	reg [7:0]				wlen,
  	input	wire					data_valid,
  	
@@ -34,13 +35,19 @@
  );
  
  //hzd_ctl
- assign ls_ready = wb_ready | (data_ok & (re | we));
- assign ls_valid = ex_valid | (data_ok & (re | we));
+ assign ls_ready = wb_ready | (data_ok  & (re | we));
+ assign ls_valid = ex_valid | (data_ok  & (re | we));
  //assign ls_flush = data_not_ready;
  
  assign core_ready = wb_ready | ~data_ok;
  
  assign device_data_o = store_data;
+ 
+ assign data_size = 	((ls_ctl == 4'b0001) | (ls_ctl == 4'b1001) | (ls_ctl == 4'b1101)) ? 3'b011 : 
+ 			((ls_ctl == 4'b0010) | (ls_ctl == 4'b1010) | (ls_ctl == 4'b1110)) ? 3'b100 :
+ 			((ls_ctl == 4'b0100) | (ls_ctl == 4'b1011) | (ls_ctl == 4'b1111)) ? 3'b101 :
+ 			((ls_ctl == 4'b1000) | (ls_ctl == 4'b1100)) ? 3'b110 :
+ 			3'b000;
  
  wire [`ysyx_22051013_DATAADDR] raddr ;
  wire [`ysyx_22051013_DATAADDR] waddr ; 
@@ -79,7 +86,6 @@ end
 		data_i <= data_i;
 	end
 end
- 
  
  assign re    = (rst == `ysyx_22051013_RSTABLE | ls_ctl == 4'b0000 ) ? 1'b0 : ls_ctl[3];
  assign we    = (rst == `ysyx_22051013_RSTABLE | ls_ctl == 4'b0000 ) ? 1'b0 : ~ls_ctl[3];
@@ -300,7 +306,7 @@ end
 //------------------------output----------------------------------------------------------------------//
 
 
-assign ls_data_o  = re & ~data_ok ? load_data : `ysyx_22051013_ZERO64 ;
+assign ls_data_o  = re/* & ~data_ok */? load_data : `ysyx_22051013_ZERO64 ;
 assign ls_data_forward  = re /*& ~data_not_ready */? load_data : alu_res ;
 //wire _unused_ok = &{alu_res[2:0]};
 endmodule

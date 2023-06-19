@@ -6,196 +6,264 @@
 `include "pip_cpu/define.v"
 `include "pip_cpu/define_axi.v"
 module ysyx_22051013_axi_master_arbitrator(
-	input wire		clk	,
-	input wire		rst	,
+	input	wire		clk	,
+	input	wire		rst	,
 	
 	//to icache
-	input wire [`ysyx_22051013_PC]	icache_pc	,
-	input wire			icache_ena	,
-	output reg [`ysyx_22051013_DATA]axi_inst	,
-	output reg			axi_inst_valid,
+	input	wire	[`ysyx_22051013_PC]	icache_pc	,
+	input	wire				icache_ena	,
+	output	wire	[`ysyx_22051013_DATA]	axi_inst	,
+	output	wire				axi_inst_valid,
 	
 	//to lsu
-	input wire [`ysyx_22051013_PC]	data_pc	,
-	input wire [`ysyx_22051013_DATA] data_i,
-	input wire			we,
-	input wire			re,
-	//input wire			data_ok,
-	input wire [7:0]			wmask,
-	output reg [`ysyx_22051013_DATA]	data_o,
-	output reg			axi_data_valid,
+	input	wire	[`ysyx_22051013_PC]	data_pc	,
+	input	wire	[`ysyx_22051013_DATA]	data_i,
+	input	wire				we,
+	input	wire				re,
+	input	wire	[2:0]			data_size,
+	input	wire	[7:0]			wmask,
+	input 	wire				clint_ena	,
+	output	wire	[`ysyx_22051013_DATA]	data_o,
+	output	wire				axi_data_valid,
 
 
 
 	//write address channel
-	output wire [`ysyx_22051013_ID]		axi_aw_id	,
-	output wire	[`ysyx_22051013_ADDR]	axi_aw_addr	,	
-	output wire			axi_aw_valid	,
-	input  wire			axi_aw_ready	,
+	output	wire 	[`ysyx_22051013_ID]	axi_aw_id	,
+	output	wire	[`ysyx_22051013_ADDR]	axi_aw_addr	,	
+	output	wire				axi_aw_valid	,
+	input	wire				axi_aw_ready	,
+	output	wire	[7:0]			axi_aw_len	,
+	output	wire	[2:0]			axi_aw_size	,
+	output	wire	[1:0]			axi_aw_burst	,
 	
 	//write data channel
-	output wire [`ysyx_22051013_DATA]	axi_w_data	,
-	output wire [`ysyx_22051013_STRB]	axi_w_strb	,
-	output wire			axi_w_valid	,
-	input wire			axi_w_ready	,
+	output	wire	[`ysyx_22051013_DATA]	axi_w_data	,
+	output	wire	[`ysyx_22051013_STRB]	axi_w_strb	,
+	output	wire				axi_w_last	,
+	output	wire				axi_w_valid	,
+	input	wire				axi_w_ready	,
 	
 	//write respond channel
-	input wire [`ysyx_22051013_ID]		axi_b_id	,
-	input wire [`ysyx_22051013_RESP]	axi_b_resp	,	
-	input wire			axi_b_valid	,
-	output wire			axi_b_ready	,
+	input	wire	[`ysyx_22051013_ID]	axi_b_id	,
+	input	wire	[`ysyx_22051013_RESP]	axi_b_resp	,	
+	input	wire				axi_b_valid	,
+	output	wire				axi_b_ready	,
 	
 	//read address channel
-	output wire [`ysyx_22051013_ID]		axi_ar_id	,
-	output wire	[`ysyx_22051013_ADDR]	axi_ar_addr	,	
-	output wire			axi_ar_valid	,
-	input  wire			axi_ar_ready	,
+	output	wire	[`ysyx_22051013_ID]	axi_ar_id	,
+	output	wire	[`ysyx_22051013_ADDR]	axi_ar_addr	,
+	output	wire	[7:0]			axi_ar_len	,
+	output	wire	[2:0]			axi_ar_size	,
+	output	wire	[1:0]			axi_ar_burst	,	
+	output	wire				axi_ar_valid	,
+	input	wire				axi_ar_ready	,
 	
 	//read data channel
-	input wire [`ysyx_22051013_ID]		axi_r_id	,
-	input wire [`ysyx_22051013_DATA]	axi_r_data	,
-	input wire [`ysyx_22051013_RESP]	axi_r_resp	,
-	input wire			axi_r_valid	,
-	output wire			axi_r_ready	
+	input	wire	[`ysyx_22051013_ID]	axi_r_id	,
+	input	wire	[`ysyx_22051013_DATA]	axi_r_data	,
+	input	wire	[`ysyx_22051013_RESP]	axi_r_resp	,
+	input	wire				axi_r_last	,
+	input	wire				axi_r_valid	,
+	output	wire				axi_r_ready	
 );
 
 
-wire if_chosen;
-wire ls_chosen_read;
-wire ls_chosen_write;
+wire if_read;
+wire ls_read;
+wire ls_write;
 
-assign if_chosen = (~ ( ls_chosen_read | ls_chosen_write)) & icache_ena ; 
-assign ls_chosen_read =  re ;
-assign ls_chosen_write =  we ;
+assign if_read = (read_state == 2'b00) & icache_ena ; 
+assign ls_read = (read_state == 2'b00) & re ;
+assign ls_write =  we ;
 
-reg [2:0] arb_state;
-reg [2:0] arb_state_next;
+wire w_valid = we ;
+wire r_valid = if_read | ls_read;
+
+wire aw_sh = axi_aw_ready & axi_aw_valid;
+wire w_sh = axi_w_ready & axi_w_valid & axi_w_last;
+wire b_sh = axi_b_ready & axi_b_valid;
+wire ar_sh = axi_ar_ready & axi_ar_valid;
+wire r_sh = axi_r_ready & axi_r_valid & axi_r_last;
+
+//write_state
+reg [2:0] arb_w_state;
 
 always@(posedge clk) begin 
 	if(rst == `ysyx_22051013_RSTABLE) begin
-		arb_state  <= `ysyx_22051013_ARB_IDLE ;
+		arb_w_state  <= `ysyx_22051013_ARB_IDLE ;
 	end
 	else begin
-		arb_state  <= arb_state_next     ;
+	  
+		case(arb_w_state)
+			`ysyx_22051013_ARB_IDLE : begin
+				if(w_valid) begin
+					arb_w_state <= `ysyx_22051013_ARB_ADDR;
+				end
+				else begin
+					arb_w_state <= `ysyx_22051013_ARB_IDLE;
+				end
+			end
+			`ysyx_22051013_ARB_ADDR : begin
+				if(w_sh) begin
+					arb_w_state <= `ysyx_22051013_ARB_RESP;
+				end
+				else if(aw_sh) begin
+					arb_w_state <= `ysyx_22051013_ARB_WRITE;
+				end
+				else begin
+					arb_w_state <= `ysyx_22051013_ARB_ADDR;
+				end
+			end
+			`ysyx_22051013_ARB_WRITE : begin
+				if(w_sh) begin
+					arb_w_state <= `ysyx_22051013_ARB_RESP;
+				end
+				else begin
+					arb_w_state <= `ysyx_22051013_ARB_WRITE;
+				end
+			end
+			`ysyx_22051013_ARB_RESP : begin
+				if(b_sh) begin
+					arb_w_state  <= `ysyx_22051013_ARB_IDLE ;
+				end
+				else begin
+					arb_w_state <= `ysyx_22051013_ARB_RESP;
+				end
+			end
+			default : begin arb_w_state  <= `ysyx_22051013_ARB_IDLE ; end
+		endcase
+	end
+end
+
+//read_state
+reg [2:0] arb_r_state;
+
+always@(posedge clk) begin 
+	if(rst == `ysyx_22051013_RSTABLE) begin
+		arb_r_state  <= `ysyx_22051013_ARB_IDLE ;
+	end
+	else begin
+		case(arb_r_state)
+			`ysyx_22051013_ARB_IDLE : begin
+				if(r_valid) begin
+					arb_r_state <= `ysyx_22051013_ARB_ADDR;
+				end
+				else begin
+					arb_r_state <= `ysyx_22051013_ARB_IDLE;
+				end
+			end
+			`ysyx_22051013_ARB_ADDR : begin
+				if(ar_sh) begin
+					arb_r_state <= `ysyx_22051013_ARB_READ;
+				end
+				else begin
+					arb_r_state <= `ysyx_22051013_ARB_ADDR;
+				end
+			end
+			`ysyx_22051013_ARB_READ : begin
+				if(r_sh) begin
+					arb_r_state <= `ysyx_22051013_ARB_IDLE;
+				end
+				else begin
+					arb_r_state <= `ysyx_22051013_ARB_READ;
+				end
+			end
+			default : begin arb_r_state  <= `ysyx_22051013_ARB_IDLE ; end
+		endcase
+	end
+end
+
+//axi_value
+
+//aw_channel
+assign axi_aw_id =  clint_ena ? 5'd2 : 5'd1 ;
+assign axi_aw_addr =  data_pc ;
+assign axi_aw_valid = (arb_w_state == `ysyx_22051013_ARB_ADDR) & w_valid ;
+assign axi_aw_len = 8'd1;
+assign axi_aw_size = data_size;
+assign axi_aw_burst = `ysyx_22051013_AXI_BURST_INCR;
+//w_channel
+assign axi_w_data =  data_i ;
+assign axi_w_strb = wmask;
+assign axi_w_valid = (arb_w_state == `ysyx_22051013_ARB_ADDR) & w_valid ;
+assign axi_w_last = w_valid;
+//b_channel
+assign axi_b_ready = `ysyx_22051013_ENABLE;
+
+
+//read
+//ar_channel
+assign axi_ar_id =  (read_state == 2'b10) & clint_ena ? 5'd2 : 5'd1 ;
+
+assign axi_ar_len = 8'd1;
+
+assign axi_ar_size = (read_state == 2'b01) ? 3'b110 : (read_state == 2'b10) ? data_size : 3'b000;
+
+assign axi_ar_burst = `ysyx_22051013_AXI_BURST_INCR;
+
+assign axi_ar_addr = (read_state == 2'b01) ? icache_pc : 
+		     (read_state == 2'b10) ? data_pc :
+		     `ysyx_22051013_ZERO64;
+		     
+assign axi_ar_valid = (arb_r_state == `ysyx_22051013_ARB_ADDR) ;
+//r_channel
+assign axi_r_ready = `ysyx_22051013_ENABLE;
+
+//////////out////////////
+reg [1:0] read_state;
+reg [1:0] read_state_next;
+
+always@(posedge clk) begin 
+	if(rst == `ysyx_22051013_RSTABLE) begin
+		read_state  <= 2'b00 ;
+	end
+	else begin
+		read_state  <= read_state_next     ;
 	end
 end
 
 always@(*) begin
-	case(arb_state)
-		`ysyx_22051013_ARB_IDLE : begin
-			if(if_chosen) begin
-				arb_state_next = `ysyx_22051013_ARB_IREAD;
+	case(read_state)
+		2'b00 : begin
+			if(if_read) begin
+				read_state_next = 2'b01;
 			end
-			else if(ls_chosen_write) begin
-				arb_state_next = `ysyx_22051013_ARB_DWRITE;
-			end
-			else if(ls_chosen_read) begin
-				arb_state_next = `ysyx_22051013_ARB_DREAD;
+			else if(ls_read) begin
+				read_state_next = 2'b10;
 			end
 			else begin
-				arb_state_next = `ysyx_22051013_ARB_IDLE;
+				read_state_next = 2'b00;
 			end
 		end
-		`ysyx_22051013_ARB_DWRITE : begin
-			if(dwrite_shakehand) begin
-				arb_state_next = `ysyx_22051013_ARB_IDLE;
+		2'b10 : begin
+			if(r_sh) begin
+				read_state_next = 2'b00;
 			end
 			else begin
-				arb_state_next = `ysyx_22051013_ARB_DWRITE;
+				read_state_next = 2'b10;
 			end
 		end
-		`ysyx_22051013_ARB_DREAD : begin
-			if(dread_shakehand) begin
-				arb_state_next = `ysyx_22051013_ARB_IDLE;
+		2'b01 : begin
+			if(r_sh) begin
+				read_state_next = 2'b00;
 			end
 			else begin
-				arb_state_next = `ysyx_22051013_ARB_DREAD;
+				read_state_next = 2'b01;
 			end
 		end
-		`ysyx_22051013_ARB_IREAD : begin
-			if(iread_shakehand) begin
-				arb_state_next = `ysyx_22051013_ARB_IDLE;
-			end
-			else begin
-				arb_state_next = `ysyx_22051013_ARB_IREAD;
-			end
-		end
-		default : arb_state_next = `ysyx_22051013_ARB_IDLE;
+		default : read_state_next = 2'b00;
 	endcase
 end
 
+assign data_o = ((read_state == 2'b10) & r_sh) ? axi_r_data : `ysyx_22051013_ZERO64;
+assign axi_inst = ((read_state == 2'b01) & r_sh) ? axi_r_data : `ysyx_22051013_ZERO64;
 
-//write 
-wire dwrite_shakehand;
-assign dwrite_shakehand = axi_b_valid & axi_b_ready & (axi_b_resp == 2'b00) & (axi_b_id == 5'b00010);
+wire data_w_not_ready = b_sh;
+wire data_r_not_ready =  r_sh;
+assign axi_inst_valid =  (read_state == 2'b01) & r_sh;
 
-assign axi_aw_id =  5'd2 ;
-assign axi_aw_addr =  data_pc ;
-assign axi_aw_valid = (arb_state == `ysyx_22051013_ARB_DWRITE) ;
-assign axi_w_data =  data_i ;
-assign axi_w_strb = wmask;
-assign axi_w_valid = (arb_state == `ysyx_22051013_ARB_DWRITE);
-assign axi_b_ready = `ysyx_22051013_ENABLE;
-
-wire data_w_not_ready = dwrite_shakehand ;
-
-//read
-
-wire iread_shakehand;
-wire dread_shakehand;
-
-assign dread_shakehand = axi_r_valid & axi_r_ready & (axi_r_resp == 2'b00) & (axi_r_id == 5'b00010);
-assign iread_shakehand = axi_r_valid & axi_r_ready & (axi_r_resp == 2'b00) & (axi_r_id == 5'b00001);
-
-assign axi_ar_id = (arb_state == `ysyx_22051013_ARB_IREAD) ? 5'd1 : 
-		   (arb_state == `ysyx_22051013_ARB_DREAD) ? 5'd2 :
-		   5'd0;
-
-assign axi_ar_addr = (arb_state == `ysyx_22051013_ARB_IREAD) ? icache_pc : 
-		     (arb_state == `ysyx_22051013_ARB_DREAD) ? data_pc :
-		     `ysyx_22051013_ZERO64;
-		     
-assign axi_ar_valid = (arb_state == `ysyx_22051013_ARB_IREAD) ? `ysyx_22051013_ENABLE : 
-		      (arb_state == `ysyx_22051013_ARB_DREAD) ? re :
-		      `ysyx_22051013_DISABLE;
-		      
-assign axi_r_ready = `ysyx_22051013_ENABLE;
-
-//////////
-
-always@(*) begin
-	if(iread_shakehand) begin
-		data_o = `ysyx_22051013_ZERO64;
-		axi_inst = axi_r_data;
-	end
-	else if(dread_shakehand) begin 
-		data_o = axi_r_data;
-		axi_inst = `ysyx_22051013_ZERO64;
-	end
-	else begin
-		data_o = `ysyx_22051013_ZERO64;
-		axi_inst = `ysyx_22051013_ZERO64;
-	end
-end
-/*
-reg [`ysyx_22051013_DATA] data_temp;
-
-
-always@(posedge clk) begin
-	if(dread_shakehand) begin 
-		data_temp <= axi_r_data;
-	end
-	else if(arb_state == `ysyx_22051013_ARB_IREAD) begin 
-		data_temp <= data_temp;
-	end
-end
-*/
-
-
-wire data_r_not_ready = dread_shakehand;
-assign axi_inst_valid =  iread_shakehand;
-
-assign axi_data_valid = (arb_state == `ysyx_22051013_ARB_DREAD) ? data_r_not_ready : (arb_state == `ysyx_22051013_ARB_DWRITE) ? data_w_not_ready : 1'b0;
+assign axi_data_valid = (read_state == 2'b10) ? data_r_not_ready : ls_write ? data_w_not_ready : 1'b0;
 
 
 

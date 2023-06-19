@@ -4,43 +4,59 @@
 */
  
  `include "pip_cpu/define.v"
- `include "pip_cpu/csr.v"
  `include "pip_cpu/mul/booth_mul.v"
  `include "pip_cpu/divide.v"
  /* verilator lint_off DECLFILENAME */
 module ysyx_22051013_exu(
-	input wire          clk,
-	input wire          rst,
-	input wire [`ysyx_22051013_DATA] op1,
-	input wire [`ysyx_22051013_DATA] op2,
-	input wire [`ysyx_22051013_IMM] imm ,
-	input wire [`ysyx_22051013_PC]	pc_i	,
-	input wire [ 7:0]     alu_sel   ,
-	input wire [3:0]      csr_ctl  ,
+	input	wire				clk	,
+	input	wire				rst	,
+	input	wire	[`ysyx_22051013_DATA]	reg_op1	,
+	input	wire	[`ysyx_22051013_DATA]	reg_op2	,
+	input	wire	[1:0]			op1_sel	,
+	input	wire	[2:0]			op2_sel	,
+	input	wire	[`ysyx_22051013_REGADDR]	rd_addr	,
+	input	wire	[`ysyx_22051013_REGADDR]	rs1_addr,
+	input	wire	[`ysyx_22051013_IMM]	imm	,
+	input	wire	[`ysyx_22051013_PC]	pc_i	,
+	input	wire	[7:0]			alu_sel	,
 	
-	input  wire			 ls_ready,
-	input  wire			 id_valid,
-	output wire			 ex_valid,
-	output wire			 ex_ready,
-	output wire			 ex_flush,
 	
-	output wire [`ysyx_22051013_REG] store_data ,
-	output wire			 ex_jump_ena,
-	output wire [`ysyx_22051013_PC]  ex_jump_pc,
-	output reg [`ysyx_22051013_DATA] exu_res
+	input 	wire			 	ls_ready,
+	input 	wire			 	id_valid,
+	output	wire			 	ex_valid,
+	output	wire			 	ex_ready,
+	
+	output	wire	[`ysyx_22051013_REG]	store_data 	,
+	output	wire	[11:0]			csr_addr,
+	output	wire	[6:0]			csr_ctl	,
+	output	wire	[`ysyx_22051013_DATA]	exu_res
 );
 
 //hzd_ctl
 assign ex_valid = id_valid | mul_stall | div_stall;
 assign ex_ready = ls_ready | mul_stall | div_stall; 
-assign ex_flush = ex_jump_ena;
+
+//alu
+
+wire [`ysyx_22051013_DATA] op1;
+wire [`ysyx_22051013_DATA] op2;
+
+assign op1 = 	(op1_sel == 2'b01) ? reg_op1 : 
+		(op1_sel == 2'b10) ? pc_i : 
+		`ysyx_22051013_ZERO64;
+		
+assign op2 = 	(op2_sel == 3'b001) ? reg_op2 : 
+		(op2_sel == 3'b010) ? `ysyx_22051013_PLUS4 : 
+		(op2_sel == 3'b100) ? imm :
+		`ysyx_22051013_ZERO64;
+
 
 // addxx
 wire     [`ysyx_22051013_DATA]  op1_add_op2   = op1 + op2 ;
 wire     [`ysyx_22051013_DATA]  op1_addw_op2  = {{32{op1_add_op2[31]}},op1_add_op2[31:0]} ;
 
 // sub subw
-wire     [`ysyx_22051013_DATA]  op1_sub_op2	 = $signed(op1) - $signed(op2) ; 
+wire     [`ysyx_22051013_DATA]  op1_sub_op2	 = op1 - op2; 
 wire     [`ysyx_22051013_DATA]  op1_subw_op2     = {{32{op1_sub_op2[31]}},op1_sub_op2[31:0]} ;
 
 //slt slti sltiu sltu
@@ -60,25 +76,7 @@ wire     [`ysyx_22051013_DATA] op1_srlw_op2 = {{32{srlw[31]}} , srlw} ;
 //sraiw sraw
 wire	 [31:0]     sraw = $signed(op1[31:0]) >>> op2[4:0] ;
 wire	 [`ysyx_22051013_DATA] op1_sraw_op2 = {{32{sraw[31]}} , sraw} ;
-/*
-// mul mulh[[s]u] 
-wire     [127:0]     mul  = op1 * op2  ;
-wire     [`ysyx_22051013_DATA]   op1_mul_op2      = mul[63:0]  ;
-wire     [`ysyx_22051013_DATA]   op1_mulh_op2     = mul[127:64]  ;
-wire     [`ysyx_22051013_DATA]   op1_mulw_op2     = {{32{mul[31]}},mul[31:0]}    ;
 
-//divxx
-wire     [`ysyx_22051013_DATA]   div = op1 / op2 ;
-wire     [31:0]     		divw  = $signed(op1[31:0]) / $signed(op2[31:0])   ;
-wire     [`ysyx_22051013_DATA]  op1_divw_op2       = {{32{divw[31]}},divw}    ;
-wire     [`ysyx_22051013_DATA]  op1_divuw_op2      = {{32{div[31]}},div[31:0]}    ;
-
-//remxx
-wire     [`ysyx_22051013_DATA]   rem = op1 % op2 ;
-wire     [31:0]     		remw  = $signed(op1[31:0]) % $signed(op2[31:0])   ;
-wire     [`ysyx_22051013_DATA]  op1_remw_op2       = {{32{remw[31]}},remw}    ;
-wire     [`ysyx_22051013_DATA]  op1_remuw_op2      = {{32{rem[31]}},rem[31:0]}    ;
-*/
 reg [`ysyx_22051013_DATA] alu_res ;
 
 
@@ -89,45 +87,33 @@ always@(*)begin
   else begin
     case(alu_sel)
           `INST_ADDI ,  `INST_ADD,
-          `INST_LUI  ,  `INST_AUIPC:  begin alu_res = op1_add_op2   	       ;end
-          `INST_ADDW ,  `INST_ADDIW:  begin alu_res = op1_addw_op2             ;end
-          
+          `INST_LUI  ,  `INST_AUIPC, 
+          `INST_JAL  ,  `INST_JALR,
           `INST_LB   ,  `INST_LH,
           `INST_LW   ,  `INST_LD,
           `INST_SB   ,  `INST_SH,
           `INST_SW   ,  `INST_SD,
           `INST_LBU  ,  `INST_LHU,  
-          `INST_LWU		   :  begin alu_res = op1 + imm   	       ;end
-          `INST_SUB                :  begin alu_res = op1_sub_op2              ;end
-          `INST_SUBW               :  begin alu_res = op1_subw_op2             ;end
+          `INST_LWU			:  begin alu_res = op1_add_op2   	    ;end
+          `INST_ADDW ,  `INST_ADDIW	:  begin alu_res = op1_addw_op2             ;end
+
+          `INST_SUB                	:  begin alu_res = op1_sub_op2              ;end
+          `INST_SUBW               	:  begin alu_res = op1_subw_op2             ;end
           
-          `INST_SLTI ,  `INST_SLT  :  begin alu_res = {63'd0 , op1_lt_op2}     ;end
-          `INST_SLTIU , `INST_SLTU :  begin alu_res = {63'd0 , (op1 < op2)}    ;end
-          `INST_SRAI ,  `INST_SRA  :  begin alu_res = op1_sra_op2              ;end
-          `INST_SLLIW,  `INST_SLLW :  begin alu_res = op1_sllw_op2             ;end
-          `INST_SRLIW,  `INST_SRLW :  begin alu_res = op1_srlw_op2             ;end
-          `INST_SRAIW,  `INST_SRAW :  begin alu_res = op1_sraw_op2             ;end
-          `INST_XORI ,  `INST_XOR  :  begin alu_res = op1 ^ op2                ;end
-          `INST_ORI  ,  `INST_OR   :  begin alu_res = op1 | op2                ;end
-          `INST_ANDI ,  `INST_AND  :  begin alu_res = op1 & op2                ;end
-          `INST_SLLI ,  `INST_SLL  :  begin alu_res = op1 << op2 [5:0]         ;end
-          `INST_SRLI ,  `INST_SRL  :  begin alu_res = op1 >> op2 [5:0]         ;end
-          `INST_JAL  ,  `INST_JALR :  begin alu_res = pc_i + 64'd4             ;end
-	  `INST_EBREAK             :  begin alu_res = op1                      ;end
+          `INST_SLTI ,  `INST_SLT  	:  begin alu_res = {63'd0 , op1_lt_op2}     ;end
+          `INST_SLTIU , `INST_SLTU 	:  begin alu_res = {63'd0 , (op1 < op2)}    ;end
+          `INST_SRAI ,  `INST_SRA  	:  begin alu_res = op1_sra_op2              ;end
+          `INST_SLLIW,  `INST_SLLW 	:  begin alu_res = op1_sllw_op2             ;end
+          `INST_SRLIW,  `INST_SRLW 	:  begin alu_res = op1_srlw_op2             ;end
+          `INST_SRAIW,  `INST_SRAW 	:  begin alu_res = op1_sraw_op2             ;end
+          `INST_XORI ,  `INST_XOR  	:  begin alu_res = op1 ^ op2                ;end
+          `INST_ORI  ,  `INST_OR   	:  begin alu_res = op1 | op2                ;end
+          `INST_ANDI ,  `INST_AND  	:  begin alu_res = op1 & op2                ;end
+          `INST_SLLI ,  `INST_SLL  	:  begin alu_res = op1 << op2 [5:0]         ;end
+          `INST_SRLI ,  `INST_SRL  	:  begin alu_res = op1 >> op2 [5:0]         ;end
+	  `INST_EBREAK             	:  begin alu_res = op1                      ;end
 	  
-	/*  `INST_MUL                :  begin alu_res = op1_mul_op2              ;end 
-          `INST_MULH               :  begin alu_res = op1_mulh_op2             ;end 
-	  `INST_MULW               :  begin alu_res = op1_mulw_op2             ;end 
-	  
-	  `INST_DIV , `INST_DIVU   :  begin alu_res = div	               ;end 
-	  `INST_DIVW		   :  begin alu_res = op1_divw_op2 	       ;end 
-	  `INST_DIVUW		   :  begin alu_res = op1_divuw_op2	       ;end 
-	  
-	  `INST_REM , `INST_REMU   :  begin alu_res = rem	               ;end 
-	  `INST_REMW		   :  begin alu_res = op1_remw_op2 	       ;end 
-	  `INST_REMUW		   :  begin alu_res = op1_remuw_op2	       ;end 
-	  */
-          default 		   :  begin alu_res = `ysyx_22051013_ZERO64; end
+          default 		   	:  begin alu_res = `ysyx_22051013_ZERO64; end
     endcase
   end
 end
@@ -139,17 +125,12 @@ reg mulw;
 
 always@(*) begin
 	case(alu_sel) 
-		`INST_MUL : begin
-			mul = 1'b1; mul_signed = 2'b11; mulw = 1'b0; end
-		`INST_MULH : begin
-			mul = 1'b1; mul_signed = 2'b11; mulw = 1'b0; end
-		`INST_MULHU : begin
-			mul = 1'b1; mul_signed = 2'b00; mulw = 1'b0; end
-		`INST_MULHSU : begin
-			mul = 1'b1; mul_signed = 2'b10; mulw = 1'b0; end
-		`INST_MULW : begin
-			mul = 1'b1; mul_signed = 2'b11; mulw = 1'b1; end
-		default : begin mul = 1'b0; mul_signed = 2'b00; mulw = 1'b0; end
+		`INST_MUL	: begin	mul = 1'b1; mul_signed = 2'b11; mulw = 1'b0; end
+		`INST_MULH	: begin	mul = 1'b1; mul_signed = 2'b11; mulw = 1'b0; end
+		`INST_MULHU	: begin	mul = 1'b1; mul_signed = 2'b00; mulw = 1'b0; end
+		`INST_MULHSU	: begin mul = 1'b1; mul_signed = 2'b10; mulw = 1'b0; end
+		`INST_MULW	: begin mul = 1'b1; mul_signed = 2'b11; mulw = 1'b1; end
+		default 	: begin mul = 1'b0; mul_signed = 2'b00; mulw = 1'b0; end
 	endcase
 end
 
@@ -242,23 +223,15 @@ reg divw;
 
 always@(*) begin
 	case(alu_sel) 
-		`INST_DIV : begin
-			div = 1'b1; div_signed = 1'b1; divw = 1'b0;  end
-		`INST_DIVU : begin
-			div = 1'b1; div_signed = 1'b0; divw = 1'b0; end
-		`INST_DIVW : begin
-			div = 1'b1; div_signed = 1'b1; divw = 1'b1; end
-		`INST_DIVUW : begin
-			div = 1'b1; div_signed = 1'b0; divw = 1'b1; end
-		`INST_REM : begin
-			div = 1'b1; div_signed = 1'b1; divw = 1'b0; end
-		`INST_REMU : begin
-			div = 1'b1; div_signed = 1'b0; divw = 1'b0; end
-		`INST_REMW : begin
-			div = 1'b1; div_signed = 1'b1; divw = 1'b1; end
-		`INST_REMUW : begin
-			div = 1'b1; div_signed = 1'b0; divw = 1'b1; end
-		default : begin div = 1'b0; div_signed = 1'b0; divw = 1'b0; end
+		`INST_DIV	: begin div = 1'b1; div_signed = 1'b1; divw = 1'b0; end
+		`INST_DIVU	: begin div = 1'b1; div_signed = 1'b0; divw = 1'b0; end
+		`INST_DIVW	: begin div = 1'b1; div_signed = 1'b1; divw = 1'b1; end
+		`INST_DIVUW	: begin div = 1'b1; div_signed = 1'b0; divw = 1'b1; end
+		`INST_REM	: begin div = 1'b1; div_signed = 1'b1; divw = 1'b0; end
+		`INST_REMU	: begin div = 1'b1; div_signed = 1'b0; divw = 1'b0; end
+		`INST_REMW	: begin div = 1'b1; div_signed = 1'b1; divw = 1'b1; end
+		`INST_REMUW	: begin div = 1'b1; div_signed = 1'b0; divw = 1'b1; end
+		default		: begin div = 1'b0; div_signed = 1'b0; divw = 1'b0; end
 	endcase
 end
 
@@ -384,53 +357,78 @@ wire div_stall;
 assign div_stall = div & ~div_reg;
 
 //out to lsu		     
-assign store_data = op2 ;
+assign store_data = reg_op2 ;
 
 
 //csr
-wire [11:0]  csr_addr = (csr_ctl != 4'd0) ? imm[11:0] : 12'd0;
-wire  [`ysyx_22051013_DATA]    read_csr_data  ;
-reg   [`ysyx_22051013_DATA]    write_csr_data  ;
-reg   [`ysyx_22051013_REG]    mcause_value  ;
+reg csr_wr_ena;
+reg csr_rd_ena;
+reg mret_ena;
+reg ecall_ena;
+reg csrrw_ena;
+reg csrrs_ena;
+reg csrrc_ena;
 
-wire [`ysyx_22051013_DATA] set_data     = read_csr_data | op1 ;
-wire [`ysyx_22051013_DATA] clear_data   = read_csr_data & (~op1) ;
+wire [`ysyx_22051013_DATA] csr_op = {{59{1'b0}},rs1_addr};
+
+assign csr_addr = (csr_ctl[3:0] != 4'd0) ? imm[11:0] : 12'd0;
+
+wire csrrxi_ena = (alu_sel == `INST_CSRRWI) | (alu_sel == `INST_CSRRSI) | (alu_sel == `INST_CSRRCI) ;
 
 always @(*) begin
-  write_csr_data = `ysyx_22051013_ZERO64;
-  mcause_value = `ysyx_22051013_ZERO64;
+  	csr_wr_ena = 1'b0;
+	csr_rd_ena = 1'b0;
+	mret_ena =  1'b0;
+	ecall_ena = 1'b0;
+	csrrw_ena = 1'b0;
+	csrrs_ena = 1'b0;
+	csrrc_ena = 1'b0;
   case(alu_sel)
-  	`INST_ECALL : begin  write_csr_data = pc_i; mcause_value = 64'd11;end
+  	`INST_ECALL : begin ecall_ena = 1'b1; end
 				
-	`INST_CSRRW, `INST_CSRRWI :  begin write_csr_data = op1        ;end
+	`INST_CSRRW, `INST_CSRRWI :  begin 	csr_wr_ena = `ysyx_22051013_WENABLE; 
+						csr_rd_ena = (rd_addr == 5'd0) ? `ysyx_22051013_RDISABLE : `ysyx_22051013_RENABLE;
+						csrrw_ena = 1'b1;
+				 	end
 		 
-	`INST_CSRRS, `INST_CSRRSI :  begin write_csr_data = set_data   ;end
+	`INST_CSRRS, `INST_CSRRSI :  begin	csr_wr_ena = (rs1_addr == 5'd0) ? `ysyx_22051013_WDISABLE : `ysyx_22051013_WENABLE; 
+						csr_rd_ena = `ysyx_22051013_RENABLE;
+						csrrs_ena = 1'b1;					
+					end
 	
-	`INST_CSRRC, `INST_CSRRCI :  begin write_csr_data = clear_data;	end
+	`INST_CSRRC, `INST_CSRRCI :  begin	csr_wr_ena = (rs1_addr == 5'd0) ? `ysyx_22051013_WDISABLE : `ysyx_22051013_WENABLE; 
+						csr_rd_ena = `ysyx_22051013_RENABLE;
+						csrrc_ena = 1'b1;
+					end
+	
+	`INST_MRET :  begin  mret_ena = 1'b1 ;end
+	
 	default : begin	
-           write_csr_data = `ysyx_22051013_ZERO64;
-           mcause_value = `ysyx_22051013_ZERO64;
+		csr_wr_ena = 1'b0;
+		csr_rd_ena = 1'b0;
+		mret_ena =  1'b0;
+		ecall_ena = 1'b0;
+		csrrw_ena = 1'b0;
+		csrrs_ena = 1'b0;
+		csrrc_ena = 1'b0;
 	end
   endcase 
 end
 
- ysyx_22051013_csr csr_operate(
-	.clk(clk)	,
-	.rst(rst)	,
-	.csr_ctl(csr_ctl)	,
-	.csr_addr(csr_addr)	,
-	.mcause_value(mcause_value),
-	.read_csr_data(read_csr_data),
-	.write_csr_data(write_csr_data)
-);
+assign csr_ctl = {csrrw_ena, csrrs_ena, csrrc_ena, csr_wr_ena, csr_rd_ena, ecall_ena, mret_ena};
 
-assign ex_jump_ena = rst == `ysyx_22051013_RSTABLE ? 1'b0 : csr_ctl[1] | csr_ctl[0];
-assign ex_jump_pc = rst == `ysyx_22051013_RSTABLE ? `ysyx_22051013_ZERO64 : read_csr_data;
 
 //out to wbu
-assign exu_res = (csr_ctl != 4'd0) ? read_csr_data : 
-			mul ? mul_res_temp :
+wire muldiv_ena;
+wire [`ysyx_22051013_DATA] muldiv_res;
+assign muldiv_ena = mul | div;
+assign muldiv_res = 	mul ? mul_res_temp :
 			div ? div_res_temp :
+			`ysyx_22051013_ZERO64;
+
+assign exu_res = 	csrrxi_ena ? csr_op :
+			(csr_ctl[3:0] != 4'd0) ? reg_op1 :
+			muldiv_ena ? muldiv_res :
 			alu_res ;
 
 endmodule

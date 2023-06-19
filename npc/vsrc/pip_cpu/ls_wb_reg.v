@@ -5,31 +5,33 @@
  `include "pip_cpu/define.v"
 /* verilator lint_off DECLFILENAME */
 module ysyx_22051013_reg_lswb(
-    input	wire                                     clk                ,
-    input	wire                                     rst                ,
-   // input       wire					 lswb_stall	,
+    input	wire                                     clk		,
+    input	wire                                     rst		,
 
-    input	wire       [`ysyx_22051013_INST]         ls_inst            ,
-    input	wire       [`ysyx_22051013_PC]           ls_pc              ,
-    input	wire 	[1:0]     			 ls_wbctl    	,
-    input 	wire 	[`ysyx_22051013_DATA] 		 ls_exu_res	,
-    input	wire 	[`ysyx_22051013_DATA]      	 ls_wbdata	,
-    input	wire                                     ls_rd_ena          ,
-    input	wire       [`ysyx_22051013_REGADDR]      ls_rd_addr         ,   
-    input	wire 	[`ysyx_22051013_DATA]      	 ls_data_forward	,
+    input	wire	[`ysyx_22051013_INST]		ls_inst	,
+    input	wire	[`ysyx_22051013_PC]		ls_pc		,
+    input	wire 	[1:0]				ls_wbctl    	,
+    input 	wire 	[`ysyx_22051013_DATA]		ls_exu_res	,
+    input	wire 	[`ysyx_22051013_DATA]		ls_wbdata	,
+    input	wire					ls_rd_ena	,
+    input	wire	[`ysyx_22051013_REGADDR]	ls_rd_addr	,   
+    input	wire 	[`ysyx_22051013_DATA]		ls_data_forward	,
+    input	wire	[6:0]				ls_csr_ctl	,
+    input	wire	[11:0]				ls_csr_addr	,
     
-    input	wire					 ls_valid		,
-    input	wire					 wb_ready		,	
-    //input	wire					 ls_flush		,
-     
+    input	wire					ls_valid	,
+    input	wire					wb_ready	,	
+    input	wire					ie_flush	,
     
-    output	reg       [`ysyx_22051013_INST]          wb_inst            ,
-    output	reg       [`ysyx_22051013_PC]            wb_pc              ,
-    output	reg 	[1:0]     			 wb_wbctl    	,
-    output 	reg 	[`ysyx_22051013_DATA] 		 wb_exu_res	,
-    output	reg 	[`ysyx_22051013_DATA]      	 wb_wbdata	,
-    output	reg                                      wb_rd_ena          ,
-    output	reg       [`ysyx_22051013_REGADDR]       wb_rd_addr         ,
+    output	reg	[6:0]				wb_csr_ctl	,
+    output	reg	[11:0]				wb_csr_addr	,
+    output	reg	[`ysyx_22051013_INST]		wb_inst		,
+    output	reg	[`ysyx_22051013_PC]		wb_pc		,
+    output	reg 	[1:0]				wb_wbctl    	,
+    output 	reg 	[`ysyx_22051013_DATA]		wb_exu_res	,
+    output	reg 	[`ysyx_22051013_DATA]     	wb_wbdata	,
+    output	reg                                     wb_rd_ena	,
+    output	reg	[`ysyx_22051013_REGADDR]	wb_rd_addr	,
     output	wire	[`ysyx_22051013_REGADDR]	ls_rd_addr_forward	,
     output	wire	[`ysyx_22051013_DATA]		ls_rd_data_forward	
 );
@@ -42,6 +44,8 @@ always@(posedge clk) begin
     wb_exu_res <= `ysyx_22051013_ZERO64;
     wb_wbdata <= `ysyx_22051013_ZERO64;
     wb_rd_ena <= 1'b0;
+    wb_csr_ctl <= 7'b0;
+    wb_csr_addr <= 12'd0;
     wb_rd_addr <= 5'd0;    
   end
   else if(wb_ready | ls_valid) begin
@@ -51,17 +55,21 @@ always@(posedge clk) begin
     wb_exu_res <= wb_exu_res;
     wb_wbdata <= wb_wbdata;
     wb_rd_ena <= wb_rd_ena ;
+    wb_csr_ctl <= wb_csr_ctl;
+    wb_csr_addr <= wb_csr_addr;
     wb_rd_addr <= wb_rd_addr;
   end
-  /*else if(ls_flush)begin 
+  else if(ie_flush)begin 
     wb_inst <= 32'd0;
     wb_pc   <= `ysyx_22051013_ZERO64;
     wb_wbctl <= 2'b0;
     wb_exu_res <= `ysyx_22051013_ZERO64;
     wb_wbdata <= `ysyx_22051013_ZERO64;
+    wb_csr_ctl <= 7'b0;
+    wb_csr_addr <= 12'd0;
     wb_rd_ena <= 1'b0;
     wb_rd_addr <= 5'd0;    
-  end  */
+  end  
   else begin
     wb_inst <= ls_inst;
     wb_pc   <= ls_pc ;
@@ -69,6 +77,8 @@ always@(posedge clk) begin
     wb_exu_res <= ls_exu_res;
     wb_wbdata <= ls_wbdata;
     wb_rd_ena <= ls_rd_ena;
+    wb_csr_ctl <= ls_csr_ctl;
+    wb_csr_addr <= ls_csr_addr;
     wb_rd_addr <= ls_rd_addr;
   end
 end

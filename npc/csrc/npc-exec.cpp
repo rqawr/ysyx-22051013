@@ -46,13 +46,14 @@ static void trace_and_difftest(Decode *_this, uint64_t dnpc) {
   if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); }
   //printf("%lx\n",_this->pc);
 #ifdef CONFIG_DIFFTEST
-  if(difftest_ena == 1){
+ // if(difftest_ena == 1){
       difftest_step(_this->pc,dnpc);
-    }
-  else {
-    difftest_ena = 1;
+      //printf("%lx\n",_this->pc);
+ //   }
+//  else {
+//    difftest_ena = 1;
     
-    }
+//    }
 #endif
   
  // IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc));
@@ -177,7 +178,7 @@ void cpu_exec(uint64_t n) {
       #endif
 
      case NPC_END:
-      Log("pc: %s at pc = " FMT_WORD,
+      Log("npc: %s at pc = " FMT_WORD,
           (npc_state.state == NPC_ABORT ? ANSI_FMT("ABORT", ANSI_FG_RED) :
            (npc_state.halt_ret == 0 ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) :
             ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED))),

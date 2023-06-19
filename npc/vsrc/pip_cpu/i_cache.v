@@ -59,19 +59,19 @@ always@(*) begin
 		end
 
 		`ysyx_22051013_I_READ : begin
-			if((~pc_ready/* & tag_update*/) & (hit1 | hit2)) begin
+			if(/*(~pc_ready)*/ & (hit1 | hit2)) begin
 				icache_state_next = `ysyx_22051013_I_HIT;
 			end
-			else if(~pc_ready /*& tag_update*/) begin
+			else /*if(~pc_ready) */begin
 				icache_state_next = `ysyx_22051013_I_MISS;
 			end
-			else begin
-				icache_state_next = `ysyx_22051013_I_READ;
-			end
+			//else begin
+			//	icache_state_next = `ysyx_22051013_I_READ;
+			//end
 		end
 
 		`ysyx_22051013_I_HIT : begin
-			if(inst_valid) begin 
+			if(inst_valid & ~pc_ready) begin 
 				icache_state_next = `ysyx_22051013_I_READ;
 			end
 			else begin
@@ -93,52 +93,12 @@ always@(*) begin
 		end
 	endcase
 end
-/*
-//tag_update
-
-reg tag_update;
-reg tag_update_temp;
-
-always@(posedge clk) begin
-	if(rst == `ysyx_22051013_RSTABLE) begin
-		tag_update <= `ysyx_22051013_DISABLE;
-	end
-	else begin
-		tag_update <= tag_update_temp;
-	end
-end
-
-always@(*) begin
-	if(icache_state == `ysyx_22051013_I_READ) begin
-		tag_update_temp = `ysyx_22051013_ENABLE;
-	end
-	else begin
-		tag_update_temp = `ysyx_22051013_DISABLE;
-	end
-end
-
-*/
 
 //-------hit--------//
 
 wire hit1;
 wire hit2;
-/*
-always@(posedge clk) begin
-	if(rst == `ysyx_22051013_RSTABLE) begin
-		hit1 <= 1'b0;
-		hit2<= 1'b0;
-	end
-	else if(icache_state_next == `ysyx_22051013_I_HIT) begin 
-		hit1 <= way1_hit;
-		hit2 <= way2_hit;
-	end
-	else begin 
-		hit1 <= 1'b0;
-		hit2<= 1'b0;
-	end
-end
-*/
+
 assign hit1 =  ((hit_tag == i_tag_way1) & (i_tag_valid1 == `ysyx_22051013_ENABLE));
 assign hit2 =  ((hit_tag == i_tag_way2) & (i_tag_valid2 == `ysyx_22051013_ENABLE));
 
@@ -146,13 +106,14 @@ assign hit2 =  ((hit_tag == i_tag_way2) & (i_tag_valid2 == `ysyx_22051013_ENABLE
 reg [63:0] hit_pc;
 reg [5:0] hit_index;
 reg [22:0] hit_tag;
+
 always@(posedge clk) begin
 	if(rst == `ysyx_22051013_RSTABLE) begin
 		hit_pc <= 64'd0;
 		hit_index <= 6'd0;
 		hit_tag <= 23'd0;
 	end
-	else if((icache_state_next == `ysyx_22051013_I_READ & ~pc_ready) ) begin 
+	else if((icache_state_next == `ysyx_22051013_I_READ & inst_valid) ) begin 
 		hit_pc <= inst_pc;
 		hit_index <= icache_index;
 		hit_tag <= icache_tag;
@@ -168,11 +129,7 @@ assign hold = (icache_state == `ysyx_22051013_I_IDLE);
 
 always@(*) begin
 	if(icache_state == `ysyx_22051013_I_HIT) begin
-		if(pc_ready) begin 
-			inst = 32'b0;
-			inst_valid = `ysyx_22051013_DISABLE;
-		end
-		else if(hit1 & hit_pc[2]) begin
+		if(hit1 & hit_pc[2]) begin
 			inst = cache_data[63:32];
 			inst_valid = `ysyx_22051013_ENABLE;
 		end
@@ -303,7 +260,7 @@ end
 //---tag---//
 wire [23:0] tag_with_valid = {1'b1,tag};
 
-wire [22:0] tag = (icache_state == `ysyx_22051013_I_HIT) ? icache_tag :
+wire [22:0] tag = ((icache_state == `ysyx_22051013_I_HIT) & ~pc_ready)? icache_tag :
 		hit_tag;
 
 wire [22:0] 	i_tag_way1;
@@ -311,7 +268,7 @@ wire		i_tag_valid1;
 
 wire way1_tag_ena = ~delay2 &(icache_state == `ysyx_22051013_I_MISS) & (cache_strb == `ysyx_22051013_STRB128_L);
 
-wire [5:0] index = (icache_state == `ysyx_22051013_I_HIT) ? icache_index :
+wire [5:0] index = ((icache_state == `ysyx_22051013_I_HIT) & ~pc_ready) ? icache_index :
 		hit_index;
 
  ysyx_22051013_cache_tag_ram tag_ram0(

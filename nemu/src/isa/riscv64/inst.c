@@ -145,5 +145,6 @@ static int decode_exec(Decode *s) {
 
 int isa_exec_once(Decode *s) {
   s->isa.inst.val = inst_fetch(&s->snpc, 4);
+  //if(s->pc >= 0x800011e0) { printf("%lx,%x\n",s->pc,s->isa.inst.val);}
   return decode_exec(s);
 }

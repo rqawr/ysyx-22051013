@@ -1,5 +1,5 @@
 #include "include/memory.h"
-#include "include/common.h"
+#include "include/isa.h"
 
 uint64_t host_read(void *addr, int len) {
   switch (len) {
@@ -23,7 +23,7 @@ void host_write(void *addr, int len, uint64_t data) {
 }
 
 
-uint8_t mem[CONFIG_MSIZE];
+uint8_t mem[CONFIG_MSIZE] = {0};
 // Memory transfer
 uint8_t* gi_to_hi(uint64_t addr) { return mem + (addr - CONFIG_MEM_BASE); }
 
