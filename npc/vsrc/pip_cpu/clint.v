@@ -66,25 +66,30 @@ wire bc_shakehand = t_axi_b_valid & t_axi_b_ready;
  
  
  always @(*) begin
-    case (clint_write_state) 
-    	`ysyx_22051013_S_IDLE : begin
-    		if(awc_shakehand & wc_shakehand) begin
-    			clint_write_state_next = `ysyx_22051013_S_WRITE;
-    		end
-    		else begin
-    			clint_write_state_next = `ysyx_22051013_S_IDLE;
-    		end
-    	end
-    	`ysyx_22051013_S_WRITE : begin
-    		if(bc_shakehand) begin
-    			clint_write_state_next = `ysyx_22051013_S_IDLE;
-    		end
-    		else begin
-    			clint_write_state_next = `ysyx_22051013_S_WRITE;
-    		end
-    	end
-    	default : begin clint_write_state_next = `ysyx_22051013_S_IDLE; end
-     endcase
+	if(rst == `ysyx_22051013_RSTABLE) begin
+		clint_write_state_next  = `ysyx_22051013_S_IDLE ;
+	end
+	else begin
+		case (clint_write_state) 
+		    	`ysyx_22051013_S_IDLE : begin
+		    		if(awc_shakehand & wc_shakehand) begin
+		    			clint_write_state_next = `ysyx_22051013_S_WRITE;
+		    		end
+		    		else begin
+		    			clint_write_state_next = `ysyx_22051013_S_IDLE;
+		    		end
+		    	end
+		    	`ysyx_22051013_S_WRITE : begin
+		    		if(bc_shakehand) begin
+		    			clint_write_state_next = `ysyx_22051013_S_IDLE;
+		    		end
+		    		else begin
+		    			clint_write_state_next = `ysyx_22051013_S_WRITE;
+		    		end
+		    	end
+		    	default : begin clint_write_state_next = `ysyx_22051013_S_IDLE; end
+		endcase
+	end
  end
  
 assign t_axi_aw_ready = t_axi_aw_valid & t_axi_w_valid;
@@ -111,25 +116,30 @@ assign t_axi_b_resp = 2'b00;
   end
   
  always @(*) begin
-    case (clint_read_state) 
-    	`ysyx_22051013_S_IDLE : begin
-    		if(arc_shakehand) begin
-    			clint_read_state_next = `ysyx_22051013_S_DATA;
-    		end
-    		else begin
-    			clint_read_state_next = `ysyx_22051013_S_IDLE;
-    		end
-    	end
-    	`ysyx_22051013_S_DATA : begin
-    		if(rc_shakehand) begin
-    			clint_read_state_next = `ysyx_22051013_S_IDLE;
-    		end
-    		else begin
-    			clint_read_state_next = `ysyx_22051013_S_DATA;
-    		end
-    	end
-    	default : begin clint_read_state_next = `ysyx_22051013_S_IDLE; end
-     endcase
+	if(rst == `ysyx_22051013_RSTABLE) begin
+		clint_read_state_next  = `ysyx_22051013_S_IDLE ;
+	end
+	else begin
+		case (clint_read_state) 
+		    	`ysyx_22051013_S_IDLE : begin
+		    		if(arc_shakehand) begin
+		    			clint_read_state_next = `ysyx_22051013_S_DATA;
+		    		end
+		    		else begin
+		    			clint_read_state_next = `ysyx_22051013_S_IDLE;
+		    		end
+		    	end
+		    	`ysyx_22051013_S_DATA : begin
+		    		if(rc_shakehand) begin
+		    			clint_read_state_next = `ysyx_22051013_S_IDLE;
+		    		end
+		    		else begin
+		    			clint_read_state_next = `ysyx_22051013_S_DATA;
+		    		end
+		    	end
+		    	default : begin clint_read_state_next = `ysyx_22051013_S_IDLE; end
+		endcase
+	end
  end
 
   assign t_axi_ar_ready = (clint_read_state == `ysyx_22051013_S_IDLE);

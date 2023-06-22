@@ -1,6 +1,6 @@
 /*------
-* Last modify date : 2022/2/8
-* Function : top layer of processor(single)
+* Last modify date : 2023/6/21
+* Function : top layer of processor(pip)
 */
 
         `include "pip_cpu/define.v"
@@ -65,8 +65,8 @@ wire	[2:0]			axi_ar_size	;
 wire	[1:0]			axi_ar_burst	;
 
 wire	[`ysyx_22051013_ID]	axi_r_id	;
-wire [`ysyx_22051013_DATA]	axi_r_data	;
-wire [`ysyx_22051013_RESP]	axi_r_resp	;
+wire	[`ysyx_22051013_DATA]	axi_r_data	;
+wire	[`ysyx_22051013_RESP]	axi_r_resp	;
 wire				axi_r_last	;
 wire				axi_r_valid	;
 wire				axi_r_ready	;
@@ -100,8 +100,8 @@ wire	[2:0]			soc_axi_ar_size	;
 wire	[1:0]			soc_axi_ar_burst	;
 
 wire	[`ysyx_22051013_ID]	soc_axi_r_id	;
-wire [`ysyx_22051013_DATA]	soc_axi_r_data	;
-wire [`ysyx_22051013_RESP]	soc_axi_r_resp	;
+wire	[`ysyx_22051013_DATA]	soc_axi_r_data	;
+wire	[`ysyx_22051013_RESP]	soc_axi_r_resp	;
 wire				soc_axi_r_last	;
 wire				soc_axi_r_valid	;
 wire				soc_axi_r_ready	;
@@ -135,20 +135,20 @@ wire	[2:0]			t_axi_ar_size	;
 wire	[1:0]			t_axi_ar_burst	;
 
 wire	[`ysyx_22051013_ID]	t_axi_r_id	;
-wire [`ysyx_22051013_DATA]	t_axi_r_data	;
-wire [`ysyx_22051013_RESP]	t_axi_r_resp	;
+wire	[`ysyx_22051013_DATA]	t_axi_r_data	;
+wire	[`ysyx_22051013_RESP]	t_axi_r_resp	;
 wire				t_axi_r_last	;
 wire				t_axi_r_valid	;
 wire				t_axi_r_ready	;
 
 //icache
 wire 				axi_icache_valid	;
-wire [`ysyx_22051013_DATA]	axi_icache_inst	;
+wire	[`ysyx_22051013_DATA]	axi_icache_inst	;
 wire	[`ysyx_22051013_PC]	icache_axi_pc	;
 wire				icache_axi_ena	;
 wire				icache_if_valid	;
 wire	[`ysyx_22051013_INST]	icache_if_inst	;
-wire [`ysyx_22051013_PC]    	if_icache_pc    	   ;
+wire	[`ysyx_22051013_PC]    	if_icache_pc    	   ;
 
 //dcache
 wire				lsu_ddsel_we	;
@@ -159,19 +159,22 @@ wire	[`ysyx_22051013_DATA]	lsu_ddsel_read_data;
 wire	[`ysyx_22051013_DATA]	lsu_ddsel_write_data;
 wire				lsu_ddsel_ready;
 wire				lsu_ddsel_valid;
+wire				lsu_ddsel_fencei;
 
 wire	[`ysyx_22051013_DATA]	lsu_ddsel_device_data;
 
 wire 				ddsel_axi_clint;
 wire 				ddsel_axi_re;
 wire 				ddsel_axi_we;
+
 wire	[7:0]			ddsel_axi_mask;
 wire	[`ysyx_22051013_DATA]	ddsel_axi_data_o;
 wire	[`ysyx_22051013_DATA]	axi_ddsel_data_i;
 wire	[`ysyx_22051013_PC]	ddsel_axi_pc;
 wire 				axi_ddsel_valid;
 wire	[2:0]			ddsel_axi_data_size;
-		
+
+wire				ddsel_dcache_fencei;		
 wire 				ddsel_dcache_re;
 wire 				ddsel_dcache_we;
 wire	[7:0]			ddsel_dcache_mask;
@@ -192,37 +195,31 @@ wire 				axi_ddsel_dcache_valid;
 //-------------------------------------------in core------------------------------------//
 
 //bpu
-//wire [`ysyx_22051013_REGADDR]   bpu_reg_addr ;
-//wire				bpu_reg_ena; 
 wire				bpu_ifid_jump;
-wire [`ysyx_22051013_PC]    	bpu_if_pc    	;
+wire	[`ysyx_22051013_PC]    	bpu_if_pc    	;
 wire				bpu_icache_hold;
 
 //ifu
 wire				if_icache_ready	;
-//wire [`ysyx_22051013_PC]    	if_bpu_pc    	   ;
-//wire				update	;
  
 //if_id_reg
- wire [`ysyx_22051013_INST]  	ifid_if_inst 	   ;
- wire [`ysyx_22051013_PC]    	ifid_if_pc    	   ;
- wire [`ysyx_22051013_INST]  	ifid_id_inst 	   ;
- wire [`ysyx_22051013_PC]    	ifid_id_pc    	   ;
+ wire	[`ysyx_22051013_INST]  	ifid_if_inst 	   ;
+ wire	[`ysyx_22051013_PC]    	ifid_if_pc    	   ;
+ wire 	[`ysyx_22051013_INST]  	ifid_id_inst 	   ;
+ wire	[`ysyx_22051013_PC]    	ifid_id_pc    	   ;
  
  
- //wire [`ysyx_22051013_REGADDR]  ifid_id_addr ;
  wire				ifid_id_jump;
 //idu
-wire [`ysyx_22051013_REGADDR] id_reg_rs1_addr ;
-wire [`ysyx_22051013_REGADDR] id_reg_rs2_addr ;
+wire	[`ysyx_22051013_REGADDR] id_reg_rs1_addr ;
+wire	[`ysyx_22051013_REGADDR] id_reg_rs2_addr ;
 
-wire                          id_reg_rs1_ena	;
-wire                          id_reg_rs2_ena	;
-wire  [`ysyx_22051013_PC]  	     id_if_pc 	   ;
-wire           			     id_if_pc_sel  ;
-wire           			     id_ifid_jumpflush;
+wire				id_reg_rs1_ena	;
+wire				id_reg_rs2_ena	;
+wire	[`ysyx_22051013_PC]	id_if_pc 	   ;
+wire				id_if_pc_sel  ;
+wire				id_ifid_jumpflush;
 wire				id_load_flag;
-//wire				id_if_stall_ena;
 
 //id_ex_reg
 wire [`ysyx_22051013_INST]  	idex_id_inst 	 ;
@@ -234,7 +231,6 @@ wire                          	idex_id_rd_ena	;
 wire [`ysyx_22051013_REGADDR] 	idex_id_rd_addr ;
 wire [3:0]      		idex_id_lsctl  	;
 wire [1:0]      		idex_id_wbctl   ;
-//wire [`ysyx_22051013_REGADDR]   idex_id_rs1_addr  ;
 wire [7:0]			idex_id_alu_sel	;
 wire	[1:0]			idex_id_op1sel	;
 wire	[2:0]			idex_id_op2sel	;
@@ -248,7 +244,6 @@ wire                          	idex_ex_rd_ena	;
 wire [`ysyx_22051013_REGADDR] 	idex_ex_rd_addr ;
 wire [3:0]      		idex_ex_lsctl  	;
 wire [1:0]      		idex_ex_wbctl   ;
-//wire [3:0]      		idex_ex_csrctl  ;
 wire [7:0]			idex_ex_alu_sel	;
 wire	[1:0]			idex_ex_op1sel	;
 wire	[2:0]			idex_ex_op2sel	;
@@ -258,14 +253,14 @@ wire [`ysyx_22051013_REGADDR]   idex_ex_rs1_addr  ;
 wire [`ysyx_22051013_REGADDR] 	ex_id_addr_forward;
 wire [`ysyx_22051013_DATA] 	ex_id_data_forward;
 wire				ex_load_ena;
-//wire				ex_h_jump_ena;
 wire	[6:0]			exls_ex_csr_ctl;
 wire	[11:0]			exls_ex_csr_addr;
+wire				exls_ex_fencei;
 
 wire  [`ysyx_22051013_REG]      exls_ex_aludata    ;
 wire [`ysyx_22051013_DATA] 	exls_ex_store_data  ;
 
-
+wire				exls_ls_fencei;
 wire [`ysyx_22051013_INST]  	exls_ls_inst 	   ;
 wire [`ysyx_22051013_PC]    	exls_ls_pc    	   ; 
 wire  [`ysyx_22051013_REG]      exls_ls_aludata    ;
@@ -283,7 +278,9 @@ wire [2:0]         ls_dcache_datasize        ;
 wire [`ysyx_22051013_DATA] 	ls_lswb_data_forward;
 wire [`ysyx_22051013_REGADDR] 	ls_id_addr_forward;
 wire [`ysyx_22051013_DATA] 	ls_id_data_forward;
-//wire				data_ok;
+wire				ls_if_pc_sel	;
+wire	[`ysyx_22051013_PC] 	ls_if_pc	;
+wire				ls_flush	;
 
 
 //is_wb_reg
@@ -319,17 +316,6 @@ wire [`ysyx_22051013_REG] reg_id_rs1_data ;
 wire [`ysyx_22051013_REG] reg_id_rs2_data ;
 wire [`ysyx_22051013_REG] reg_bpu_data ;
 
-//hzd_ctl
-/*
-wire	h_ifid_stall;
-wire	h_idex_stall;
-wire	h_exls_stall;
-wire	h_lswb_stall;
-
-wire	h_ifid_flush;
-wire	h_idex_flush;
-wire	h_if_pcstall;
-*/
 wire if_valid;
 wire id_valid;
 wire ex_valid;
@@ -452,8 +438,8 @@ ysyx_22051013_i_cache i_cache2(
 		.inst(icache_if_inst)	,
 		.pc(ifid_if_pc),
 		.hold(bpu_icache_hold),
-		//.jump(if_icache_jump),
-		.inst_valid(icache_if_valid)	,
+		.fencei(lsu_ddsel_fencei),
+		.i_valid(icache_if_valid)	,
 		
 		.axi_pc(icache_axi_pc)	,
 		.axi_ena(icache_axi_ena)	,
@@ -471,6 +457,7 @@ ysyx_22051013_dcache_device_sel dcache_device_sel3(
 		.core_addr(lsu_ddsel_data_pc),
 		.core_ready(lsu_ddsel_ready),
 		.core_size(ls_dcache_datasize),
+		.fencei(lsu_ddsel_fencei),
 		.data_valid(lsu_ddsel_valid),
 		.data_to_core(lsu_ddsel_read_data),
 		
@@ -486,6 +473,7 @@ ysyx_22051013_dcache_device_sel dcache_device_sel3(
 		
 		.dcache_re(ddsel_dcache_re),
 		.dcache_we(ddsel_dcache_we),
+		.dcache_fencei(ddsel_dcache_fencei),
 		.dcache_mask(ddsel_dcache_mask),
 		.dcache_data_o(ddsel_dcache_data),
 		.dcache_data_i(dcache_ddsel_data),
@@ -512,6 +500,7 @@ ysyx_22051013_d_cache d_cache4(
 		.wmask(ddsel_dcache_mask),
 		.we(ddsel_dcache_we),
 		.re(ddsel_dcache_re),
+		.fencei(ddsel_dcache_fencei),
 		.data_valid(dcache_ddsel_valid)	,
 		
 		.axi_pc(dcache_ddsel_axi_pc)	,
@@ -632,9 +621,6 @@ ysyx_22051013_bpu_static bpu_static(
 		.rst(rst)	,
 		.inst(ifid_if_inst)	,
 		.pc_i(ifid_if_pc)	,
-		//.rs1_data(reg_bpu_data)	,
-		//.rs1_addr(bpu_reg_addr)	,
-		//.rs1_ena(bpu_reg_ena)	,
 		.pc_o(bpu_if_pc)	,
 		.bpu_pc_hold(bpu_icache_hold),
 		.bpu_jump(bpu_ifid_jump)
@@ -647,6 +633,8 @@ ysyx_22051013_ifu ifu0(
  		.id_pc_i(id_if_pc)	,
  		.ie_pc_jump(ie_if_pc_sel)  ,
  		.ie_pc_i(ie_if_pc)	,
+ 		.ls_pc_jump(ls_if_pc_sel)  ,
+ 		.ls_pc_i(ls_if_pc)	,
  		.bpu_pc_i(bpu_if_pc)	,
  		.inst_valid(icache_if_valid),
  		.id_ready(id_ready)	,
@@ -666,7 +654,7 @@ ysyx_22051013_reg_ifid reg_ifid1(
 		.bpu_jump(bpu_ifid_jump),
 		
 		.if_valid(if_valid),
-		//.id_stall(id_if_stall_ena),
+		.ls_flush(ls_flush),
 		.id_flush(id_ifid_flush),
 		.ie_flush(ie_flush),
 		.id_ready(id_ready),
@@ -684,7 +672,6 @@ ysyx_22051013_idu idu2(
  	.inst_o(idex_id_inst)	,
  	
  	.bpu_jump(ifid_id_jump),
-	//.jalr_addr(ifid_id_addr),
  	
 	.rs1_addr(id_reg_rs1_addr)	,
 	.rs2_addr(id_reg_rs2_addr)	,
@@ -707,7 +694,6 @@ ysyx_22051013_idu idu2(
 	.alusrc_o(idex_id_alu_sel)	,
 	.lsctl_o(idex_id_lsctl)		,
  	.wbctl_o(idex_id_wbctl)		,
- 	//.csr_ctl(idex_id_csrctl)	,
  	.op1_sel(idex_id_op1sel)	,
  	.op2_sel(idex_id_op2sel)	,
  	.load_flag(id_load_flag)	,
@@ -718,7 +704,6 @@ ysyx_22051013_idu idu2(
 	.id_ex_flush(id_idex_flush),
 	.ex_ready(ex_ready),
 	.id_ready(id_ready),
-	//.id_stall(id_if_stall_ena),
  	
 	.jump_pc(id_if_pc)		,
 	.jump_ena(id_if_pc_sel)	,
@@ -743,12 +728,12 @@ ysyx_22051013_reg_idex reg_idex3(
 	.id_alusrc(idex_id_alu_sel),
 	.id_lsctl(idex_id_lsctl),
 	.id_wbctl(idex_id_wbctl),
-	//.id_csrctl(idex_id_csrctl),
 	.id_load_flag(id_load_flag),
 	
 	.id_valid(id_valid),
 	.id_flush(id_idex_flush),
 	.ie_flush(ie_flush),
+	.ls_flush(ls_flush),
 	.ex_ready(ex_ready),
 
 	.ex_inst(idex_ex_inst),
@@ -781,6 +766,7 @@ ysyx_22051013_exu exu4(
 	.pc_i(idex_ex_pc)	,
 	.imm(idex_ex_imm)	,
 	.alu_sel(idex_ex_alu_sel)	,
+	.fencei(exls_ex_fencei),
 	
 	.id_valid(id_valid),
 	.ex_valid(ex_valid),
@@ -797,7 +783,6 @@ ysyx_22051013_exu exu4(
 ysyx_22051013_reg_exls reg_exls5(
 	.clk(clk)	,
 	.rst(rst)	,
-	//.exls_stall(h_exls_stall),
 	.ex_inst(idex_ex_inst),
 	.ex_pc(idex_ex_pc)	,
 	.ex_store_data(exls_ex_store_data),
@@ -808,6 +793,7 @@ ysyx_22051013_reg_exls reg_exls5(
 	.ex_wbctl(idex_ex_wbctl),
 	.ex_csr_addr(exls_ex_csr_addr),
 	.ex_csr_ctl(exls_ex_csr_ctl),
+	.ex_fencei(exls_ex_fencei),
 	
 	.ex_rd_addr_forward(ex_id_addr_forward),
 	.ex_rd_data_forward(ex_id_data_forward),
@@ -815,12 +801,13 @@ ysyx_22051013_reg_exls reg_exls5(
 	.ex_valid(ex_valid),
 	.ls_ready(ls_ready),
 	.ie_flush(ie_flush),
+	.ls_flush(ls_flush),
 
+	.ls_fencei(exls_ls_fencei),	
 	.ls_csr_addr(exls_ls_csr_addr),
 	.ls_csr_ctl(exls_ls_csr_ctl),
 	.ls_inst(exls_ls_inst),
 	.ls_pc(exls_ls_pc),
-	//.ls_csr_sign(lswb_ls_csr_sign),
 	.ls_store_data(exls_ls_store_data),
 	.ls_exu_res(exls_ls_aludata),
 	.ls_rd_ena(exls_ls_rd_ena),
@@ -835,12 +822,15 @@ ysyx_22051013_lsu lsu6(
  	.alu_res(exls_ls_aludata)	,
  	.store_data(exls_ls_store_data)	,
  	.ls_ctl	(exls_ls_lsctl) 	,
+ 	.fencei(exls_ls_fencei),
  	
  	.ex_valid(ex_valid),
  	.ls_valid(ls_valid),
 	.ls_ready(ls_ready),
 	.wb_ready(wb_ready),
-	//.ls_flush(ls_lswb_flush),
+	.ls_jump(ls_if_pc_sel),
+	.ls_jump_pc(ls_if_pc),
+	.ls_flush(ls_flush),
 	
 	//axi
 	.data_pc(lsu_ddsel_data_pc)	,
@@ -851,6 +841,7 @@ ysyx_22051013_lsu lsu6(
 	.core_ready(lsu_ddsel_ready),
 	.we(lsu_ddsel_we),
 	.re(lsu_ddsel_re),
+	.fencei_o(lsu_ddsel_fencei),
 	.data_size(ls_dcache_datasize),
 	.wlen(lsu_ddsel_wmask),
  	
@@ -861,7 +852,6 @@ ysyx_22051013_lsu lsu6(
  ysyx_22051013_reg_lswb reg_lswb7(
 	.clk(clk)	,
 	.rst(rst)	,
-	//.lswb_stall(h_lswb_stall),
 	.ls_inst(exls_ls_inst),
 	.ls_pc(exls_ls_pc)	,
 	.ls_rd_ena(exls_ls_rd_ena),
@@ -937,28 +927,7 @@ ysyx_22051013_regfile reg9(
 	.wen(wb_reg_rd_ena)	,
 	.ren1(id_reg_rs1_ena)	,
 	.ren2(id_reg_rs2_ena)	
-	//.bpu_data(reg_bpu_data)	,
-	//.bpu_en(bpu_reg_ena),
-	//.bpu_addr(bpu_reg_addr)
 );
-/*
-ysyx_22051013_hzd_ctl hzd_ctl10(
-	.clk(clk)	,
-	.rst(rst)	,
-	.id_stall_ena(id_h_stall_ena),
-	.id_jump_ena(id_ifid_jumpflush)	,
-	.ex_jump_ena(ex_h_jump_ena)	,
-	.inst_not_ready(inst_not_ready)	,
-	
-	.if_pc_stall(h_if_pcstall)	,
-	.ifid_stall(h_ifid_stall)	,
-	.idex_stall(h_idex_stall)	,
-	.exls_stall(h_exls_stall)	,
-	.lswb_stall(h_lswb_stall)	,
-	
-	.ifid_flush(h_ifid_flush)	,
-	.idex_flush(h_idex_flush)
-);*/
 
 ysyx_22051013_clint clint10(
 	.clk(clk),

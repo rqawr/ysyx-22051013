@@ -224,6 +224,10 @@ always@(posedge clk) begin
 end
 
 always@(*) begin
+	if(rst == `ysyx_22051013_RSTABLE) begin
+		read_state_next  = 2'b00 ;
+	end
+	else begin
 	case(read_state)
 		2'b00 : begin
 			if(if_read) begin
@@ -254,6 +258,7 @@ always@(*) begin
 		end
 		default : read_state_next = 2'b00;
 	endcase
+	end
 end
 
 assign data_o = ((read_state == 2'b10) & r_sh) ? axi_r_data : `ysyx_22051013_ZERO64;

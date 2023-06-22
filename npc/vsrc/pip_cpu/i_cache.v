@@ -1,42 +1,95 @@
-/*
-*
-	*
-	*/
+/*------
+Last modify date : 2023/6/21
+Fucntion : generate PC,INST with icache
+*/
  `include "pip_cpu/define.v"
  `include "pip_cpu/define_axi.v"
  `include "pip_cpu/cache_tag_ram.v"
  `include "pip_cpu/cache_data_ram.v"
 
  module ysyx_22051013_i_cache(
-	 input wire		clk	,
-	 input wire		rst	,
+	 input	wire		clk	,
+	 input	wire		rst	,
 	 
 	 //to ifu
-	 input wire [`ysyx_22051013_PC]		inst_pc	,
-	 input wire				pc_ready	,	
-	 output reg				inst_valid	,
-	 output wire				hold	,
-	// input wire				jump	,
-	 output reg [`ysyx_22051013_INST]	inst	,
-	 output wire [`ysyx_22051013_PC]	pc	,
+	 input	wire	[`ysyx_22051013_PC]	inst_pc	,
+	 input	wire				pc_ready,	
+	 input	wire				fencei	,
+	 output	wire				i_valid	,
+	 output	wire				hold	,
+	 output	reg	[`ysyx_22051013_INST]	inst	,
+	 output	wire	[`ysyx_22051013_PC]	pc	,
 
 	 //to axi
-	 output reg [`ysyx_22051013_PC]	axi_pc	,
-	 output reg				axi_ena	,
-	 input wire [`ysyx_22051013_DATA]	axi_inst,
-	 input wire				axi_valid	
+	 output	reg	[`ysyx_22051013_PC]	axi_pc	,
+	 output	reg				axi_ena	,
+	 input	wire	[`ysyx_22051013_DATA]	axi_inst,
+	 input	wire				axi_valid	
 );
-
+//------------------------------------------------------pc_now--------------------------------------------------------------//
 wire [22:0] 	icache_tag = inst_pc[31:9];
 wire [5:0]	icache_index = inst_pc[8:3];
 
-assign pc = hit_pc;
+wire hit1;
+wire hit2;
+
+assign hit1 =  ((hit_tag == i_tag_way1) & (i_tag_valid1 == `ysyx_22051013_ENABLE));
+assign hit2 =  ((hit_tag == i_tag_way2) & (i_tag_valid2 == `ysyx_22051013_ENABLE));
+
+
+reg [63:0] hit_pc;
+reg [5:0] hit_index;
+reg [22:0] hit_tag;
+
+always@(posedge clk) begin
+	if(rst == `ysyx_22051013_RSTABLE) begin
+		hit_pc <= 64'd0;
+		hit_index <= 6'd0;
+		hit_tag <= 23'd0;
+	end
+	else if((icache_state_next == `ysyx_22051013_I_READ & i_valid) ) begin 
+		hit_pc <= inst_pc;
+		hit_index <= icache_index;
+		hit_tag <= icache_tag;
+	end
+	else begin 
+		hit_pc <= hit_pc;
+		hit_index <= hit_index;
+		hit_tag <= hit_tag;
+	end
+end
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------fencei--------------------------------------------------------------//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+reg [6:0] fencei_index ;
+
+always@(posedge clk) begin 
+	if(rst == `ysyx_22051013_RSTABLE) begin
+		fencei_index <= 7'd0;
+	end
+	else if(fencei) begin
+		if(fencei_index >= 7'd64) begin
+			fencei_index <= fencei_index ;
+		end 
+		else begin
+			fencei_index <= fencei_index + 1'b1;
+		end
+	end
+	else begin
+		fencei_index <= 7'd0;
+	end
+end
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------icache--------------------------------------------------------------//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//---------------------------------------------------icache state trans------------------------------------------------//
 
 reg [3:0] icache_state;
 reg [3:0] icache_state_next;
-
-wire way1_hit = ((icache_tag == i_tag_way1) & (i_tag_valid1 == `ysyx_22051013_ENABLE));
-wire way2_hit = ((icache_tag == i_tag_way2) & (i_tag_valid2 == `ysyx_22051013_ENABLE));
 
 always@(posedge clk) begin 
 	if(rst == `ysyx_22051013_RSTABLE) begin
@@ -48,6 +101,9 @@ always@(posedge clk) begin
 end
 
 always@(*) begin
+	if(rst == `ysyx_22051013_RSTABLE) begin
+		icache_state_next = `ysyx_22051013_I_IDLE;
+	end
 	case(icache_state) 
 		`ysyx_22051013_I_IDLE : begin
 			if(~rst) begin
@@ -59,15 +115,15 @@ always@(*) begin
 		end
 
 		`ysyx_22051013_I_READ : begin
-			if(/*(~pc_ready)*/ & (hit1 | hit2)) begin
+			if(fencei) begin
+				icache_state_next = `ysyx_22051013_I_READ;
+			end
+			else if(/*(~pc_ready) &*/ (hit1 | hit2)) begin
 				icache_state_next = `ysyx_22051013_I_HIT;
 			end
-			else /*if(~pc_ready) */begin
+			else begin
 				icache_state_next = `ysyx_22051013_I_MISS;
 			end
-			//else begin
-			//	icache_state_next = `ysyx_22051013_I_READ;
-			//end
 		end
 
 		`ysyx_22051013_I_HIT : begin
@@ -94,41 +150,15 @@ always@(*) begin
 	endcase
 end
 
-//-------hit--------//
+//---------------------------------------------------hit------------------------------------------------//
 
-wire hit1;
-wire hit2;
-
-assign hit1 =  ((hit_tag == i_tag_way1) & (i_tag_valid1 == `ysyx_22051013_ENABLE));
-assign hit2 =  ((hit_tag == i_tag_way2) & (i_tag_valid2 == `ysyx_22051013_ENABLE));
-
-
-reg [63:0] hit_pc;
-reg [5:0] hit_index;
-reg [22:0] hit_tag;
-
-always@(posedge clk) begin
-	if(rst == `ysyx_22051013_RSTABLE) begin
-		hit_pc <= 64'd0;
-		hit_index <= 6'd0;
-		hit_tag <= 23'd0;
-	end
-	else if((icache_state_next == `ysyx_22051013_I_READ & inst_valid) ) begin 
-		hit_pc <= inst_pc;
-		hit_index <= icache_index;
-		hit_tag <= icache_tag;
-	end
-	else begin 
-		hit_pc <= hit_pc;
-		hit_index <= hit_index;
-		hit_tag <= hit_tag;
-	end
-end
-
-assign hold = (icache_state == `ysyx_22051013_I_IDLE);
-
+reg inst_valid;
 always@(*) begin
-	if(icache_state == `ysyx_22051013_I_HIT) begin
+	if(rst == `ysyx_22051013_RSTABLE) begin
+		inst = 32'b0;
+		inst_valid = `ysyx_22051013_DISABLE;
+	end
+	else if(icache_state == `ysyx_22051013_I_HIT) begin
 		if(hit1 & hit_pc[2]) begin
 			inst = cache_data[63:32];
 			inst_valid = `ysyx_22051013_ENABLE;
@@ -156,7 +186,7 @@ always@(*) begin
 	end
 end
 
-//-------------miss-----------//
+//---------------------------------------------------miss------------------------------------------------//
 
 reg [`ysyx_22051013_CACHE] miss_data;
 reg [`ysyx_22051013_CACHE] cache_strb;
@@ -176,28 +206,30 @@ always@(posedge clk) begin
 	end
 end
 
-reg delay2;
-always@(posedge clk) begin
-	if(rst == `ysyx_22051013_RSTABLE) begin
-		delay2 <= 1'b0;
-	end
-	else if(inst_valid) begin
-		delay2 <= 1'b0;
-	end
-	else if(icache_state == `ysyx_22051013_I_MISS) begin
-		delay2 <= 1'b1;
-	end
-	else begin
-		delay2 <= delay2;
-	end
-end
-
 
 always@(*) begin
+	if(rst == `ysyx_22051013_RSTABLE) begin
+		axi_ena = `ysyx_22051013_DISABLE;
+		miss_data = 128'd0;
+		axi_pc = `ysyx_22051013_ZERO64;
+		cache_ena = `ysyx_22051013_DISABLE;
+		cache_strb = 128'd0;
+		write_in_valid = `ysyx_22051013_DISABLE;
+	end
 	if(icache_state == `ysyx_22051013_I_MISS & ~axi_valid & ~delay1) begin 
 		axi_ena = `ysyx_22051013_ENABLE;
 		axi_pc = {hit_pc[63:3],3'b000};
 		miss_data = 128'd0;
+		cache_strb = 128'd0;
+		cache_ena = `ysyx_22051013_DISABLE;
+		write_in_valid = `ysyx_22051013_DISABLE;
+	end
+	else if(icache_state == `ysyx_22051013_I_MISS & axi_valid) begin
+		axi_ena = `ysyx_22051013_DISABLE;
+		axi_pc = `ysyx_22051013_ZERO64;
+		miss_data = {axi_inst,axi_inst};
+		write_in_valid = `ysyx_22051013_DISABLE;
+		cache_ena = `ysyx_22051013_ENABLE;
 		if(i_tag_valid1 == `ysyx_22051013_DISABLE) begin
 			cache_strb = `ysyx_22051013_STRB128_L;
 		end
@@ -216,26 +248,6 @@ always@(*) begin
 		
 		else begin
 			cache_strb = 128'd0;
-		end
-		cache_ena = `ysyx_22051013_DISABLE;
-		write_in_valid = `ysyx_22051013_DISABLE;
-	end
-	else if(icache_state == `ysyx_22051013_I_MISS & axi_valid) begin
-		axi_ena = `ysyx_22051013_DISABLE;
-		axi_pc = `ysyx_22051013_ZERO64;
-		miss_data = {axi_inst,axi_inst};
-		write_in_valid = `ysyx_22051013_DISABLE;
-		cache_ena = `ysyx_22051013_ENABLE;
-		if(way1_recent_use[hit_index]) begin
-			cache_strb = `ysyx_22051013_STRB128_H;
-		end
-		
-		else if(way2_recent_use[hit_index]) begin
-			cache_strb = `ysyx_22051013_STRB128_L;
-		end
-		
-		else begin
-			cache_strb = `ysyx_22051013_STRB128_L;
 		end
 	end
 	else if(icache_state == `ysyx_22051013_I_MISS & delay1) begin
@@ -256,20 +268,31 @@ always@(*) begin
 	end
 end
 
-//-----------cache---------------------//
-//---tag---//
-wire [23:0] tag_with_valid = {1'b1,tag};
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------ram--------------------------------------------------------------//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-wire [22:0] tag = ((icache_state == `ysyx_22051013_I_HIT) & ~pc_ready)? icache_tag :
-		hit_tag;
+//------------------------------------------------------tag ram--------------------------------------------------------------//
 
-wire [22:0] 	i_tag_way1;
-wire		i_tag_valid1;
+wire [22:0] tag = 	((icache_state == `ysyx_22051013_I_HIT) & ~pc_ready)? icache_tag :	
+			hit_tag;
+wire [23:0] tag_with_valid = fencei ? 24'd0 : {1'b1,tag};
 
-wire way1_tag_ena = ~delay2 &(icache_state == `ysyx_22051013_I_MISS) & (cache_strb == `ysyx_22051013_STRB128_L);
+wire way1_tag_ena = 	fencei ? 1'b1 :
+			(icache_state == `ysyx_22051013_I_MISS) & (cache_strb == `ysyx_22051013_STRB128_L);
 
-wire [5:0] index = ((icache_state == `ysyx_22051013_I_HIT) & ~pc_ready) ? icache_index :
-		hit_index;
+wire way2_tag_ena = 	fencei ? 1'b1 :
+			(icache_state == `ysyx_22051013_I_MISS) & (cache_strb == `ysyx_22051013_STRB128_H);
+
+wire [5:0] index = 	fencei ? fencei_index[5:0] :
+			((icache_state == `ysyx_22051013_I_HIT) & ~pc_ready) ? icache_index :
+			hit_index;
+			
+			
+ wire [22:0] 	i_tag_way1;
+ wire		i_tag_valid1;
+ wire [22:0] 	i_tag_way2;
+ wire		i_tag_valid2;
 
  ysyx_22051013_cache_tag_ram tag_ram0(
  	.clk(clk),
@@ -279,11 +302,6 @@ wire [5:0] index = ((icache_state == `ysyx_22051013_I_HIT) & ~pc_ready) ? icache
  	.tag_data_o(i_tag_way1),
  	.tag_valid(i_tag_valid1)
  );
- 
- wire [22:0] 	i_tag_way2;
- wire		i_tag_valid2;
-
-wire way2_tag_ena = ~delay2 &(icache_state == `ysyx_22051013_I_MISS) & (cache_strb == `ysyx_22051013_STRB128_H);
 
  ysyx_22051013_cache_tag_ram tag_ram1(
  	.clk(clk),
@@ -294,10 +312,10 @@ wire way2_tag_ena = ~delay2 &(icache_state == `ysyx_22051013_I_MISS) & (cache_st
  	.tag_valid(i_tag_valid2)
  );
  
-//---data---//
+//------------------------------------------------------data ram--------------------------------------------------------------//
 
 wire [`ysyx_22051013_CACHE] cache_data;
-wire ce = 1'b0;
+wire ce = (icache_state == `ysyx_22051013_I_IDLE);
 
  ysyx_22051013_cache_data_ram data_ram0(
 	.Q(cache_data),
@@ -309,11 +327,20 @@ wire ce = 1'b0;
  	.D(miss_data)
  );
  		
-//------------replace logic------------//
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//---------------------------------------------cacheline replace logical-------------------------------------------------------//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 reg way1_recent_use [63:0];
 reg way2_recent_use [63:0];
+integer i;
 
 always@(posedge clk) begin
+	if(rst == `ysyx_22051013_RSTABLE) begin
+		for(i=0; i<64; i=i+1) begin 
+			way1_recent_use[i] <= 1'b0;
+			way2_recent_use[i] <= 1'b0;
+		end
+	end
 	if((icache_state == `ysyx_22051013_I_HIT) & hit1) begin
 		way1_recent_use[hit_index] <= `ysyx_22051013_ENABLE;
 		way2_recent_use[hit_index] <= `ysyx_22051013_DISABLE;
@@ -322,7 +349,18 @@ always@(posedge clk) begin
 		way1_recent_use[hit_index] <= `ysyx_22051013_DISABLE;
 		way2_recent_use[hit_index] <= `ysyx_22051013_ENABLE;
 	end
+	if(fencei) begin
+		way1_recent_use[fencei_index[5:0]] <= `ysyx_22051013_DISABLE;
+		way2_recent_use[fencei_index[5:0]] <= `ysyx_22051013_DISABLE;
+	end
 end
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------output sign--------------------------------------------------------------//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+assign pc = hit_pc;
+assign i_valid = fencei ? ~pc_ready : inst_valid;
+assign hold = (icache_state == `ysyx_22051013_I_IDLE);
 
 endmodule
 

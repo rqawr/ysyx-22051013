@@ -6,43 +6,47 @@
 `include "pip_cpu/define_axi.v"
 
 module ysyx_22051013_dcache_device_sel(
-	input wire		core_re	,
-	input wire		core_we	,
-	input wire [7:0]	core_mask	,
-	input wire [`ysyx_22051013_DATA]	core_data_i	,
-	input wire [`ysyx_22051013_DATA]	device_data_i	,
-	input wire [`ysyx_22051013_PC]		core_addr	,
-	input wire		core_ready	,
-	input wire	[2:0]	core_size	,
+	//core
+	input	wire				core_re	,
+	input	wire				core_we	,
+	input	wire	[7:0]			core_mask	,
+	input	wire 	[`ysyx_22051013_DATA]	core_data_i	,
+	input	wire	[`ysyx_22051013_DATA]	device_data_i	,
+	input	wire	[`ysyx_22051013_PC]	core_addr	,
+	input	wire				core_ready	,
+	input	wire	[2:0]			core_size	,
+	input	wire				fencei	,
 		
-	output wire		data_valid	,
-	output wire [`ysyx_22051013_DATA]	data_to_core	,
+	output	wire				data_valid	,
+	output	wire	[`ysyx_22051013_DATA]	data_to_core	,
 	
-	output wire		clint_ena	,
-	output wire		axi_re	,
-	output wire		axi_we	,
-	output wire [7:0]	axi_mask	,
-	output wire [`ysyx_22051013_DATA]	axi_data_o	,
-	output wire [`ysyx_22051013_PC]		axi_data_pc	,
+	//axi
+	output	wire				clint_ena	,
+	output	wire				axi_re	,
+	output	wire				axi_we	,
+	output	wire	[7:0]			axi_mask	,
+	output	wire	[`ysyx_22051013_DATA]	axi_data_o	,
+	output	wire	[`ysyx_22051013_PC]	axi_data_pc	,
 	output	wire	[2:0]			axi_size	,
-	input wire		axi_valid	,
-	input wire [`ysyx_22051013_DATA]	axi_data_i	, 
+	input	wire				axi_valid	,
+	input	wire	[`ysyx_22051013_DATA]	axi_data_i	, 
+	input	wire				dcache_axi_re	,
+	input	wire				dcache_axi_we	,
+	input	wire	[`ysyx_22051013_PC]	dcache_axi_pc	,
+	input	wire 	[`ysyx_22051013_DATA]	dcache_axi_data	,
+	output	wire	[`ysyx_22051013_DATA]	axi_dcache_data	,
+	output	wire				axi_dcache_valid,
 	
-	output wire		dcache_re	,
-	output wire		dcache_we	,
-	output wire [7:0]	dcache_mask	,
-	output wire [`ysyx_22051013_DATA]	dcache_data_o	,
-	output wire [`ysyx_22051013_PC]		dcache_data_pc	,
-	output wire		dcache_ready	,
-	input wire		dcache_valid	,
-	input wire [`ysyx_22051013_DATA]	dcache_data_i	,
-	
-	input wire		dcache_axi_re	,
-	input wire		dcache_axi_we	,
-	input wire [`ysyx_22051013_PC]		dcache_axi_pc	,
-	input wire [`ysyx_22051013_DATA]	dcache_axi_data	,
-	output wire [`ysyx_22051013_DATA]	axi_dcache_data	,
-	output wire		axi_dcache_valid
+	//dcache
+	output	wire				dcache_re	,
+	output	wire				dcache_we	,
+	output	wire	[7:0]			dcache_mask	,
+	output	wire	[`ysyx_22051013_DATA]	dcache_data_o	,
+	output	wire	[`ysyx_22051013_PC]	dcache_data_pc	,
+	output	wire				dcache_ready	,
+	output	wire				dcache_fencei	,
+	input	wire				dcache_valid	,
+	input	wire	[`ysyx_22051013_DATA]	dcache_data_i	
 );
 
 wire device_ena;
@@ -63,6 +67,8 @@ assign dcache_mask = ~device_ena ? core_mask : 8'd0;
 assign dcache_data_pc = ~device_ena ? core_addr : `ysyx_22051013_ZERO64;
 assign dcache_data_o = ~device_ena ? core_data_i : `ysyx_22051013_ZERO64;
 assign dcache_ready = ~device_ena ? core_ready : `ysyx_22051013_DISABLE;
+
+assign dcache_fencei = fencei;
 
 assign axi_dcache_data = ~device_ena ? axi_data_i : `ysyx_22051013_ZERO64;
 assign axi_dcache_valid = ~device_ena ? axi_valid : `ysyx_22051013_DISABLE;

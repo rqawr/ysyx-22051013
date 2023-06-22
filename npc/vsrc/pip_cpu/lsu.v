@@ -6,48 +6,44 @@
  `include "pip_cpu/define.v"
  /* verilator lint_off DECLFILENAME */
  module ysyx_22051013_lsu(
-  	input     wire                    		rst       ,
-  	input     wire                    		clk       ,
- 	input     wire [`ysyx_22051013_DATA]            alu_res   ,
- 	input     wire [`ysyx_22051013_DATA]            store_data ,
- 	input     wire [3:0]               		ls_ctl ,
+  	input	wire                    		rst       ,
+  	input	wire                    		clk       ,
+ 	input	wire	[`ysyx_22051013_DATA]            alu_res   ,
+ 	input	wire	[`ysyx_22051013_DATA]            store_data ,
+ 	input	wire	[3:0]               		ls_ctl ,
+ 	input	wire					fencei	,
 	
-	input	  wire					wb_ready,
-	input	  wire					ex_valid,
- 	output    wire					ls_ready,
- 	output	  wire					ls_valid,
- 	//output	  wire					ls_flush,
+	input	wire					wb_ready,
+	input	wire					ex_valid,
+ 	output	wire					ls_ready,
+ 	output	wire					ls_valid,
+ 	output	wire					ls_flush,
+ 	output	wire					ls_jump,
+ 	output	wire	[`ysyx_22051013_PC]		ls_jump_pc,
  	
  	//axi
  	output	wire					we,
  	output	wire					re,
+ 	output	wire					fencei_o,
  	output	wire					core_ready,
  	output	wire	[`ysyx_22051013_PC]		data_pc,
  	input	wire	[`ysyx_22051013_DATA]		data_temp,
  	output	reg	[`ysyx_22051013_DATA]		data_o,
  	output 	wire	[2:0]				data_size	,
- 	output	wire [`ysyx_22051013_DATA]		device_data_o,
- 	output	reg [7:0]				wlen,
+ 	output	wire 	[`ysyx_22051013_DATA]		device_data_o,
+ 	output	reg	[7:0]				wlen,
  	input	wire					data_valid,
  	
- 	output    wire [`ysyx_22051013_DATA]      	ls_data_forward,
- 	output    wire [`ysyx_22051013_DATA]      	ls_data_o
+ 	output	wire	[`ysyx_22051013_DATA]      	ls_data_forward,
+ 	output	wire	[`ysyx_22051013_DATA]      	ls_data_o
  );
  
- //hzd_ctl
- assign ls_ready = wb_ready | (data_ok  & (re | we));
- assign ls_valid = ex_valid | (data_ok  & (re | we));
- //assign ls_flush = data_not_ready;
- 
- assign core_ready = wb_ready | ~data_ok;
- 
- assign device_data_o = store_data;
- 
- assign data_size = 	((ls_ctl == 4'b0001) | (ls_ctl == 4'b1001) | (ls_ctl == 4'b1101)) ? 3'b011 : 
- 			((ls_ctl == 4'b0010) | (ls_ctl == 4'b1010) | (ls_ctl == 4'b1110)) ? 3'b100 :
- 			((ls_ctl == 4'b0100) | (ls_ctl == 4'b1011) | (ls_ctl == 4'b1111)) ? 3'b101 :
- 			((ls_ctl == 4'b1000) | (ls_ctl == 4'b1100)) ? 3'b110 :
- 			3'b000;
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------hzd_ctl--------------------------------------------------------------//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+ assign ls_ready = wb_ready | (data_ok  & (re | we | fencei));
+ assign ls_valid = ex_valid | (data_ok  & (re | we | fencei));
  
  wire [`ysyx_22051013_DATAADDR] raddr ;
  wire [`ysyx_22051013_DATAADDR] waddr ; 
@@ -86,14 +82,10 @@ end
 		data_i <= data_i;
 	end
 end
- 
- assign re    = (rst == `ysyx_22051013_RSTABLE | ls_ctl == 4'b0000 ) ? 1'b0 : ls_ctl[3];
- assign we    = (rst == `ysyx_22051013_RSTABLE | ls_ctl == 4'b0000 ) ? 1'b0 : ~ls_ctl[3];
- assign waddr    = (rst == `ysyx_22051013_RSTABLE) ? `ysyx_22051013_ZERO64 : alu_res ;
- assign raddr    = (rst == `ysyx_22051013_RSTABLE) ? `ysyx_22051013_ZERO64 : {alu_res[63:3],3'b000} ;
 
-
-assign data_pc = re ? raddr : we ? waddr : `ysyx_22051013_ZERO64;
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------load store --------------------------------------------------------------//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
  
  //--------------------------load-----------------------------------------------------------------//
 wire [ 2:0] byte_sel = alu_res[2:0] ;
@@ -286,27 +278,45 @@ always @(*) begin
         endcase
     end
 end
-/*
-//--------------------------dpi-c--------------------------------------------------------------------//
- import "DPI-C" function void pmem_read(input longint raddr, output longint rdata, input byte rlen);
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------output--------------------------------------------------------------//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//------------------------------------------------------out to ifu--------------------------------------------------------------//
+
+ assign ls_flush = ls_jump;
+ assign ls_jump_pc = alu_res;
+ assign ls_jump = fencei;
  
- import "DPI-C" function void pmem_write( input longint waddr, input longint wdata, input byte wlen);
-  
-  
-always @(negedge clk) begin
- if(ls_valid) begin
-  if(re) begin
-  pmem_read(raddr, data_i, rlen);end
-  //else begin data_i = `ysyx_22051013_ZERO64;end
-  if(we)begin
-  pmem_write(waddr, data_o , wlen);end
- end
-end
-*/
-//------------------------output----------------------------------------------------------------------//
+//------------------------------------------------------out to idu--------------------------------------------------------------//
+
+ assign ls_data_forward  = re ? load_data : alu_res ;
+
+//------------------------------------------------------out to dcache--------------------------------------------------------------//
+ assign fencei_o = fencei;
+ 
+ assign core_ready = wb_ready | ~data_ok;
+ 
+ assign device_data_o = store_data;
+ 
+ assign data_size = 	((ls_ctl == 4'b0001) | (ls_ctl == 4'b1001) | (ls_ctl == 4'b1101)) ? 3'b011 : 
+ 			((ls_ctl == 4'b0010) | (ls_ctl == 4'b1010) | (ls_ctl == 4'b1110)) ? 3'b100 :
+ 			((ls_ctl == 4'b0100) | (ls_ctl == 4'b1011) | (ls_ctl == 4'b1111)) ? 3'b101 :
+ 			((ls_ctl == 4'b1000) | (ls_ctl == 4'b1100)) ? 3'b110 :
+ 			3'b000;
+
+ assign re	= (rst == `ysyx_22051013_RSTABLE | ls_ctl == 4'b0000 ) ? 1'b0 : ls_ctl[3];
+ assign we	= (rst == `ysyx_22051013_RSTABLE | ls_ctl == 4'b0000 ) ? 1'b0 : ~ls_ctl[3];
+ assign waddr	= (rst == `ysyx_22051013_RSTABLE) ? `ysyx_22051013_ZERO64 : alu_res ;
+ assign raddr	= (rst == `ysyx_22051013_RSTABLE) ? `ysyx_22051013_ZERO64 : {alu_res[63:3],3'b000} ;
 
 
-assign ls_data_o  = re/* & ~data_ok */? load_data : `ysyx_22051013_ZERO64 ;
-assign ls_data_forward  = re /*& ~data_not_ready */? load_data : alu_res ;
-//wire _unused_ok = &{alu_res[2:0]};
+ assign data_pc = re ? raddr : we ? waddr : `ysyx_22051013_ZERO64;
+
+
+//------------------------------------------------------out to wbu--------------------------------------------------------------//
+
+ assign ls_data_o  = re ? load_data : `ysyx_22051013_ZERO64 ;
+
 endmodule

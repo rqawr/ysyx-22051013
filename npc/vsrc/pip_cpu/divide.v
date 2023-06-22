@@ -16,7 +16,7 @@
 	 output wire				out_valid	,
 	 output wire [`ysyx_22051013_DATA]	quotient	,
 	 output wire [`ysyx_22051013_DATA]	remainder
-	);
+);
 
 	assign div_ready = flush | (cnt == 7'b0);
 	assign out_valid = flush | ~div_doing ? 1'b0 : div_ready;

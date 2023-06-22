@@ -6,17 +6,17 @@
  `include "single_cpu/define.v"
  /* verilator lint_off DECLFILENAME */
 module ysyx_22051013_csr(
-	input wire			clk		,
-	input wire			rst		,
-	input wire [`ysyx_22051013_PC]	pc_i,
-	input wire [3:0]		csr_ctl	,//{csr_wr_ena, csr_rd_ena, ecall_ena, mret_ena}
-	input wire [11:0]		csr_addr,
-	input wire			core_valid,
-	input wire [`ysyx_22051013_REG]	mcause_value,
-	input wire [`ysyx_22051013_DATA]	write_csr_data,
-	input wire			time_interrupt		,
-	output wire			time_interrupt_confirm	,
-	output wire [`ysyx_22051013_DATA]	read_csr_data
+	input	wire				clk		,
+	input	wire				rst		,
+	input	wire	[`ysyx_22051013_PC]	pc_i		,
+	input	wire	[3:0]			csr_ctl		,//{csr_wr_ena, csr_rd_ena, ecall_ena, mret_ena}
+	input	wire	[11:0]			csr_addr	,
+	input	wire				core_valid	,
+	input	wire	[`ysyx_22051013_REG]	mcause_value	,
+	input	wire	[`ysyx_22051013_DATA]	write_csr_data	,
+	input	wire				time_interrupt	,
+	output	wire				time_interrupt_confirm	,
+	output	wire	[`ysyx_22051013_DATA]	read_csr_data
 );
 
 import "DPI-C" function void difftest_dut_csr(
@@ -104,16 +104,24 @@ always@(posedge clk) begin
   	if(rst == `ysyx_22051013_RSTABLE) begin 
   		mstatus_mie <= 1'b0;
   		mstatus_mpie <= 1'b0;
-		mstatus_mpp <= 2'b00;
  	end
 	else if(mstatus_ie_ena & ~core_valid) begin 
 		mstatus_mie <= mie_set;
 		mstatus_mpie <= mpie_set;
-		mstatus_mpp <= mpp_set; 
 	end
 	else begin  
 		mstatus_mie <= mstatus_mie;
 		mstatus_mpie <= mstatus_mpie;
+	end
+end
+always@(posedge clk) begin
+  	if(rst == `ysyx_22051013_RSTABLE) begin 
+		mstatus_mpp <= 2'b00;
+ 	end
+	else if(mstatus_ie_ena) begin 
+		mstatus_mpp <= mpp_set; 
+	end
+	else begin  
 		mstatus_mpp <= mstatus_mpp;
 	end
 end

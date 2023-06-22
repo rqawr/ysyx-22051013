@@ -5,24 +5,21 @@
  `include "pip_cpu/define.v"
  /* verilator lint_off DECLFILENAME */
 module ysyx_22051013_regfile(
- input wire							clk			,
- input wire							rst			,
+	input	wire					clk	,
+	input	wire					rst	,
 
- input wire	[`ysyx_22051013_REGADDR]		waddr		,
- input wire [`ysyx_22051013_REG]			wdata		,
- input wire						wen			,
+	input	wire	[`ysyx_22051013_REGADDR]	waddr	,
+	input	wire	[`ysyx_22051013_REG]		wdata	,
+	input	wire					wen	,
 
- input wire	[`ysyx_22051013_REGADDR]		raddr1		,
- output wire	[`ysyx_22051013_REG]			rdata1		,
- input wire						ren1			,
+	input	wire	[`ysyx_22051013_REGADDR]	raddr1	,
+	output	wire	[`ysyx_22051013_REG]		rdata1	,
+	input	wire					ren1	,
 
- input wire	[`ysyx_22051013_REGADDR]		raddr2		,
- output wire [`ysyx_22051013_REG]			rdata2		,
- input wire						ren2		
- 
- //input wire	[`ysyx_22051013_REGADDR]		bpu_addr		,
- //output wire [`ysyx_22051013_REG]			bpu_data		,
- //input wire						bpu_en	
+	input	wire	[`ysyx_22051013_REGADDR]	raddr2	,
+	output	wire	[`ysyx_22051013_REG]		rdata2	,
+	input	wire					ren2		
+
  
  );
 
@@ -104,9 +101,38 @@ module ysyx_22051013_regfile(
  integer i;
  always@(posedge clk) begin
 	 if(rst == `ysyx_22051013_RSTABLE) begin
-		 for(i=0;i<32;i+=1) begin
-			 regs[i] <=	`ysyx_22051013_ZERO64;
-		 end
+		regs[0] <= `ysyx_22051013_ZERO64; 
+ 		regs[1] <= `ysyx_22051013_ZERO64; 
+ 		regs[2] <= `ysyx_22051013_ZERO64; 
+ 		regs[3] <= `ysyx_22051013_ZERO64; 
+ 		regs[4] <= `ysyx_22051013_ZERO64; 
+ 		regs[5] <= `ysyx_22051013_ZERO64; 
+ 		regs[6] <= `ysyx_22051013_ZERO64; 
+ 		regs[7] <= `ysyx_22051013_ZERO64; 
+ 		regs[8] <= `ysyx_22051013_ZERO64; 
+ 		regs[9] <= `ysyx_22051013_ZERO64; 
+ 		regs[10] <= `ysyx_22051013_ZERO64; 
+ 		regs[11] <= `ysyx_22051013_ZERO64; 
+ 		regs[12] <= `ysyx_22051013_ZERO64; 
+ 		regs[13] <= `ysyx_22051013_ZERO64; 
+ 		regs[14] <= `ysyx_22051013_ZERO64; 
+ 		regs[15] <= `ysyx_22051013_ZERO64; 
+ 		regs[16] <= `ysyx_22051013_ZERO64; 
+ 		regs[17] <= `ysyx_22051013_ZERO64; 
+ 		regs[18] <= `ysyx_22051013_ZERO64; 
+ 		regs[19] <= `ysyx_22051013_ZERO64; 
+ 		regs[20] <= `ysyx_22051013_ZERO64; 
+ 		regs[21] <= `ysyx_22051013_ZERO64; 
+ 		regs[22] <= `ysyx_22051013_ZERO64; 
+ 		regs[23] <= `ysyx_22051013_ZERO64; 
+ 		regs[24] <= `ysyx_22051013_ZERO64; 
+ 		regs[25] <= `ysyx_22051013_ZERO64; 
+ 		regs[26] <= `ysyx_22051013_ZERO64; 
+ 		regs[27] <= `ysyx_22051013_ZERO64; 
+ 		regs[28] <= `ysyx_22051013_ZERO64; 
+ 		regs[29] <= `ysyx_22051013_ZERO64; 
+ 		regs[30] <= `ysyx_22051013_ZERO64; 
+ 		regs[31] <= `ysyx_22051013_ZERO64;
 	 end
    else begin
 		 if(wen == `ysyx_22051013_WENABLE && waddr != 5'd0)begin
@@ -117,8 +143,6 @@ module ysyx_22051013_regfile(
 
  assign rdata1 = ((rst != `ysyx_22051013_RSTABLE) && (ren1 == `ysyx_22051013_RENABLE)) ? regs[raddr1] : `ysyx_22051013_ZERO64;
  assign rdata2 = ((rst != `ysyx_22051013_RSTABLE) && (ren2 == `ysyx_22051013_RENABLE)) ? regs[raddr2] : `ysyx_22051013_ZERO64;
- 
- //assign bpu_data = ((rst != `ysyx_22051013_RSTABLE) && (bpu_en == `ysyx_22051013_RENABLE)) ? ((wen & (bpu_addr == waddr)) ? wdata : regs[bpu_addr]) : `ysyx_22051013_ZERO64;
 
  endmodule
 
