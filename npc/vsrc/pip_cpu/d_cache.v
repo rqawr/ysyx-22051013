@@ -1,12 +1,11 @@
-/*
-*
-	*
-	*/
+/*---------------------------------------
+Last modify date : 2023/6/21
+Fucntion : dcache (write back)
+---------------------------------------*/
+
  `include "pip_cpu/define.v"
  `include "pip_cpu/define_axi.v"
- //`include "pip_cpu/cache_tag_ram.v"
- //`include "pip_cpu/cache_data_ram.v"
-
+/* verilator lint_off DECLFILENAME */
  module ysyx_22051013_d_cache(
 	 input wire		clk	,
 	 input wire		rst	,
@@ -195,6 +194,7 @@ reg [`ysyx_22051013_CACHE] cache_r_strb;
 
 reg dirtyr_way1_clean;
 reg dirtyr_way2_clean;
+wire [2:0] pc_zero = data_pc[2:0] & 3'b000;
 
 always@(*) begin
 	if(rst == `ysyx_22051013_RSTABLE) begin
@@ -210,7 +210,7 @@ always@(*) begin
 	end
 	else if(dread_state == `ysyx_22051013_D_MISSR & ~axi_valid) begin 
 		missr_ena = `ysyx_22051013_ENABLE;
-		missr_pc = {data_pc[63:3],3'b000};
+		missr_pc = {data_pc[63:3],pc_zero};
 		missr_data = 128'd0;
 		cache_r_strb = 128'd0;
 		way1_r_ena = `ysyx_22051013_DISABLE;
@@ -435,8 +435,6 @@ end
 //------------------------------------------------------write hit--------------------------------------------------------------//
 
 reg data_w_valid;
-reg dirtyw_way1_clean;
-reg dirtyw_way2_clean;
 reg [`ysyx_22051013_CACHE] data_write_o;
 reg [`ysyx_22051013_CACHE] hit_w_strb;
 wire [`ysyx_22051013_DATA] strb_w_64 = {{8{wmask[7]}},{8{wmask[6]}},{8{wmask[5]}},{8{wmask[4]}},{8{wmask[3]}},{8{wmask[2]}},{8{wmask[1]}},{8{wmask[0]}}};
@@ -820,6 +818,7 @@ wire		d_tag_valid1;
 
  ysyx_22051013_cache_tag_ram tag_ram0(
  	.clk(clk),
+ 	.rst(rst),
  	.addr(tag_index),
  	.tag_data_i(tag_with_valid),
  	.write_ena(way1_ena),
@@ -840,6 +839,7 @@ wire		d_tag_valid1;
 
  ysyx_22051013_cache_tag_ram tag_ram1(
  	.clk(clk),
+ 	.rst(rst),
  	.addr(tag_index),
  	.tag_data_i(tag_with_valid),
  	.write_ena(way2_ena),

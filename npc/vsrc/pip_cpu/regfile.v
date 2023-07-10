@@ -97,8 +97,6 @@ module ysyx_22051013_regfile(
  	);
  end
  
-
- integer i;
  always@(posedge clk) begin
 	 if(rst == `ysyx_22051013_RSTABLE) begin
 		regs[0] <= `ysyx_22051013_ZERO64; 

@@ -50,7 +50,7 @@ module ysyx_22051013_axi_slave(
 );
 //write
 
-wire awc_shakehand = axi_aw_valid & axi_aw_ready;
+wire awc_shakehand = axi_aw_valid & axi_aw_ready & (axi_aw_len == 8'd0);
 wire wc_shakehand = axi_w_valid & axi_w_ready;
 wire bc_shakehand = axi_b_valid & axi_b_ready;
 
@@ -103,7 +103,7 @@ assign axi_b_resp = 2'b00;
 
 
 //read
- wire   arc_shakehand   = axi_ar_ready & axi_ar_valid;
+ wire   arc_shakehand   = axi_ar_ready & axi_ar_valid & (axi_ar_len == 8'd0);
  wire   rc_shakehand    = axi_r_ready & axi_r_valid ;
  
  reg  [1:0] s_read_state     ;
@@ -147,7 +147,7 @@ assign axi_b_resp = 2'b00;
  
  assign axi_ar_ready = (s_read_state == `ysyx_22051013_S_IDLE);
  assign axi_r_valid = (s_read_state == `ysyx_22051013_S_DATA);
- assign axi_r_id = (s_read_state == `ysyx_22051013_S_DATA) ? axi_ar_id : 5'd0;
+ assign axi_r_id = (s_read_state == `ysyx_22051013_S_DATA) ? axi_ar_id : 4'd0;
  assign axi_r_resp = 2'b00;
  assign axi_r_data = (s_read_state == `ysyx_22051013_S_DATA) ? dpic_read_data : `ysyx_22051013_ZERO64;
  assign axi_r_last = (s_read_state == `ysyx_22051013_S_DATA);
@@ -158,11 +158,13 @@ assign axi_b_resp = 2'b00;
   
 import "DPI-C" function void pmem_read(input longint raddr, output longint rdata, input byte rlen);
 import "DPI-C" function void pmem_write( input longint waddr, input longint wdata, input byte wlen);
-reg [7:0] rlen = 	(axi_ar_size == 3'b110) ? 8'd8 : 
-			(axi_ar_size == 3'b101) ? 8'd4 : 
-			(axi_ar_size == 3'b100) ? 8'd2 : 
-			(axi_ar_size == 3'b011) ? 8'd1 : 
+reg [7:0] rlen = 	(axi_ar_size == 3'b011) ? 8'd8 : 
+			(axi_ar_size == 3'b010) ? 8'd4 : 
+			(axi_ar_size == 3'b001) ? 8'd2 : 
+			(axi_ar_size == 3'b000) ? 8'd1 : 
 			8'd8;
+			
+
 always @(posedge clk) begin
   if(arc_shakehand)
 	pmem_read(axi_ar_addr,dpic_read_data,rlen);
@@ -170,6 +172,6 @@ always @(posedge clk) begin
 	pmem_write(axi_aw_addr,axi_w_data,axi_w_strb);
 end
 
-wire unused_ok = &{axi_aw_size,axi_w_last,axi_aw_len,axi_aw_burst,axi_ar_burst,axi_ar_len};
+wire unused_ok = &{axi_aw_size,axi_w_last,axi_aw_burst,axi_ar_burst};
 endmodule
  

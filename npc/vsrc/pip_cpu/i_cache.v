@@ -1,12 +1,12 @@
-/*------
+/*---------------------------------------
 Last modify date : 2023/6/21
 Fucntion : generate PC,INST with icache
-*/
+---------------------------------------*/
  `include "pip_cpu/define.v"
  `include "pip_cpu/define_axi.v"
  `include "pip_cpu/cache_tag_ram.v"
  `include "pip_cpu/cache_data_ram.v"
-
+/* verilator lint_off DECLFILENAME */
  module ysyx_22051013_i_cache(
 	 input	wire		clk	,
 	 input	wire		rst	,
@@ -15,8 +15,9 @@ Fucntion : generate PC,INST with icache
 	 input	wire	[`ysyx_22051013_PC]	inst_pc	,
 	 input	wire				pc_ready,	
 	 input	wire				fencei	,
+	 input	wire				icache_ena	,
+	 input	wire				icache_valid	, 
 	 output	wire				i_valid	,
-	 output	wire				hold	,
 	 output	reg	[`ysyx_22051013_INST]	inst	,
 	 output	wire	[`ysyx_22051013_PC]	pc	,
 
@@ -47,7 +48,7 @@ always@(posedge clk) begin
 		hit_index <= 6'd0;
 		hit_tag <= 23'd0;
 	end
-	else if((icache_state_next == `ysyx_22051013_I_READ & i_valid) ) begin 
+	else if((icache_state_next == `ysyx_22051013_I_READ) & icache_valid & icache_ena ) begin 
 		hit_pc <= inst_pc;
 		hit_index <= icache_index;
 		hit_tag <= icache_tag;
@@ -106,7 +107,7 @@ always@(*) begin
 	end
 	case(icache_state) 
 		`ysyx_22051013_I_IDLE : begin
-			if(~rst) begin
+			if(~rst & icache_ena & icache_valid) begin
 				icache_state_next = `ysyx_22051013_I_READ;
 			end
 			else begin 
@@ -118,7 +119,7 @@ always@(*) begin
 			if(fencei) begin
 				icache_state_next = `ysyx_22051013_I_READ;
 			end
-			else if(/*(~pc_ready) &*/ (hit1 | hit2)) begin
+			else if((hit1 | hit2)) begin
 				icache_state_next = `ysyx_22051013_I_HIT;
 			end
 			else begin
@@ -296,6 +297,7 @@ wire [5:0] index = 	fencei ? fencei_index[5:0] :
 
  ysyx_22051013_cache_tag_ram tag_ram0(
  	.clk(clk),
+ 	.rst(rst),
  	.addr(index),
  	.tag_data_i(tag_with_valid),
  	.write_ena(way1_tag_ena),
@@ -305,6 +307,7 @@ wire [5:0] index = 	fencei ? fencei_index[5:0] :
 
  ysyx_22051013_cache_tag_ram tag_ram1(
  	.clk(clk),
+ 	.rst(rst),
  	.addr(index),
  	.tag_data_i(tag_with_valid),
  	.write_ena(way2_tag_ena),
@@ -360,7 +363,6 @@ end
 
 assign pc = hit_pc;
 assign i_valid = fencei ? ~pc_ready : inst_valid;
-assign hold = (icache_state == `ysyx_22051013_I_IDLE);
 
 endmodule
 

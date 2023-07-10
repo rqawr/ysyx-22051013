@@ -1,16 +1,16 @@
  #include <cstdio>
  #include <assert.h>
- #include "Vysyx_22051013_rvcpu.h"
+ #include "Vysyx_22051013.h"
  #include <verilated.h>          
  #include "verilated_dpi.h"
  #include <verilated_vcd_c.h>  
- #include <Vysyx_22051013_rvcpu__Dpi.h>
+ #include <Vysyx_22051013__Dpi.h>
  #include <svdpi.h>
  #include "include/memory.h"
  #include "include/isa.h"
  #include "include/mmio.h"
  
-Vysyx_22051013_rvcpu* rvcpu ;
+Vysyx_22051013* rvcpu ;
 #ifdef CONFIG_GTK
 VerilatedVcdC* tfp;
 #endif
@@ -162,21 +162,21 @@ void close_npc(){
 }
 
 void cpu_reset(){
-  rvcpu -> clk = 0;
-  rvcpu -> rst = 1;  
+  rvcpu -> clock = 0;
+  rvcpu -> reset = 1;  
   rvcpu -> eval();
 #ifdef CONFIG_GTK
   tfp -> dump(main_time++);
 #endif  
 
-  rvcpu -> clk = 1;
-  rvcpu -> rst = 1;
+  rvcpu -> clock = 1;
+  rvcpu -> reset = 1;
   rvcpu -> eval();
 #ifdef CONFIG_GTK
   tfp -> dump(main_time++);
 #endif  
 
-  rvcpu -> rst = 0;
+  rvcpu -> reset = 0;
 
 }
 
@@ -186,13 +186,13 @@ void isa_exec_once(){
  while(inst_end){
 #endif
 
-  rvcpu->clk = 0;
+  rvcpu-> clock = 0;
   rvcpu -> eval();
 #ifdef CONFIG_GTK
   tfp -> dump(main_time++);
 #endif  
 
-  rvcpu -> clk = 1;
+  rvcpu -> clock = 1;
   rvcpu -> eval();
 #ifdef CONFIG_GTK
   tfp -> dump(main_time++);
@@ -208,7 +208,7 @@ void isa_exec_once(){
 int main(int argc, char** argv) {
 	contextp = new VerilatedContext;
 	contextp->commandArgs(argc,argv);
-	rvcpu = new Vysyx_22051013_rvcpu{contextp};
+	rvcpu = new Vysyx_22051013{contextp};
 #ifdef CONFIG_GTK
 	Verilated::traceEverOn(true);
 	tfp = new VerilatedVcdC;

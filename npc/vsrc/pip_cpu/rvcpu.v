@@ -149,7 +149,7 @@ wire				icache_axi_ena	;
 wire				icache_if_valid	;
 wire	[`ysyx_22051013_INST]	icache_if_inst	;
 wire	[`ysyx_22051013_PC]    	if_icache_pc    	   ;
-
+wire	[`ysyx_22051013_PC]    	icache_if_pc    	   ;
 //dcache
 wire				lsu_ddsel_we	;
 wire				lsu_ddsel_re	;
@@ -436,7 +436,7 @@ ysyx_22051013_i_cache i_cache2(
 		.inst_pc(if_icache_pc)	,
 		.pc_ready(if_icache_ready)	,
 		.inst(icache_if_inst)	,
-		.pc(ifid_if_pc),
+		.pc(icache_if_pc),
 		.hold(bpu_icache_hold),
 		.fencei(lsu_ddsel_fencei),
 		.i_valid(icache_if_valid)	,
@@ -642,7 +642,9 @@ ysyx_22051013_ifu ifu0(
  		.if_valid(if_valid)	,
  		.core_ready(if_icache_ready),
  		.inst_i(icache_if_inst)	,
- 		.inst_o(ifid_if_inst)	,		
+ 		.inst_o(ifid_if_inst)	,	
+ 		.pc_i(icache_if_pc)	,
+ 		.pc_o(ifid_if_pc)	,	
 		.pc_next(if_icache_pc)
 );
 

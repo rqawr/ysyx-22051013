@@ -1,20 +1,21 @@
-/*-------
-* Last modify date : 2022/2/16
-* Function : load & store data
-*/
- 
- `include "pip_cpu/define.v"
+
+/*-------------------------------------
+* Last modify date : 2023/7/2
+* Function : load store exe
+---------------------------------------*/
+  `include "pip_cpu/define.v"
  /* verilator lint_off DECLFILENAME */
  module ysyx_22051013_lsu(
   	input	wire                    		rst       ,
   	input	wire                    		clk       ,
- 	input	wire	[`ysyx_22051013_DATA]            alu_res   ,
- 	input	wire	[`ysyx_22051013_DATA]            store_data ,
+ 	input	wire	[`ysyx_22051013_DATA]           alu_res   ,
+ 	input	wire	[`ysyx_22051013_DATA]           store_data ,
  	input	wire	[3:0]               		ls_ctl ,
  	input	wire					fencei	,
 	
 	input	wire					wb_ready,
 	input	wire					ex_valid,
+	input	wire					except_ena,
  	output	wire					ls_ready,
  	output	wire					ls_valid,
  	output	wire					ls_flush,
@@ -30,7 +31,7 @@
  	input	wire	[`ysyx_22051013_DATA]		data_temp,
  	output	reg	[`ysyx_22051013_DATA]		data_o,
  	output 	wire	[2:0]				data_size	,
- 	output	wire 	[`ysyx_22051013_DATA]		device_data_o,
+ 	output	wire	[`ysyx_22051013_DATA]		device_data_o,
  	output	reg	[7:0]				wlen,
  	input	wire					data_valid,
  	
@@ -300,16 +301,16 @@ end
  
  assign device_data_o = store_data;
  
- assign data_size = 	((ls_ctl == 4'b0001) | (ls_ctl == 4'b1001) | (ls_ctl == 4'b1101)) ? 3'b011 : 
- 			((ls_ctl == 4'b0010) | (ls_ctl == 4'b1010) | (ls_ctl == 4'b1110)) ? 3'b100 :
- 			((ls_ctl == 4'b0100) | (ls_ctl == 4'b1011) | (ls_ctl == 4'b1111)) ? 3'b101 :
- 			((ls_ctl == 4'b1000) | (ls_ctl == 4'b1100)) ? 3'b110 :
+ assign data_size = 	((ls_ctl == 4'b0001) | (ls_ctl == 4'b1001) | (ls_ctl == 4'b1101)) ? 3'b000 : 
+ 			((ls_ctl == 4'b0010) | (ls_ctl == 4'b1010) | (ls_ctl == 4'b1110)) ? 3'b001 :
+ 			((ls_ctl == 4'b0100) | (ls_ctl == 4'b1011) | (ls_ctl == 4'b1111)) ? 3'b010 :
+ 			((ls_ctl == 4'b0101) | (ls_ctl == 4'b1100)) ? 3'b011 :
  			3'b000;
 
- assign re	= (rst == `ysyx_22051013_RSTABLE | ls_ctl == 4'b0000 ) ? 1'b0 : ls_ctl[3];
- assign we	= (rst == `ysyx_22051013_RSTABLE | ls_ctl == 4'b0000 ) ? 1'b0 : ~ls_ctl[3];
+ assign re	= (rst == `ysyx_22051013_RSTABLE | ls_ctl == 4'b0000 | except_ena ) ? 1'b0 : ls_ctl[3];
+ assign we	= (rst == `ysyx_22051013_RSTABLE | ls_ctl == 4'b0000 | except_ena ) ? 1'b0 : ~ls_ctl[3];
  assign waddr	= (rst == `ysyx_22051013_RSTABLE) ? `ysyx_22051013_ZERO64 : alu_res ;
- assign raddr	= (rst == `ysyx_22051013_RSTABLE) ? `ysyx_22051013_ZERO64 : {alu_res[63:3],3'b000} ;
+ assign raddr	= (rst == `ysyx_22051013_RSTABLE) ? `ysyx_22051013_ZERO64 : alu_res ;
 
 
  assign data_pc = re ? raddr : we ? waddr : `ysyx_22051013_ZERO64;

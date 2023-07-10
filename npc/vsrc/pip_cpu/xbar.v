@@ -1,5 +1,10 @@
+/*---------------------------------------
+Last modify date : 2023/7/2
+Fucntion : xbar (device select)
+---------------------------------------*/
 `include "pip_cpu/define.v"
 `include "pip_cpu/define_axi.v"
+/* verilator lint_off DECLFILENAME */
 module ysyx_22051013_xbar(
 //master
 	//write address channel
@@ -120,10 +125,10 @@ module ysyx_22051013_xbar(
 	output	wire				t_axi_r_ready	
 );
 
-wire clint_read = axi_ar_id == 5'd2;
-wire clint_write = axi_aw_id == 5'd2;
+wire clint_read = axi_ar_id == 4'd2;
+wire clint_write = axi_aw_id == 4'd2;
 
-assign t_axi_aw_id =	clint_write ? axi_aw_id 	: 5'd0;
+assign t_axi_aw_id =	clint_write ? axi_aw_id 	: 4'd0;
 assign t_axi_aw_addr =	clint_write ? axi_aw_addr 	: 64'd0;
 assign t_axi_aw_valid =	clint_write ? axi_aw_valid 	: 1'd0;
 assign t_axi_aw_len =	clint_write ? axi_aw_len 	: 8'd0;
@@ -136,7 +141,7 @@ assign t_axi_w_valid =	clint_write ? axi_w_valid 	: 1'd0;
 assign t_axi_b_ready = 	clint_write ? axi_b_ready 	: 1'd0;
 
 
-assign soc_axi_aw_id =		~clint_write ? axi_aw_id 	: 5'd0;
+assign soc_axi_aw_id =		~clint_write ? axi_aw_id 	: 4'd0;
 assign soc_axi_aw_addr =	~clint_write ? axi_aw_addr 	: 64'd0;
 assign soc_axi_aw_valid =	~clint_write ? axi_aw_valid 	: 1'd0;
 assign soc_axi_aw_len =		~clint_write ? axi_aw_len 	: 8'd0;
@@ -150,7 +155,7 @@ assign soc_axi_b_ready = 	~clint_write ? axi_b_ready 	: 1'd0;
 
 
 
-assign t_axi_ar_id =	clint_read ? axi_ar_id		: 5'd0;
+assign t_axi_ar_id =	clint_read ? axi_ar_id		: 4'd0;
 assign t_axi_ar_addr =	clint_read ? axi_ar_addr	: 64'd0;
 assign t_axi_ar_valid =	clint_read ? axi_ar_valid	: 1'd0;
 assign t_axi_ar_len =	clint_read ? axi_ar_len		: 8'd0;
@@ -158,7 +163,7 @@ assign t_axi_ar_size =	clint_read ? axi_ar_size	: 3'd0;
 assign t_axi_ar_burst =	clint_read ? axi_ar_burst	: 2'd0;
 assign t_axi_r_ready =	clint_read ? axi_r_ready	: 1'd0;
 
-assign soc_axi_ar_id =		~clint_read ? axi_ar_id		: 5'd0;
+assign soc_axi_ar_id =		~clint_read ? axi_ar_id		: 4'd0;
 assign soc_axi_ar_addr =	~clint_read ? axi_ar_addr	: 64'd0;
 assign soc_axi_ar_valid =	~clint_read ? axi_ar_valid	: 1'd0;
 assign soc_axi_ar_len =		~clint_read ? axi_ar_len	: 8'd0;

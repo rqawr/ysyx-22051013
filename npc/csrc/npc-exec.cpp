@@ -17,7 +17,7 @@ uint64_t g_nr_guest_inst = 0;
 static uint64_t g_timer = 0; // unit: us
 static bool g_print_step = false;
 int flag = 0;
-int difftest_ena = 0;
+//int difftest_ena = 0;
 
 void device_update();
 

@@ -1,6 +1,10 @@
-
+/*---------------------------------------
+Last modify date : 2023/7/2
+Fucntion : clint (only time-interrupt)
+---------------------------------------*/
 `include "pip_cpu/define.v"
 `include "pip_cpu/define_axi.v"
+/* verilator lint_off DECLFILENAME */
 module ysyx_22051013_clint(
 	input wire				clk	,
 	input wire				rst	,
@@ -52,7 +56,7 @@ reg  [1:0] clint_write_state     ;
  reg  [1:0] clint_write_state_next ;
  
  wire awc_shakehand = t_axi_aw_valid & t_axi_aw_ready;
-wire wc_shakehand = t_axi_w_valid & t_axi_w_ready;
+wire wc_shakehand = t_axi_w_valid & t_axi_w_ready & t_axi_w_last;
 wire bc_shakehand = t_axi_b_valid & t_axi_b_ready;
  
   always @(posedge clk) begin
@@ -92,7 +96,7 @@ wire bc_shakehand = t_axi_b_valid & t_axi_b_ready;
 	end
  end
  
-assign t_axi_aw_ready = t_axi_aw_valid & t_axi_w_valid;
+assign t_axi_aw_ready = t_axi_aw_valid ;
 assign t_axi_w_ready = t_axi_aw_valid & t_axi_w_valid;
 
 assign t_axi_b_id = t_axi_aw_id;
@@ -144,13 +148,13 @@ assign t_axi_b_resp = 2'b00;
 
   assign t_axi_ar_ready = (clint_read_state == `ysyx_22051013_S_IDLE);
  assign t_axi_r_valid = (clint_read_state == `ysyx_22051013_S_DATA);
- assign t_axi_r_id = (clint_read_state == `ysyx_22051013_S_DATA) ? t_axi_ar_id : 5'd0;
+ assign t_axi_r_id = (clint_read_state == `ysyx_22051013_S_DATA) ? t_axi_ar_id : 4'd0;
  assign t_axi_r_resp = 2'b00;
  assign t_axi_r_last = (clint_read_state == `ysyx_22051013_S_DATA);
  assign t_axi_r_data = (clint_read_state == `ysyx_22051013_S_DATA) ? read_csr_data : `ysyx_22051013_ZERO64;
 
 //in clint
-reg [63:0] read_csr_data;
+wire [63:0] read_csr_data;
 reg [63:0] csr_mtime;
 reg [63:0] csr_mtimecmp;
 
@@ -159,10 +163,13 @@ wire mtime_write;
 wire mtimecmp_read;
 wire mtimecmp_write;
 
-assign mtime_read = (t_axi_ar_addr == `ysyx_22051013_MTIME);
-assign mtimecmp_read = (t_axi_ar_addr == `ysyx_22051013_MTIMECMP);
-assign mtime_write = (t_axi_aw_addr == `ysyx_22051013_MTIME);
-assign mtimecmp_write =(t_axi_aw_addr == `ysyx_22051013_MTIMECMP);
+wire read_condi = (t_axi_ar_len == 8'd0) & (t_axi_ar_size == 3'b011) & (t_axi_ar_burst == `ysyx_22051013_AXI_BURST_INCR);
+wire write_condi = (t_axi_aw_len == 8'd0) & (t_axi_aw_size == 3'b011) & (t_axi_aw_burst == `ysyx_22051013_AXI_BURST_INCR);
+
+assign mtime_read = (t_axi_ar_addr == `ysyx_22051013_MTIME) & read_condi;
+assign mtimecmp_read = (t_axi_ar_addr == `ysyx_22051013_MTIMECMP) & read_condi;
+assign mtime_write = (t_axi_aw_addr == `ysyx_22051013_MTIME) & awc_shakehand & wc_shakehand & write_condi;
+assign mtimecmp_write =(t_axi_aw_addr == `ysyx_22051013_MTIMECMP) & awc_shakehand & wc_shakehand & write_condi;
 
 wire [63:0] wmask;
 
@@ -192,3 +199,4 @@ assign mtimecmp_temp = mtimecmp_write ? ((wmask & t_axi_w_data) | (~wmask & csr_
 assign time_interrupt = (csr_mtime > csr_mtimecmp);
 
 endmodule
+

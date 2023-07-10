@@ -19,12 +19,14 @@ static void welcome() {
   Log("Build time: %s, %s", __TIME__, __DATE__);
   printf("Welcome to %s-NPC!\n", ANSI_FMT("riscv64", ANSI_FG_YELLOW ANSI_BG_RED));
   printf("For help, type \"help\"\n");
+  
 }
 
 void sdb_set_batch_mode();
 
-
-static char *diff_so_file = (char *)"/home/hxy/ysyx-workbench/nemu/build/riscv64-nemu-interpreter-so";;
+char *p = getenv("NEMU_HOME");
+const char *q = "/build/riscv64-nemu-interpreter-so";
+static char *diff_so_file = NULL;
 static char *img_file = NULL;
 static char *elf_file =NULL;
 static char *log_file = NULL;
@@ -83,6 +85,10 @@ static int parse_args(int argc, char *argv[]) {
 }
 
 void init_monitor(int argc, char *argv[]) {
+  /* For diff_so_file*/
+	strcat(p,q);
+	diff_so_file = p;
+	
   /* Perform some global initialization. */
 
   /* Parse arguments. */

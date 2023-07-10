@@ -1,8 +1,8 @@
-/*------
-Last modify date : 2023/6/21
-Fucntion : generate ctl/data signal, support RV64IM, FENCEI
-*/
 
+/*-----------------------------------------------------------
+*	Last modify date : 2023/6/21
+*	Fucntion : generate ctl/data signal, support RV64IM, FENCEI
+-------------------------------------------------------------*/
   `include "pip_cpu/define.v" 
   `include "pip_cpu/idu_decode.v"
   /* verilator lint_off DECLFILENAME */
@@ -11,8 +11,7 @@ module ysyx_22051013_idu(
 	input	wire		       			rst	,
 	input	wire	[`ysyx_22051013_INST]		inst_i	,
 	input	wire	[`ysyx_22051013_PC]		pc_i	,
-
-		
+	
 	//bpu
 	input	wire					bpu_jump,
 	
@@ -24,6 +23,8 @@ module ysyx_22051013_idu(
 	input	wire	[`ysyx_22051013_REGADDR]	wb_addr_forward	,
 	input	wire	[`ysyx_22051013_DATA]		wb_data_forward	,
 	input 	wire					ex_load_ena	,
+	input	wire					ex_csr_ena	,
+	input	wire					ls_csr_ena	,
 	
 	//regfile signal
 	output	wire	[`ysyx_22051013_REGADDR]	rs1_addr ,
@@ -43,7 +44,8 @@ module ysyx_22051013_idu(
 	output  wire	[1:0]     			wbctl_o		,
 	output	wire	[1:0]				op1_sel		,
 	output	wire	[2:0]				op2_sel		,
-	output	wire 					load_flag	,	
+	output	wire 					load_flag	,
+	output	wire					csr_ena		,
 	
 	//data out signal
 	output  wire 	[`ysyx_22051013_DATA]  		op1 ,
@@ -51,6 +53,7 @@ module ysyx_22051013_idu(
 	output  wire 	[`ysyx_22051013_IMM]      	imm ,
 	output	wire 	[`ysyx_22051013_INST]		inst_o	,
 	output	wire 	[`ysyx_22051013_PC]		pc_o	,
+	output	wire	[4:0]				csr_imm	,
 	
 	//hzd
 	input	wire					ex_ready,
@@ -71,7 +74,7 @@ module ysyx_22051013_idu(
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 assign id_flush = jump_ena ;
-assign id_ready = ex_ready | id_stall_ena;
+assign id_ready = ex_ready ;
 assign id_valid = if_valid; 
 assign id_ex_flush = id_stall_ena;
 
@@ -95,6 +98,7 @@ ysyx_22051013_idu_decode decode(
 	.rs2_ena(rs2_ena),
 	.ext_imm(imm)	,
 	.wb_ctl (wbctl_o) ,
+	.csr(csr_ena),
  	.mem_ctl(lsctl_o) ,
  	.op1_sel(op1_sel),
  	.op2_sel(op2_sel),
@@ -111,10 +115,16 @@ ysyx_22051013_idu_decode decode(
 //stall
 wire op1_relate ;//load inst
 wire op2_relate ;
+wire csr_op1_stall;
+wire csr_op2_stall;
 wire id_stall_ena;
-assign op1_relate = (rst == `ysyx_22051013_RSTABLE) ? 1'b0 : rs1_ena & ex_load_ena & (rs1_addr == ex_addr_forward) ;
-assign op2_relate = (rst == `ysyx_22051013_RSTABLE) ? 1'b0 : rs2_ena & ex_load_ena & (rs2_addr == ex_addr_forward) ;
-assign id_stall_ena = (rst == `ysyx_22051013_RSTABLE) ? 1'b0 : op1_relate | op2_relate ;
+assign op1_relate = ((rst == `ysyx_22051013_RSTABLE) & (rs1_addr == 5'd0)) ? 1'b0 : rs1_ena & ex_load_ena & (rs1_addr == ex_addr_forward) ;
+assign op2_relate = ((rst == `ysyx_22051013_RSTABLE) & (rs2_addr == 5'd0)) ? 1'b0 : rs2_ena & ex_load_ena & (rs2_addr == ex_addr_forward) ;
+
+assign csr_op1_stall = (ex_op1_forward & ex_csr_ena) | (ls_op1_forward & ls_csr_ena);
+assign csr_op2_stall = (ex_op2_forward & ex_csr_ena) | (ls_op2_forward & ls_csr_ena);
+
+assign id_stall_ena = (rst == `ysyx_22051013_RSTABLE) ? 1'b0 : op1_relate | op2_relate | csr_op1_stall | csr_op2_stall;
 
 //forward
 wire ex_op1_forward ;
@@ -161,6 +171,7 @@ assign rd_addr = rd_ena ? rd : 5'd0 ;
 //data out singal
 assign op1 = rs1_ena & op1_forward_ena ? op1_forward_data : rs1_ena ? rs1_data : `ysyx_22051013_ZERO64;
 assign op2 = rs2_ena & op2_forward_ena ? op2_forward_data : rs2_ena ? rs2_data : `ysyx_22051013_ZERO64;
+assign csr_imm = rs1;
 
 assign pc_o = rst == `ysyx_22051013_RSTABLE ? `ysyx_22051013_ZERO64 : pc_i	;
 assign inst_o = rst == `ysyx_22051013_RSTABLE ? 32'd0 : inst_i	;
@@ -168,10 +179,12 @@ assign inst_o = rst == `ysyx_22051013_RSTABLE ? 32'd0 : inst_i	;
 //---------------------------------------------branch calculate-------------------------------------------------------//
 
 reg ex_branch ;
-/* verilator lint_off UNUSED */
-wire     [`ysyx_22051013_DATA]  op1_sub_op2	 = op1 - op2 ; 
 
-wire     op1_lt_op2 = (op1[63] && ~op2[63]) || (~op1[63] && ~op2[63] && op1_sub_op2[63]) || (op1[63] && op2[63] && op1_sub_op2[63]) ;
+wire diff_sign = op1[63] ^ op2[63];
+
+wire op_ltu_op2 = op1 <  op2;
+
+wire op1_lt_op2 = diff_sign ? op1[63] : op_ltu_op2;
 
 always @(*) begin
 	if(rst == `ysyx_22051013_RSTABLE) begin
@@ -184,8 +197,8 @@ always @(*) begin
 		case (alusrc_o) 
 			`INST_BEQ     : begin  ex_branch = (op1 == op2) ? `ysyx_22051013_BRANCHABLE : `ysyx_22051013_BRANCHDISABLE ;  end
 			`INST_BNE     : begin  ex_branch = (op1 != op2) ? `ysyx_22051013_BRANCHABLE : `ysyx_22051013_BRANCHDISABLE ;  end
-			`INST_BLTU    : begin  ex_branch = (op1 <  op2) ? `ysyx_22051013_BRANCHABLE : `ysyx_22051013_BRANCHDISABLE ;  end
-			`INST_BGEU    : begin  ex_branch = (op1 >=  op2) ? `ysyx_22051013_BRANCHABLE : `ysyx_22051013_BRANCHDISABLE ;  end
+			`INST_BLTU    : begin  ex_branch = (op_ltu_op2) ? `ysyx_22051013_BRANCHABLE : `ysyx_22051013_BRANCHDISABLE ;  end
+			`INST_BGEU    : begin  ex_branch = (~op_ltu_op2) ? `ysyx_22051013_BRANCHABLE : `ysyx_22051013_BRANCHDISABLE ;  end
 			`INST_BLT     : begin  ex_branch = ( op1_lt_op2 ) ? `ysyx_22051013_BRANCHABLE : `ysyx_22051013_BRANCHDISABLE ;  end
 			`INST_BGE     : begin  ex_branch = (~op1_lt_op2 ) ? `ysyx_22051013_BRANCHABLE : `ysyx_22051013_BRANCHDISABLE ;  end
 			default:        begin  ex_branch = `ysyx_22051013_BRANCHDISABLE  ;    end 
@@ -207,8 +220,5 @@ assign p2 =	bpu_jump ? `ysyx_22051013_PLUS4 : imm;
 
 assign jump_pc = jump_ena ? (p1 + p2) :
 		 `ysyx_22051013_ZERO64;
-		 
-
-
 
 endmodule

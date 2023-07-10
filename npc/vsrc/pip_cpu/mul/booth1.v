@@ -1,3 +1,7 @@
+/*-------------------------------------
+* Last modify date : 2023/7/2
+* Function : booth part mul generate
+---------------------------------------*/
  module ysyx_22051013_booth1(
 	 input wire [131:0]	mult	,
 	 input wire [2:0]		sel	,

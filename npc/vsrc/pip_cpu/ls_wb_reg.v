@@ -1,7 +1,8 @@
-/*-------
-*
-*
-*/
+
+/*-------------------------------------
+* Last modify date : 2023/7/2
+* Function : ls-wb reg
+---------------------------------------*/
  `include "pip_cpu/define.v"
 /* verilator lint_off DECLFILENAME */
 module ysyx_22051013_reg_lswb(
@@ -21,8 +22,8 @@ module ysyx_22051013_reg_lswb(
     
 	//ctl
 	input	wire					ls_valid	,
-	input	wire					wb_ready	,	
-	input	wire					ie_flush	,
+	input	wire					wb_ready	,
+	input	wire					ie_flush	,	
 
 	//output to next stage  
 	output	reg	[6:0]				wb_csr_ctl	,
@@ -39,8 +40,7 @@ module ysyx_22051013_reg_lswb(
 	output	wire	[`ysyx_22051013_REGADDR]	ls_rd_addr_forward	,
 	output	wire	[`ysyx_22051013_DATA]		ls_rd_data_forward	
 );
-
- wire flush = ie_flush;
+wire flush = ie_flush;
  wire stall = ls_valid | wb_ready;
 
 always@(posedge clk) begin
@@ -65,7 +65,7 @@ always@(posedge clk) begin
 		wb_csr_ctl	<= wb_csr_ctl;
 		wb_csr_addr	<= wb_csr_addr;
 		wb_rd_addr	<= wb_rd_addr;
-	end
+	end 
 	else if(flush)begin 
 		wb_inst		<= 32'd0;
 		wb_pc		<= `ysyx_22051013_ZERO64;
@@ -75,8 +75,8 @@ always@(posedge clk) begin
 		wb_rd_ena	<= 1'b0;
 		wb_csr_ctl	<= 7'b0;
 		wb_csr_addr	<= 12'd0;
-		wb_rd_addr	<= 5'd0;   
-	end  
+		wb_rd_addr	<= 5'd0;    
+	end
 	else begin
 		wb_inst		<= ls_inst;
 		wb_pc		<= ls_pc ;

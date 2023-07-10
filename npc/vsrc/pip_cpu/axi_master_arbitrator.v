@@ -1,17 +1,19 @@
-/*----
-*
-*
-*/
+/*---------------------------------------
+Last modify date : 2023/6/21
+Fucntion : axi master arbitrator
+---------------------------------------*/
 
 `include "pip_cpu/define.v"
 `include "pip_cpu/define_axi.v"
+/* verilator lint_off DECLFILENAME */
 module ysyx_22051013_axi_master_arbitrator(
-	input	wire		clk	,
-	input	wire		rst	,
+	input	wire				clk	,
+	input	wire				rst	,
 	
 	//to icache
 	input	wire	[`ysyx_22051013_PC]	icache_pc	,
 	input	wire				icache_ena	,
+	input	wire	[2:0]			inst_size	,
 	output	wire	[`ysyx_22051013_DATA]	axi_inst	,
 	output	wire				axi_inst_valid,
 	
@@ -25,8 +27,6 @@ module ysyx_22051013_axi_master_arbitrator(
 	input 	wire				clint_ena	,
 	output	wire	[`ysyx_22051013_DATA]	data_o,
 	output	wire				axi_data_valid,
-
-
 
 	//write address channel
 	output	wire 	[`ysyx_22051013_ID]	axi_aw_id	,
@@ -80,11 +80,12 @@ assign ls_write =  we ;
 wire w_valid = we ;
 wire r_valid = if_read | ls_read;
 
+
 wire aw_sh = axi_aw_ready & axi_aw_valid;
 wire w_sh = axi_w_ready & axi_w_valid & axi_w_last;
-wire b_sh = axi_b_ready & axi_b_valid;
+wire b_sh = axi_b_ready & axi_b_valid & ((axi_b_id == 4'd1) |(axi_b_id == 4'd2));
 wire ar_sh = axi_ar_ready & axi_ar_valid;
-wire r_sh = axi_r_ready & axi_r_valid & axi_r_last;
+wire r_sh = axi_r_ready & axi_r_valid & axi_r_last & ((axi_r_id == 4'd1) | (axi_r_id == 4'd2));
 
 //write_state
 reg [2:0] arb_w_state;
@@ -105,7 +106,7 @@ always@(posedge clk) begin
 				end
 			end
 			`ysyx_22051013_ARB_ADDR : begin
-				if(w_sh) begin
+				if(w_sh & aw_sh) begin
 					arb_w_state <= `ysyx_22051013_ARB_RESP;
 				end
 				else if(aw_sh) begin
@@ -174,19 +175,19 @@ always@(posedge clk) begin
 	end
 end
 
-//axi_value
+///axi_value
 
 //aw_channel
-assign axi_aw_id =  clint_ena ? 5'd2 : 5'd1 ;
+assign axi_aw_id =  w_valid & clint_ena ? 4'd2 : 4'd1 ;
 assign axi_aw_addr =  data_pc ;
-assign axi_aw_valid = (arb_w_state == `ysyx_22051013_ARB_ADDR) & w_valid ;
-assign axi_aw_len = 8'd1;
+assign axi_aw_valid = ((arb_w_state == `ysyx_22051013_ARB_ADDR)) & w_valid ;
+assign axi_aw_len = 8'd0;
 assign axi_aw_size = data_size;
 assign axi_aw_burst = `ysyx_22051013_AXI_BURST_INCR;
 //w_channel
 assign axi_w_data =  data_i ;
 assign axi_w_strb = wmask;
-assign axi_w_valid = (arb_w_state == `ysyx_22051013_ARB_ADDR) & w_valid ;
+assign axi_w_valid = ((arb_w_state == `ysyx_22051013_ARB_ADDR) | (arb_w_state == `ysyx_22051013_ARB_WRITE)) & w_valid ;
 assign axi_w_last = w_valid;
 //b_channel
 assign axi_b_ready = `ysyx_22051013_ENABLE;
@@ -194,11 +195,11 @@ assign axi_b_ready = `ysyx_22051013_ENABLE;
 
 //read
 //ar_channel
-assign axi_ar_id =  (read_state == 2'b10) & clint_ena ? 5'd2 : 5'd1 ;
+assign axi_ar_id =  (read_state == 2'b10) & clint_ena ? 4'd2 : 4'd1 ;
 
-assign axi_ar_len = 8'd1;
+assign axi_ar_len = 8'd0;
 
-assign axi_ar_size = (read_state == 2'b01) ? 3'b110 : (read_state == 2'b10) ? data_size : 3'b000;
+assign axi_ar_size = (read_state == 2'b01) ? inst_size : (read_state == 2'b10) ? data_size : 3'b000;
 
 assign axi_ar_burst = `ysyx_22051013_AXI_BURST_INCR;
 
@@ -270,6 +271,5 @@ assign axi_inst_valid =  (read_state == 2'b01) & r_sh;
 
 assign axi_data_valid = (read_state == 2'b10) ? data_r_not_ready : ls_write ? data_w_not_ready : 1'b0;
 
-
-
+wire unused_ok = &{axi_r_resp,axi_b_resp};
 endmodule

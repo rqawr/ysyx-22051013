@@ -1,50 +1,53 @@
-/*-------
-*
-*
-*/
+
+/*-------------------------------------
+* Last modify date : 2023/7/8
+* Function : id_ex reg
+---------------------------------------*/
  `include "pip_cpu/define.v"
 /* verilator lint_off DECLFILENAME */
 module ysyx_22051013_reg_idex(
 	//front stage input
-    input	wire					clk		,
-    input	wire					rst		,
-    input	wire	[`ysyx_22051013_INST]		id_inst		,	
-    input	wire	[`ysyx_22051013_PC]		id_pc		,
-    input	wire	[`ysyx_22051013_REG]		id_op1		,
-    input	wire	[`ysyx_22051013_REG]		id_op2		,
-    input	wire	[1:0]				id_op1_sel	,
-    input	wire	[2:0]				id_op2_sel	,
-    input	wire	[`ysyx_22051013_IMM]		id_imm		,
-    input	wire					id_rd_ena	,
-    input	wire	[`ysyx_22051013_REGADDR]	id_rd_addr	,
-    input	wire	[`ysyx_22051013_REGADDR]	id_rs1_addr	,
-    input	wire	[7:0]         			id_alusrc	,
-    input	wire	[3:0]      			id_lsctl	,
-    input	wire	[1:0]     			id_wbctl	,
-    input	wire 					id_load_flag	, 
+   	input	wire					clk		,
+   	input	wire					rst		,
+   	input	wire	[`ysyx_22051013_INST]		id_inst		,	
+   	input	wire	[`ysyx_22051013_PC]		id_pc		,
+   	input	wire	[`ysyx_22051013_REG]		id_op1		,
+   	input	wire	[`ysyx_22051013_REG]		id_op2		,
+   	input	wire	[1:0]				id_op1_sel	,
+   	input	wire	[2:0]				id_op2_sel	,
+   	input	wire	[`ysyx_22051013_IMM]		id_imm		,
+   	input	wire					id_rd_ena	,
+   	input	wire	[`ysyx_22051013_REGADDR]	id_rd_addr	,
+   	input	wire	[`ysyx_22051013_REGADDR]	id_rs1_addr	,
+   	input	wire	[7:0]         			id_alusrc	,
+   	input	wire	[3:0]      			id_lsctl	,
+   	input	wire	[1:0]     			id_wbctl	,
+   	input	wire 					id_load_flag	, 
+   	input	wire 					id_csr_ena	,
     
     	//ctl
-    input	wire					id_valid	,
-    input	wire					id_flush	,
-    input	wire					ie_flush	,
-    input	wire					ls_flush	,
-    input	wire					ex_ready	,
+   	input	wire					id_valid	,
+   	input	wire					id_flush	,
+   	input	wire					ie_flush	,
+   	input	wire					ls_flush	,
+   	input	wire					ex_ready	,
 
 	//output to next stage
-    output	reg	[`ysyx_22051013_INST]		ex_inst		,
-    output	reg	[`ysyx_22051013_PC]		ex_pc		,
-    output	reg	[`ysyx_22051013_REG]		ex_op1		,
-    output	reg	[`ysyx_22051013_REG]		ex_op2		,
-    output	reg	[1:0]				ex_op1_sel	,
-    output	reg	[2:0]				ex_op2_sel	,
-    output	reg	[`ysyx_22051013_IMM]		ex_imm 		,
-    output	reg					ex_rd_ena	,
-    output	reg	[`ysyx_22051013_REGADDR]	ex_rd_addr	,
-    output	reg	[`ysyx_22051013_REGADDR]	ex_rs1_addr	,
-    output	reg	[7:0]				ex_alusrc  	,
-    output	reg	[3:0]      			ex_lsctl   	,
-    output	reg 					ex_load_flag	,
-    output	reg	[1:0]     			ex_wbctl    
+	output	reg	[`ysyx_22051013_INST]		ex_inst		,
+	output	reg	[`ysyx_22051013_PC]		ex_pc		,
+	output	reg	[`ysyx_22051013_REG]		ex_op1		,
+	output	reg	[`ysyx_22051013_REG]		ex_op2		,
+	output	reg	[1:0]				ex_op1_sel	,
+	output	reg	[2:0]				ex_op2_sel	,
+	output	reg	[`ysyx_22051013_IMM]		ex_imm 		,
+	output	reg					ex_rd_ena	,
+	output	reg	[`ysyx_22051013_REGADDR]	ex_rd_addr	,
+	output	reg	[`ysyx_22051013_REGADDR]	ex_rs1_addr	,
+	output	reg	[7:0]				ex_alusrc  	,
+	output	reg	[3:0]      			ex_lsctl   	,
+	output	reg 					ex_load_flag	,
+	output	reg 					ex_csr_ena	,
+	output	reg	[1:0]     			ex_wbctl    
    );
 
 wire flush = id_flush | ie_flush | ls_flush;
@@ -66,6 +69,7 @@ always@(posedge clk) begin
 		ex_lsctl	<= 4'd0;
 		ex_wbctl	<= 2'b0;
 		ex_load_flag	<= 1'b0;
+		ex_csr_ena	<= 1'b0;
 	end
 	else if(stall) begin 
 		ex_inst		<= ex_inst;
@@ -82,6 +86,7 @@ always@(posedge clk) begin
 		ex_lsctl	<= ex_lsctl;
 		ex_wbctl	<= ex_wbctl;
 		ex_load_flag	<= ex_load_flag;
+		ex_csr_ena	<= ex_csr_ena;
 	end
 	else if(flush) begin 
 		ex_inst		<= 32'd0;
@@ -98,6 +103,7 @@ always@(posedge clk) begin
 		ex_lsctl	<= 4'd0;
 		ex_wbctl	<= 2'b0;
 		ex_load_flag	<= 1'b0;
+		ex_csr_ena	<= 1'b0;
 	end
 	else begin
 		ex_inst		<= id_inst;
@@ -114,8 +120,9 @@ always@(posedge clk) begin
 		ex_lsctl	<= id_lsctl;
 		ex_wbctl	<= id_wbctl;
 		ex_load_flag	<= id_load_flag;
+		ex_csr_ena	<= id_csr_ena;
 	end
 end
 
 endmodule
-  
+

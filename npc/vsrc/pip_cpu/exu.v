@@ -1,24 +1,24 @@
-/*-------
-* Last modify date : 2023/6/21
-* Function : execute 
-*/
+/*----------------------------------
+*	Last modify date : 2023/6/21
+*	Function : execute 
+-----------------------------------*/
  
  `include "pip_cpu/define.v"
  `include "pip_cpu/mul/booth_mul.v"
  `include "pip_cpu/divide.v"
  /* verilator lint_off DECLFILENAME */
 module ysyx_22051013_exu(
-	input	wire				clk	,
-	input	wire				rst	,
-	input	wire	[`ysyx_22051013_DATA]	reg_op1	,
-	input	wire	[`ysyx_22051013_DATA]	reg_op2	,
-	input	wire	[1:0]			op1_sel	,
-	input	wire	[2:0]			op2_sel	,
+	input	wire					clk	,
+	input	wire					rst	,
+	input	wire	[`ysyx_22051013_DATA]		reg_op1	,
+	input	wire	[`ysyx_22051013_DATA]		reg_op2	,
+	input	wire	[1:0]				op1_sel	,
+	input	wire	[2:0]				op2_sel	,
 	input	wire	[`ysyx_22051013_REGADDR]	rd_addr	,
 	input	wire	[`ysyx_22051013_REGADDR]	rs1_addr,
-	input	wire	[`ysyx_22051013_IMM]	imm	,
-	input	wire	[`ysyx_22051013_PC]	pc_i	,
-	input	wire	[7:0]			alu_sel	,
+	input	wire	[`ysyx_22051013_IMM]		imm	,
+	input	wire	[`ysyx_22051013_PC]		pc_i	,
+	input	wire	[7:0]				alu_sel	,
 	
 	
 	input 	wire			 	ls_ready,
@@ -178,7 +178,6 @@ wire mul_valid;
 assign mul_valid = mul & ~delay1;
 
 wire mul_out_valid;
-wire mul_ready;
 
 wire [`ysyx_22051013_DATA] result_hi;
 wire [`ysyx_22051013_DATA] result_lo;
@@ -196,7 +195,6 @@ ysyx_22051013_booth_mul booth_mul0(
 		.mulw(mulw),
 		.mult_op1(op1),
 		.mult_op2(op2),
-		.mul_ready(mul_ready),
 		.out_valid(mul_out_valid),
 		.result_hi(result_hi),
 		.result_lo(result_lo)
@@ -292,7 +290,6 @@ wire div_valid;
 assign div_valid = div & ~delay2;
 
 wire div_out_valid;
-wire div_ready;
 
 wire [`ysyx_22051013_DATA] quotient;
 wire [`ysyx_22051013_DATA] remainder;
@@ -308,7 +305,6 @@ ysyx_22051013_divide divide1(
 		.divw(divw),
 		.div_op1(op1),
 		.div_op2(op2),
-		.div_ready(div_ready),
 		.out_valid(div_out_valid),
 		.quotient(quotient),
 		.remainder(remainder)

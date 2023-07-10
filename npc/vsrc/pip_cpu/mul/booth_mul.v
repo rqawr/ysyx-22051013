@@ -1,7 +1,7 @@
-/*
-*
-	*
-	*/
+/*-------------------------------------
+* Last modify date : 2023/7/2
+* Function : 2-bit booth multiply (32 clk)
+---------------------------------------*/
  `include "pip_cpu/define.v"
  `include "pip_cpu/mul/booth1.v"
  module ysyx_22051013_booth_mul(
@@ -9,15 +9,17 @@
 	 input wire				rst	,
 	 input wire				mul_valid	,
 	 input wire				flush	,
-	 input wire [1:0]	mul_signed	,
+	 input wire [1:0]			mul_signed	,
 	 input wire				mulw	,
 	 input wire [`ysyx_22051013_DATA]	mult_op1	,
 	 input wire [`ysyx_22051013_DATA]	mult_op2	,
-	 output wire				mul_ready	,
+
 	 output wire				out_valid	,
 	 output wire [`ysyx_22051013_DATA]	result_hi	,
 	 output wire [`ysyx_22051013_DATA]	result_lo
-	);
+);
+
+wire	mul_ready;
 
 	assign mul_ready = flush | ~(|multiplier[66:0]);
 	assign out_valid = flush | ~mul_doing ? 1'b0 : mul_ready;
@@ -105,8 +107,6 @@ end
 
 assign result_hi = out_valid ? result_temp[127:64] : `ysyx_22051013_ZERO64;
 assign result_lo = out_valid ? result_temp[63:0] : `ysyx_22051013_ZERO64;
-
-wire unused_ok = &{result_temp[131:128]};
 
 endmodule
 

@@ -1,10 +1,11 @@
-/*-------
-* Last modify date : 2023/6/21
+/*--------------------------------------
+* Last modify date : 2023/7/8
 * Function : write back data to regs
-*/
+--------------------------------------*/
+
 
  `include "pip_cpu/define.v"
-  `include "pip_cpu/csr.v"
+ `include "pip_cpu/csr.v"
  module ysyx_22051013_wbu(
  	input	wire 					clk	,
  	input	wire            			rst	,
@@ -17,7 +18,7 @@
     	input	wire	[`ysyx_22051013_REGADDR]	rd_addr	, 
     	input	wire	[6:0]				csr_ctl	,
     	input	wire	[11:0]				csr_addr,
-    	
+    	input	wire	[`ysyx_22051013_PC]		ls_pc_i	,
     	input	wire					ls_valid,
     	input 	wire					id_stall,
     	input 	wire					time_interrupt,
@@ -57,17 +58,18 @@ assign write_csr_data =	({64{csr_ctl[6]}} & exu_res) |
 			({64{csr_ctl[1]}} & pc_i) | 
 			`ysyx_22051013_ZERO64;
 
-assign w_csr_data = time_jump ? pc_i : write_csr_data;
+assign w_csr_data = time_jump ? ls_pc_i : write_csr_data;
 
 wire	time_jump;
+
 
  ysyx_22051013_csr csr_operate(
 	.clk(clk)	,
 	.rst(rst)	,
-	.pc_i(pc_i)	,
+	.pc_i(ls_pc_i)	,
 	.csr_ctl(csr_ctl[3:0])	,
 	.csr_addr(csr_addr)	,
-	.core_valid(ls_valid | id_stall),
+	.core_valid(ls_valid),
 	.mcause_value(mcause_value),
 	.time_interrupt(time_interrupt),
 	.time_interrupt_confirm(time_jump),
@@ -92,8 +94,8 @@ assign wb_data = (csr_ctl[3:0] != 4'd0) ? read_csr_data :
 		 (wb_ctl == 2'b10) ?  exu_res :
 		 `ysyx_22051013_ZERO64;
 
-assign wb_rd_ena = time_jump ? 1'b0 : rd_ena	;
-assign wb_rd_addr = time_jump ? 5'd0 :rd_addr	;
+assign wb_rd_ena =  rd_ena	;
+assign wb_rd_addr = rd_addr	;
 
 //out to idu
 assign wb_rd_addr_forward = wb_rd_addr	;

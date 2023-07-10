@@ -1,10 +1,10 @@
-/*
 
-*/
-
+/*------------------------------------
+* Last modify date: 2023/7/2
+* Function : dcache device select
+------------------------------------*/
 `include "pip_cpu/define.v"
 `include "pip_cpu/define_axi.v"
-
 module ysyx_22051013_dcache_device_sel(
 	//core
 	input	wire				core_re	,
@@ -53,12 +53,12 @@ wire device_ena;
 
 assign clint_ena = ((core_addr >= `ysyx_22051013_CLINT_START) & (core_addr <= `ysyx_22051013_CLINT_END));
 
-assign device_ena =/*1'b1; */((core_addr >= `ysyx_22051013_UART_START) & (core_addr <= `ysyx_22051013_UART_END)) | 
-		((core_addr >= `ysyx_22051013_CLINT_START) & (core_addr <= `ysyx_22051013_CLINT_END)) |
+assign device_ena =((core_addr >= `ysyx_22051013_UART_START) & (core_addr <= `ysyx_22051013_UART_END)) | 
 		((core_addr >= `ysyx_22051013_RTC_START) & (core_addr <= `ysyx_22051013_RTC_END)) | 
 		((core_addr >= `ysyx_22051013_VGAC_START) & (core_addr <= `ysyx_22051013_VGAC_END)) | 
 		((core_addr >= `ysyx_22051013_VMEM_START) & (core_addr <= `ysyx_22051013_VMEM_END)) | 
 		((core_addr >= `ysyx_22051013_KBD_START) & (core_addr <= `ysyx_22051013_KBD_END)) ;
+
 
 //to dcache
 assign dcache_re = ~device_ena ? core_re : `ysyx_22051013_DISABLE;
@@ -70,21 +70,25 @@ assign dcache_ready = ~device_ena ? core_ready : `ysyx_22051013_DISABLE;
 
 assign dcache_fencei = fencei;
 
-assign axi_dcache_data = ~device_ena ? axi_data_i : `ysyx_22051013_ZERO64;
-assign axi_dcache_valid = ~device_ena ? axi_valid : `ysyx_22051013_DISABLE;
+assign axi_dcache_data = fencei | ~device_ena ? axi_data_i : `ysyx_22051013_ZERO64;
+assign axi_dcache_valid = fencei | ~device_ena ? axi_valid : `ysyx_22051013_DISABLE;
 
 // to axi
-assign axi_re = device_ena & ~core_ready ? core_re : dcache_axi_re;
-assign axi_we = device_ena & ~core_ready ? core_we : dcache_axi_we;
-assign axi_data_pc = device_ena ? core_addr : dcache_axi_pc;
-assign axi_data_o = device_ena  ? device_data_i : dcache_axi_data;
-assign axi_mask = device_ena  ? core_mask :  ~device_ena ? 8'hff : 8'h0;
+assign axi_re = ~fencei & device_ena & ~core_ready ? core_re : dcache_axi_re;
+assign axi_we = ~fencei & device_ena & ~core_ready ? core_we : dcache_axi_we;
+assign axi_data_pc = ~fencei & device_ena ? core_addr : dcache_axi_pc;
+assign axi_data_o = ~fencei & device_ena  ? device_data_i : dcache_axi_data;
+assign axi_mask = ~fencei & device_ena  ? core_mask :  ~device_ena ? 8'hff : 8'h0;
 
-assign axi_size = device_ena ? core_size : 3'b110;
+
+assign axi_size = 	~fencei & device_ena  ? core_size : 
+			~fencei & device_ena  ? 3'b010 : 
+			3'b011;
+			
 
 //to core
-assign data_valid = device_ena ? ~axi_valid : dcache_valid ;
+assign data_valid = ~fencei & device_ena ? ~axi_valid : dcache_valid ;
 assign data_to_core = device_ena ? axi_data_i : dcache_data_i;
 
-
 endmodule
+

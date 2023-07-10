@@ -1,7 +1,7 @@
-/*-------
-* Last modify date : 2022/3/8
+/*---------------------------------------------------------------------
+* Last modify date : 2023/7/2
 * Function : csr operate (mcycle mip mie mstatus mepc mtvec mcause)
-*/
+---------------------------------------------------------------------*/
  
  `include "single_cpu/define.v"
  /* verilator lint_off DECLFILENAME */
@@ -53,26 +53,28 @@ wire mie_rd = (csr_addr == 12'h304) && csr_ctl[2] ;
 wire mie_wr = (csr_addr == 12'h304) && csr_ctl[3] ;
 
 reg mtie;
-reg [`ysyx_22051013_REG] mie = {56'd0, mtie, 7'd0};
+wire [`ysyx_22051013_REG] mie = {56'd0, mtie, 7'd0};
 
 
 always@(posedge clk) begin
   if(rst == `ysyx_22051013_RSTABLE) begin mtie <= 1'b0; end
   else if(mie_wr) begin mtie <= write_csr_data[7]; end
-  else if(time_interrupt_confirm & ~core_valid) begin mtie <= 1'b0; end
+  //else if(time_interrupt_confirm & ~core_valid) begin mtie <= 1'b0; end
   else             begin mtie <= mtie ;end
 end
+
 
 //0x344 mip
 wire mip_rd = (csr_addr == 12'h344) && csr_ctl[2] ;
 
 reg mtip;
-reg [`ysyx_22051013_REG] mip = {56'd0, mtip, 7'd0};
+wire [`ysyx_22051013_REG] mip = {56'd0, mtip, 7'd0};
 
 
 always@(posedge clk) begin
 	if(rst == `ysyx_22051013_RSTABLE) begin mtip <= 1'b0; end
-  else             begin mtip <= time_interrupt ;end
+	else if(~core_valid) begin mtip <= time_interrupt; end
+	else	begin mtip <= mtip ;end
 end
 
 //0X300 mstatus
@@ -140,7 +142,7 @@ end
 
 wire [1:0] mtvec_mode ;
 assign mtvec_mode =2'b00;
-reg [`ysyx_22051013_REG] mtvec = {mtvec_base,mtvec_mode};
+wire [`ysyx_22051013_REG] mtvec = {mtvec_base,mtvec_mode};
 
 //0x341 mepc
 wire mepc_rd = ((csr_addr==12'h341) && csr_ctl[2]) | csr_ctl[0] ;
@@ -178,3 +180,4 @@ assign read_csr_data =	({64{mstatus_rd}} & mstatus)
 			| `ysyx_22051013_ZERO64;
 
 endmodule
+

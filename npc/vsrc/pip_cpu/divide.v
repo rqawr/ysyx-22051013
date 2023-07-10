@@ -1,7 +1,7 @@
-/*
-*
-	*
-	*/
+/*-------------------------------------
+* Last modify date : 2023/7/2
+* Function : shift divider
+---------------------------------------*/
  `include "pip_cpu/define.v"
  module ysyx_22051013_divide(
 	 input wire				clk	,
@@ -12,11 +12,12 @@
 	 input wire				div_signed	,
 	 input wire [`ysyx_22051013_DATA]	div_op1	,
 	 input wire [`ysyx_22051013_DATA]	div_op2	,
-	 output wire				div_ready	,
 	 output wire				out_valid	,
 	 output wire [`ysyx_22051013_DATA]	quotient	,
 	 output wire [`ysyx_22051013_DATA]	remainder
 );
+
+wire div_ready;
 
 	assign div_ready = flush | (cnt == 7'b0);
 	assign out_valid = flush | ~div_doing ? 1'b0 : div_ready;

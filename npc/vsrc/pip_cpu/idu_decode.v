@@ -1,8 +1,8 @@
-/*---------
-* Last modify date : 2023/6/21
-* Function : decode inst to control signal
-*/
 
+/*---------------------------------------------------
+*	Last modify date : 2023/6/21
+*	Function : decode inst to control signal
+---------------------------------------------------*/
  `include "pip_cpu/define.v"
  /* verilator lint_off DECLFILENAME */
 module ysyx_22051013_idu_decode(
@@ -11,6 +11,7 @@ module ysyx_22051013_idu_decode(
   
 	output	wire				rs1_ena	,
 	output	wire				rs2_ena	,
+	output	wire				csr,
 	output	wire	[1:0]			wb_ctl  ,
 	output	reg	[3:0]			mem_ctl ,
 	output	wire				branch  ,
@@ -94,7 +95,7 @@ wire inst_xor   = inst_type[3] &  funct3[2] & ~funct3[1] & ~funct3[0] & ~funct7[
 wire inst_srl   = inst_type[3] &  funct3[2] & ~funct3[1] &  funct3[0] & ~funct7[5] & ~funct7[0];
 wire inst_sra   = inst_type[3] &  funct3[2] & ~funct3[1] &  funct3[0] &  funct7[5] & ~funct7[0];
 wire inst_or    = inst_type[3] &  funct3[2] &  funct3[1] & ~funct3[0] & ~funct7[0] ;
-wire inst_and   = inst_type[3] &  funct3[2] &  funct3[1] &  funct3[0] & ~funct7[0]  ;
+wire inst_and   = inst_type[3] &  funct3[2] &  funct3[1] &  funct3[0] & (funct7 ==  7'd0) ;
 wire inst_div   = inst_type[3] &  funct3[2] & ~funct3[1] & ~funct3[0]  & funct7[0] ;
 wire inst_divu  = inst_type[3] &  funct3[2] & ~funct3[1] &  funct3[0]  & funct7[0] ;
 wire inst_mul   = inst_type[3] &  ~funct3[2] & ~funct3[1] & ~funct3[0] & funct7[0] ;
@@ -148,23 +149,24 @@ wire inst_fencei = ~funct3[2] & ~funct3[1] & funct3[0] & (opcode[6:2] == 5'b0001
 
 //---------------------------------------------ctl signal------------------------------------------------------//
 
-assign alu_ctl[7] = (rst == `ysyx_22051013_RSTABLE) ? 0 :   inst_srli | inst_xor | inst_auipc | inst_addw | inst_sraw | inst_ebreak | inst_sh | inst_sw | inst_bltu | inst_ld | inst_mulh | inst_div | inst_divw | inst_remu | inst_remuw | inst_csrrw | inst_csrrwi  |  inst_csrrsi | inst_csrrci | inst_fencei;
+assign alu_ctl[7] = (rst == `ysyx_22051013_RSTABLE) ? 1'b0 :   inst_srli | inst_xor | inst_auipc | inst_addw | inst_sraw | inst_ebreak | inst_sh | inst_sw | inst_bltu | inst_ld | inst_mulh | inst_div | inst_divw | inst_remu | inst_remuw | inst_csrrw | inst_csrrwi  |  inst_csrrsi | inst_csrrci | inst_fencei;
 
-assign alu_ctl[6] = (rst == `ysyx_22051013_RSTABLE) ? 0 :   inst_slli | inst_sltu | inst_xor | inst_lui | inst_sraiw | inst_srlw | inst_jalr | inst_sb | inst_bge | inst_bltu | inst_lw | inst_ld | inst_mul | inst_mulw | inst_divuw | inst_rem | inst_mret | inst_csrrc | inst_csrrsi | inst_fencei;
+assign alu_ctl[6] = (rst == `ysyx_22051013_RSTABLE) ? 1'b0 :   inst_slli | inst_sltu | inst_xor | inst_lui | inst_sraiw | inst_srlw | inst_jalr | inst_sb | inst_bge | inst_bltu | inst_lw | inst_ld | inst_mul | inst_mulw | inst_divuw | inst_rem | inst_mret | inst_csrrc | inst_csrrsi | inst_fencei;
 
-assign alu_ctl[5] = (rst == `ysyx_22051013_RSTABLE) ? 0 :   inst_andi | inst_slt | inst_sltu | inst_and |inst_auipc | inst_srliw | inst_sllw | inst_jal | inst_blt | inst_bge | inst_bltu | inst_lh | inst_lw | inst_lwu | inst_mulh | inst_mulhu | inst_divu | inst_ecall | inst_csrrw | inst_csrrs | inst_csrrci;
+assign alu_ctl[5] = (rst == `ysyx_22051013_RSTABLE) ? 1'b0 :   inst_andi | inst_slt | inst_sltu | inst_and |inst_auipc | inst_srliw | inst_sllw | inst_jal | inst_blt | inst_bge | inst_bltu | inst_lh | inst_lw | inst_lwu | inst_mulh | inst_mulhu | inst_divu | inst_ecall | inst_csrrw | inst_csrrs | inst_csrrci;
 
-assign alu_ctl[4] = (rst == `ysyx_22051013_RSTABLE) ? 0 :   inst_ori | inst_sll | inst_slt | inst_or | inst_lui |inst_slliw | inst_addw | inst_subw | inst_bne | inst_blt | inst_bge | inst_lb | inst_lh | inst_ld | inst_lhu | inst_mul | inst_mulh | inst_mulhu | inst_div | inst_remw | inst_mret | inst_csrrwi;
+assign alu_ctl[4] = (rst == `ysyx_22051013_RSTABLE) ? 1'b0 :   inst_ori | inst_sll | inst_slt | inst_or | inst_lui |inst_slliw | inst_addw | inst_subw | inst_bne | inst_blt | inst_bge | inst_lb | inst_lh | inst_ld | inst_lhu | inst_mul | inst_mulh | inst_mulhu | inst_div | inst_remw | inst_mret | inst_csrrwi;
 
-assign alu_ctl[3] = (rst == `ysyx_22051013_RSTABLE) ? 0 :   inst_xori  | inst_sub | inst_sll  | inst_sra  | inst_and  | inst_addiw  | inst_sraiw | inst_sraw | inst_beq | inst_bne   | inst_blt | inst_bgeu  | inst_lb  | inst_lw   | inst_lbu | inst_lwu | inst_mul | inst_mulw | inst_div | inst_divw | inst_ecall  | inst_csrrw | inst_csrrc | inst_csrrsi ;
+assign alu_ctl[3] = (rst == `ysyx_22051013_RSTABLE) ? 1'b0 :   inst_xori  | inst_sub | inst_sll  | inst_sra  | inst_and  | inst_addiw  | inst_sraiw | inst_sraw | inst_beq | inst_bne   | inst_blt | inst_bgeu  | inst_lb  | inst_lw   | inst_lbu | inst_lwu | inst_mul | inst_mulw | inst_div | inst_divw | inst_ecall  | inst_csrrw | inst_csrrc | inst_csrrsi ;
 
-assign alu_ctl[2] = (rst == `ysyx_22051013_RSTABLE) ? 0 :   inst_sltiu   | inst_add | inst_sub | inst_srl  | inst_or  | inst_srliw   | inst_srlw  | inst_ebreak  | inst_sd | inst_beq | inst_bne | inst_bgeu   | inst_lh | inst_lhu | inst_lwu | inst_mulhu | inst_mulw | inst_divuw | inst_divw | inst_remu | inst_remw | inst_mret  | inst_csrrs | inst_csrrwi | inst_csrrci ;
+assign alu_ctl[2] = (rst == `ysyx_22051013_RSTABLE) ? 1'b0 :   inst_sltiu   | inst_add | inst_sub | inst_srl  | inst_or  | inst_srliw   | inst_srlw  | inst_ebreak  | inst_sd | inst_beq | inst_bne | inst_bgeu   | inst_lh | inst_lhu | inst_lwu | inst_mulhu | inst_mulw | inst_divuw | inst_divw | inst_remu | inst_remw | inst_mret  | inst_csrrs | inst_csrrwi | inst_csrrci ;
 
-assign alu_ctl[1] = (rst == `ysyx_22051013_RSTABLE) ? 0 :   inst_slti | inst_srai  | inst_add  | inst_sra   | inst_slliw  | inst_sllw | inst_jalr  | inst_sh  | inst_sd   | inst_beq   | inst_lb  | inst_lbu | inst_lhu | inst_mulhsu | inst_mulhu | inst_divu | inst_divuw | inst_rem | inst_remu | inst_remuw | inst_ecall |inst_csrrc  ;
+assign alu_ctl[1] = (rst == `ysyx_22051013_RSTABLE) ? 1'b0 :   inst_slti | inst_srai  | inst_add  | inst_sra   | inst_slliw  | inst_sllw | inst_jalr  | inst_sh  | inst_sd   | inst_beq   | inst_lb  | inst_lbu | inst_lhu | inst_mulhsu | inst_mulhu | inst_divu | inst_divuw | inst_rem | inst_remu | inst_remuw | inst_ecall |inst_csrrc  ;
 
-assign alu_ctl[0] = (rst == `ysyx_22051013_RSTABLE) ? 0 :   inst_addi | inst_srai  | inst_srl  | inst_addiw  | inst_subw | inst_jal | inst_sb | inst_sw   | inst_sd   | inst_bgeu    | inst_lbu | inst_mulhsu | inst_divu | inst_rem | inst_remuw | inst_remw  | inst_csrrs   | inst_fencei;          
+assign alu_ctl[0] = (rst == `ysyx_22051013_RSTABLE) ? 1'b0 :   inst_addi | inst_srai  | inst_srl  | inst_addiw  | inst_subw | inst_jal | inst_sb | inst_sw   | inst_sd   | inst_bgeu    | inst_lbu | inst_mulhsu | inst_divu | inst_rem | inst_remuw | inst_remw  | inst_csrrs   | inst_fencei;          
 
 wire inst_csr   = inst_csrrw | inst_csrrs | inst_csrrc ;
+assign csr   = inst_csrrw | inst_csrrs | inst_csrrc | inst_csrrwi | inst_csrrsi | inst_csrrci;
 
 //output to regfile signal
 assign rs1_ena =  inst_type[6] | inst_type[5] | inst_type[4] | inst_type[3] | inst_type[2] | inst_type[1] | inst_type[0] | inst_jalr | inst_csr | inst_ecall;
@@ -225,6 +227,4 @@ always @(*) begin
 	else                                                       begin ext_imm = `ysyx_22051013_ZERO64; end
 end 
 
-
-wire _unused_ok = &{funct7[6],funct7[4:1]};
 endmodule

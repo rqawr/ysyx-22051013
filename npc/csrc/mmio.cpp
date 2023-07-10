@@ -48,18 +48,14 @@ uint64_t map_read(uint64_t addr, int len, IOMap *map) {
   invoke_callback(map->callback, offset, len, false); // prepare data to read
   uint64_t ret = host_read(map->space + offset, len);
  #ifdef CONFIG_DTRACE
- 	if(map->name != "keyboard") {
     Log("%#lx\t for len=%d at %s with content %ld", addr, len, map ? map->name : "No device",ret);
-    }
  #endif
   return ret;
 }
 
 void map_write(uint64_t addr, int len, uint64_t data, IOMap *map) {
 #ifdef CONFIG_DTRACE
-if(map->name == "serial") {
     Log("%#lx\t write data= %lx for len = %d to %s at %lx", addr,data,len, map ? map->name : "No device",cpu.pc);
-    }
  #endif
   assert(len >= 1 && len <= 8);
   check_bound(map, addr);

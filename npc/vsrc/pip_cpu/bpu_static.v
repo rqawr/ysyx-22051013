@@ -1,16 +1,17 @@
-/*-----------
+
+/*-----------------------------------------------------------------
 *	Last modify date : 2023/06/21
 *	Function : predict PC for jal/bxx (jalr has not predict)
-*/
+-----------------------------------------------------------------*/
  `include "pip_cpu/define.v"
  /* verilator lint_off DECLFILENAME */
 module ysyx_22051013_bpu_static(
+	input	wire				clk	,
 	input	wire				rst	,
 	input	wire	[`ysyx_22051013_INST]	inst	,
 	input	wire	[`ysyx_22051013_PC]	pc_i	,
 	
 	output	wire	[`ysyx_22051013_PC]	pc_o	,
-	input	wire				bpu_pc_hold,
 	output	wire				bpu_jump
 	
 );
@@ -43,7 +44,17 @@ assign op2 = inst_jal  			? {{44{j_imm[20]}} , j_imm[20:1] << 1} :
 wire [`ysyx_22051013_DATA] pr_pc;
 assign pr_pc = op1 + op2;
 
-assign pc_o = ((rst == `ysyx_22051013_RSTABLE) | bpu_pc_hold) ? `ysyx_22051013_STARTPC : pr_pc;
+reg hold;
+always@(posedge clk) begin
+	if(rst == `ysyx_22051013_RSTABLE) begin
+		hold <= 1'b1;
+	end
+	else begin
+		hold <= 1'b0;
+	end
+end
+
+assign pc_o = (hold) ? `ysyx_22051013_STARTPC : pr_pc;
 assign bpu_jump = (rst == `ysyx_22051013_RSTABLE) ? 1'b0 : (inst_bxx & b_imm[12]);
 
 

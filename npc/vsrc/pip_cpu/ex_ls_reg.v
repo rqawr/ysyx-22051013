@@ -1,7 +1,7 @@
-/*-------
-*
-*
-*/
+/*-------------------------------------
+* Last modify date : 2023/7/2
+* Function : ex-ls reg
+---------------------------------------*/
  `include "pip_cpu/define.v"
 /* verilator lint_off DECLFILENAME */
 module ysyx_22051013_reg_exls(
@@ -19,6 +19,7 @@ module ysyx_22051013_reg_exls(
 	input	wire	[6:0]				ex_csr_ctl	,
 	input	wire	[11:0]				ex_csr_addr	,
 	input	wire					ex_fencei	,
+	input	wire					ex_csr_ena	,
     
  	//ctl
 	input	wire					ex_valid	,	
@@ -27,7 +28,7 @@ module ysyx_22051013_reg_exls(
 	input	wire					ls_flush	,
     
 	//output to next stage
-	output	reg					ls_fencei	, 
+	output	reg					ls_fencei	,  
 	output	reg	[6:0]				ls_csr_ctl	,
 	output	reg	[11:0]				ls_csr_addr	,
 	output	reg	[`ysyx_22051013_INST]		ls_inst		,
@@ -38,9 +39,13 @@ module ysyx_22051013_reg_exls(
 	output	reg 	[1:0]		     		ls_wbctl   	, 
 	output	reg                                     ls_rd_ena	,
 	output	reg	[`ysyx_22051013_REGADDR]	ls_rd_addr	,
+	
+	//ls csr forward to idu
+	output	reg					ls_csr_ena	,
     
 	//ex forward to idu
 	output	wire	[`ysyx_22051013_REGADDR]	ex_rd_addr_forward	,
+	output	wire					ex_csr		,
 	output	wire	[`ysyx_22051013_DATA]		ex_rd_data_forward	
 );
 
@@ -60,6 +65,7 @@ always@(posedge clk) begin
 		ls_csr_ctl	<= 7'b0;
 		ls_csr_addr	<= 12'b0;
 		ls_rd_addr	<= 5'd0;
+		ls_csr_ena 	<= 1'b0;
 	end
 	else if(stall) begin 
 		ls_inst		<= ls_inst;
@@ -73,6 +79,7 @@ always@(posedge clk) begin
 		ls_csr_ctl	<= ls_csr_ctl;
 		ls_csr_addr	<= ls_csr_addr;
 		ls_rd_addr	<= ls_rd_addr;
+		ls_csr_ena 	<= ls_csr_ena;
 	end
 	else if(flush)begin 
 		ls_inst		<= 32'd0;
@@ -86,6 +93,7 @@ always@(posedge clk) begin
 		ls_csr_ctl	<= 7'b0;
 		ls_csr_addr	<= 12'b0;
 		ls_rd_addr	<= 5'd0;
+		ls_csr_ena 	<= 1'b0;
 	end
 	else begin
 		ls_inst		<= ex_inst;
@@ -99,10 +107,12 @@ always@(posedge clk) begin
 		ls_csr_ctl	<= ex_csr_ctl;
 		ls_csr_addr	<= ex_csr_addr;
 		ls_rd_addr	<= ex_rd_addr;
+		ls_csr_ena 	<= ex_csr_ena;
 	end
 end
 
 assign ex_rd_addr_forward = ex_rd_addr	;
 assign ex_rd_data_forward = ex_exu_res	;
+assign ex_csr = ex_csr_ena;
 
 endmodule

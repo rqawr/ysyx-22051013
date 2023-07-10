@@ -34,10 +34,9 @@
 //#define CONFIG_DTRACE
 #endif
 
-//#define CONFIG_DIFFTEST 1
+#define CONFIG_DIFFTEST 1
 
 //#define CONFIG_GTK
-
 
 #define CONFIG_DEVICE 1
 
