@@ -131,7 +131,7 @@ extern "C" void difftest_dut_regs(long long Z0, long long ra, long long sp, long
 
 #ifdef HAS_CSR
 extern "C" void difftest_dut_csr(long long csr_mstatus, long long csr_mtvec, long long csr_mepc, long long csr_mcause){
-    cpu.csr[0] = csr_mstatus;
+    cpu.csr[0] = csr_mstatus & 0x0ull ;
     cpu.csr[1] = csr_mtvec;
     cpu.csr[2] = csr_mepc;    
     cpu.csr[3] = csr_mcause;

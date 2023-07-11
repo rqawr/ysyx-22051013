@@ -29,7 +29,7 @@ __am_asm_trap:
   sd t0, OFFSET_SP(sp)
 
   csrr t0, mcause
-  csrr t1, mstatus
+  li t1, 0
   csrr t2, mepc
 
   sd t0, OFFSET_CAUSE(sp)
