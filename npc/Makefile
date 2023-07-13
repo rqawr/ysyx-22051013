@@ -1,4 +1,4 @@
-ifeq ($(wildcard /home/hxy/ysyx-workbench/npc/csrc/main.cpp),)
+ifeq ($(wildcard $(NPC_HOME)/csrc/main.cpp),)
   $(error can't find the sim cpp file)
 endif
 
