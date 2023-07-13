@@ -6,6 +6,7 @@
 #include <stdio.h>
 
 void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_Rect *dstrect) {
+//printf("in SDL_BlitSurface\n");
   assert(dst && src);
   assert(dst->format->BitsPerPixel == src->format->BitsPerPixel);
   int src_x, src_y, dst_x, dst_y, sur_h, sur_w;
@@ -41,14 +42,14 @@ void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_
       }
     }
 }
-	else if(src->format->BitsPerPixel == 8){
-		uint8_t *src_pixels = (uint8_t *)src->pixels;
+  else if(src->format->BitsPerPixel == 8){
+	uint8_t *src_pixels = (uint8_t *)src->pixels;
   	uint8_t *dst_pixels = (uint8_t *)dst->pixels;
 
 
     for (int i = 0; i < sur_h; ++i){
       for (int j = 0; j < sur_w; ++j){
-        dst_pixels[(dst_y + i) * dst->w + dst_x + j] = src_pixels[(src_y + i) * src->w + src_x + j];
+        dst_pixels[(dst_y + i) * dst->w + dst_x + j] = src_pixels[(src_y + i) * dst->w + src_x + j];
       }
     }
 	}
@@ -58,6 +59,7 @@ void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_
 }
 
 void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
+//printf("in SDL_FillRect\n");
 
   uint32_t *pixels = (uint32_t *)dst->pixels;
   int sur_x, sur_y, sur_h, sur_w;
@@ -83,10 +85,11 @@ void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
 }
 
 static inline uint32_t color_sequence(SDL_Color *color){
-	return (color->a << 24) | (color->r << 16) | (color->g << 8) | (color->b);
+	return (color->a << 24) | (color->r << 16) | (color->g << 8) | (color->b);//argb
 }
 
 void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
+//printf("in SDL_UpdateRect\n");
 	if(s->format->BitsPerPixel == 32){
 	  if(w == 0 && h == 0 && x ==0 && y == 0){
 		  NDL_DrawRect((uint32_t *)s->pixels, 0, 0, s->w, s->h);

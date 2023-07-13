@@ -59,7 +59,7 @@ bool ienabled() {
 uint64_t time_now;
 
 void iset(bool enable) {
-	int time = 0x0200bff8;
+/*	int time = 0x0200bff8;
 	int timecmp = 0x02004000;
 	int set = 500;
 	int mie_set = 0x80;
@@ -68,5 +68,5 @@ void iset(bool enable) {
 	uint64_t time_set = time_now + set;
 	outll(timecmp,time_set);
 	asm volatile("csrw mie, %0" : : "r"(mie_set));
-	asm volatile("csrw mstatus, %0" : : "r"(mstatus_set));
+	asm volatile("csrw mstatus, %0" : : "r"(mstatus_set));*/
 }

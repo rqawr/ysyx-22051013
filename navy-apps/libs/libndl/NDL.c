@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/time.h>
@@ -14,11 +15,13 @@ struct timeval tv;
 struct timezone tz;
 
 uint32_t NDL_GetTicks() {
+  //printf("in NDL_GetTicks\n");
   gettimeofday(&tv, &tz);
   return tv.tv_sec * 1000 + tv.tv_usec / 1000;
 }
 
 int NDL_PollEvent(char *buf, int len) {
+//printf("in NDL_PollEvent\n");
   int fd = open("/dev/events", 0, 0);
   int valid = read(fd, buf, len);
   //if(valid !=0) printf("%s\n",buf);
@@ -26,6 +29,7 @@ int NDL_PollEvent(char *buf, int len) {
 }
 
 void NDL_OpenCanvas(int *w, int *h) {
+//printf("in NDL_OpenCanvas\n");
   if (getenv("NWM_APP")) {
     int fbctl = 4;
     fbdev = 5;
@@ -52,13 +56,14 @@ void NDL_OpenCanvas(int *w, int *h) {
   central_h = (screen_h - *h)/2;
 }
 
-void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h) {
+void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h) {\
+//printf("in NDL_DrawRect\n");
  int fd;
  fd = open("/dev/fb",0,0);
  if(__ISA__ == "native") {
  	for (int i = 0; i < h; ++i) {
    		lseek(fd, ((central_h + y + i) * screen_w + central_w + x) * 4, SEEK_SET);
-   		write(fd, pixels + i * w, w);
+   		write(fd, pixels + i * w, w*4);
   	}
   }
   else {

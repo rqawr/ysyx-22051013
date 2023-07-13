@@ -1,5 +1,6 @@
 #include <am.h>
 #include "../riscv.h"
+#include <stdio.h>
 
 #define SYNC_ADDR (VGACTL_ADDR + 4)
 
@@ -10,6 +11,7 @@ void __am_gpu_init() {
   uint32_t config = inl(VGACTL_ADDR);
   W = (config >> 16) & 0xffff;
   H = config & 0xffff;
+  //printf("w : %d , h : %d \n",W,H);
   fb = (uint32_t *)(uintptr_t)FB_ADDR;
 }
 

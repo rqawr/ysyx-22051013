@@ -43,12 +43,13 @@ static Finfo file_table[] __attribute__((used)) = {
 };
 
 void init_fs() {
-  AM_GPU_CONFIG_T config = io_read(AM_GPU_CONFIG);
+//printf("init_fs\n");
+  AM_GPU_CONFIG_T config = io_read(AM_GPU_CONFIG);  
   file_table[FD_FB].size = config.width * config.height * sizeof(uint32_t);
 }
 
 int fs_open(const char *pathname, int flags, int mode){
-  //Log("pathname %s \n",pathname);
+  //printf("pathname %s \n",pathname);
   int num = sizeof(file_table) / sizeof(Finfo);
   for(int i = 0; i < num; i++){
     if(strcmp(pathname, file_table[i].name) == 0) return i;
@@ -57,6 +58,7 @@ int fs_open(const char *pathname, int flags, int mode){
 }
 
 size_t fs_read(int fd, void *buf, size_t len) {
+//printf("fs_read GPR2(fd) :%d, GPR3(addr) : %x, GPR4(len) : %d, offset : %d\n",fd,buf,len,file_table[fd].open_offset);
   if (file_table[fd].read == NULL) {
     if (file_table[fd].open_offset + len > file_table[fd].size) {
       len = file_table[fd].size - file_table[fd].open_offset;
@@ -68,6 +70,7 @@ size_t fs_read(int fd, void *buf, size_t len) {
 }
 
 size_t fs_write(int fd, const void *buf, size_t len) {
+//printf("fs_write GPR2(fd) :%d, GPR3(addr) : %x, GPR4(len) : %d, offset : %d\n",fd,buf,len,file_table[fd].open_offset);
   if (file_table[fd].write == NULL) {
     if (file_table[fd].open_offset + len > file_table[fd].size) {
       len = file_table[fd].size - file_table[fd].open_offset;
@@ -79,9 +82,10 @@ size_t fs_write(int fd, const void *buf, size_t len) {
 }
 
 size_t fs_lseek(int fd, size_t offset, int whence) {
+//printf("fs_lseek GPR2(fd) :%d, open_offset : %d, GPR3(offset) : %d, GPR4(whence) : %d\n",fd,file_table[fd].open_offset,offset,whence);
   switch (whence) {
     case SEEK_SET:
-      file_table[fd].open_offset = offset;
+      file_table[fd].open_offset = offset;//0
       break;
     case SEEK_CUR:
       file_table[fd].open_offset += offset;
@@ -92,7 +96,9 @@ size_t fs_lseek(int fd, size_t offset, int whence) {
     default:
       panic("error in fs_lseek");
   }
+  //printf("return offset : %d\n",file_table[fd].open_offset);
   return file_table[fd].open_offset;
+  
 }
 
 int fs_close(int fd) {

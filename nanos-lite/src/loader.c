@@ -40,14 +40,15 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
 
   int fd = fs_open(filename, 0, 0);
   Elf_Ehdr ehdr;
-  fs_read(fd, &ehdr, sizeof(Elf_Ehdr));
+  assert(fs_read(fd, &ehdr, sizeof(Elf_Ehdr))!=0);
+  
   
   assert(*(uint32_t *)ehdr.e_ident == 0x464C457F);
   assert(EXPECT_TYPE == ehdr.e_machine);
   
   Elf_Phdr phdr[ehdr.e_phnum];
   fs_lseek(fd, ehdr.e_phoff, SEEK_SET);
-  fs_read(fd, phdr, ehdr.e_phentsize * ehdr.e_phnum);
+  assert(fs_read(fd, phdr, ehdr.e_phentsize * ehdr.e_phnum)!=0);
   
   for (int i = 0; i < ehdr.e_phnum; i++) {
     if(phdr[i].p_type == PT_LOAD){

@@ -11,9 +11,9 @@ int main() {
 		d = fixedpt_toint(fixedpt_div(fixedpt_mul(a + FIXEDPT_ONE,b),fixedpt_rconst(2.3)));
 		e = fixedpt_toint(fixedpt_muli(fixedpt_divi(c - FIXEDPT_ONE, 3), 4));
 	}
-	printf("%d, %d\n", fixedpt_toint(fixedpt_mul(a + FIXEDPT_ONE, b)), d);
-	printf("%d, %d\n", fixedpt_toint(fixedpt_divi(c - FIXEDPT_ONE, 3)), e);
-  printf("%d\n", fixedpt_toint(fixedpt_abs(a)));
-  printf("%d, %d\n", fixedpt_toint(fixedpt_ceil(a)),fixedpt_toint(fixedpt_ceil(c)));
-  printf("%d, %d\n", fixedpt_toint(fixedpt_floor(a)),fixedpt_toint(fixedpt_floor(c)));
+	printf("mul -4 :%d, div -1 :%d\n", fixedpt_toint(fixedpt_mul(a + FIXEDPT_ONE, b)), d);
+	printf("divi 2 :%d, muli 11 :%d\n", fixedpt_toint(fixedpt_divi(c - FIXEDPT_ONE, 3)), e);
+  printf("abs 1 :%d\n", fixedpt_toint(fixedpt_abs(a)));
+  printf("ceil -1 :%d, ceil 10 :%d\n", fixedpt_toint(fixedpt_ceil(a)),fixedpt_toint(fixedpt_ceil(c)));
+  printf("floor -2 :%d, floor 9 : %d\n", fixedpt_toint(fixedpt_floor(a)),fixedpt_toint(fixedpt_floor(c)));
   }

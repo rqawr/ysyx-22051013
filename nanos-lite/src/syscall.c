@@ -7,6 +7,28 @@ static void strace(Context *c);
 #define STRACE 1
 #undef STRACE
 
+const char *sys_name[] = {
+  "SYS_exit",
+  "SYS_yield",
+  "SYS_open",
+  "SYS_read",
+  "SYS_write",
+  "SYS_kill",
+  "SYS_getpid",
+  "SYS_close",
+  "SYS_lseek",
+  "SYS_brk",
+  "SYS_fstat",
+  "SYS_time",
+  "SYS_signal",
+  "SYS_execve",
+  "SYS_fork",
+  "SYS_link",
+  "SYS_unlink",
+  "SYS_wait",
+  "SYS_times",
+  "SYS_gettimeofday"
+};
 
 static void strace(Context *c){
   #ifdef STRACE
@@ -14,10 +36,11 @@ static void strace(Context *c){
     printf("\n\nSystem call trace open file : %s\n\n", c->GPR2);
     }
     else{
-    printf("System call trace \nmcause\t\t\t\tGPR1\t\t\t\tGPR2\t\t\t\tGPR3\t\t\t\tGPR4 \n0x%x\t\t\t\t %d\t\t\t\t 0x%x\t\t\t\t 0x%x\t\t\t\t 0x%x\n", c->mcause, c->GPR1, c->GPR2, c->GPR3, c->GPR4);
+    printf("System call trace \nGPR1\t\t\t\tGPR2\t\t\t\tGPR3\t\t\t\tGPR4 \n%s\t\t\t\t 0x%x\t\t\t\t 0x%x\t\t\t\t 0x%x\n", sys_name[c->GPR1], c->GPR2, c->GPR3, c->GPR4);
     }
   #endif
 }
+
 
 void do_syscall(Context *c) {
   uintptr_t a[4];
