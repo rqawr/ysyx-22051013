@@ -61,7 +61,7 @@ int SDL_PollEvent(SDL_Event *ev) {
     }
     return 1;
   }
-  printf("SDL_WaitEvent receive wrong format input\n");
+  printf("SDL_PollEvent receive wrong format input\n");
   while(1);
 }
 
