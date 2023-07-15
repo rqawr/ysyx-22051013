@@ -71,11 +71,11 @@ module ysyx_22051013_axi_master_arbitrator(
 
 wire if_read;
 wire ls_read;
-wire ls_write;
+//wire ls_write;
 
 assign if_read = (read_state == 2'b00) & icache_ena ; 
 assign ls_read = (read_state == 2'b00) & re ;
-assign ls_write =  we ;
+//assign ls_write =  we ;
 
 wire w_valid = we ;
 wire r_valid = if_read | ls_read;
@@ -178,7 +178,7 @@ end
 ///axi_value
 
 //aw_channel
-assign axi_aw_id =  w_valid & clint_ena ? 4'd2 : 4'd1 ;
+assign axi_aw_id = /*w_valid & clint_ena ? 4'd2 : */4'd1 ;
 assign axi_aw_addr =  data_pc ;
 assign axi_aw_valid = ((arb_w_state == `ysyx_22051013_ARB_ADDR)) & w_valid ;
 assign axi_aw_len = 8'd0;
@@ -195,7 +195,7 @@ assign axi_b_ready = `ysyx_22051013_ENABLE;
 
 //read
 //ar_channel
-assign axi_ar_id =  (read_state == 2'b10) & clint_ena ? 4'd2 : 4'd1 ;
+assign axi_ar_id =  /*(read_state == 2'b10) & clint_ena ? 4'd2 : */4'd1 ;
 
 assign axi_ar_len = 8'd0;
 
@@ -269,7 +269,7 @@ wire data_w_not_ready = b_sh;
 wire data_r_not_ready =  r_sh;
 assign axi_inst_valid =  (read_state == 2'b01) & r_sh;
 
-assign axi_data_valid = (read_state == 2'b10) ? data_r_not_ready : ls_write ? data_w_not_ready : 1'b0;
+assign axi_data_valid = (read_state == 2'b10) ? data_r_not_ready : data_w_not_ready ;
 
-wire unused_ok = &{axi_r_resp,axi_b_resp};
+wire unused_ok = &{axi_r_resp,axi_b_resp,clint_ena};
 endmodule

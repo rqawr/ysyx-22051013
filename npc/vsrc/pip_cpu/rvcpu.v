@@ -24,7 +24,7 @@
 	`include "pip_cpu/d_cache.v"
 	`include "pip_cpu/xbar.v"
 	/* verilator lint_off DECLFILENAME */
-module ysyx_22051013_rvcpu(
+module ysyx_22051013(
 	input wire              clk		,
 	input wire              rst		
 		

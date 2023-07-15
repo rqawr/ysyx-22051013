@@ -73,7 +73,7 @@ end
 
 //to icache
 assign icache_fencei = fencei;
-assign icache_ena = core_ready ? 1'b0 : mem_ena;
+assign icache_ena = /*core_ready ? 1'b0 : */mem_ena;
 assign icache_inst_pc = mem_ena ? core_addr : `ysyx_22051013_ZERO64;
 assign icache_ready = mem_ena ? core_ready : `ysyx_22051013_DISABLE;
 
@@ -82,7 +82,7 @@ assign axi_icache_inst = sel_now ? axi_inst_i : `ysyx_22051013_ZERO64;
 assign axi_icache_valid = sel_now ? axi_valid : `ysyx_22051013_DISABLE;
 
 // to axi
-assign axi_re = sel_now & ~core_ready ? icache_axi_re : 
+assign axi_re = sel_now /*& ~core_ready */? icache_axi_re : 
 		~sel_now & ~clint_ena & ~core_ready ? core_re :
 		1'b0;
 		
