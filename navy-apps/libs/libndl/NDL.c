@@ -14,10 +14,15 @@ static int central_w = 0, central_h = 0;
 struct timeval tv;
 struct timezone tz;
 
+struct timeval init_tv;
+struct timeval init_tz;
+uint32_t init_time;
+
 uint32_t NDL_GetTicks() {
   //printf("in NDL_GetTicks\n");
   gettimeofday(&tv, &tz);
-  return tv.tv_sec * 1000 + tv.tv_usec / 1000;
+  uint32_t time =tv.tv_sec * 1000 + tv.tv_usec / 1000;
+  return (time-init_time);
 }
 
 int NDL_PollEvent(char *buf, int len) {
@@ -56,7 +61,7 @@ void NDL_OpenCanvas(int *w, int *h) {
   central_h = (screen_h - *h)/2;
 }
 
-void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h) {\
+void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h) {
 //printf("in NDL_DrawRect\n");
  int fd;
  fd = open("/dev/fb",0,0);
@@ -103,6 +108,8 @@ int NDL_Init(uint32_t flags) {
     } 
     else if (buf[i] == ':') flag += 1;
   } 
+  gettimeofday(&init_tv, &init_tz);
+  init_time = init_tv.tv_sec * 1000 + init_tv.tv_usec / 1000;
   return 0;
 }
 

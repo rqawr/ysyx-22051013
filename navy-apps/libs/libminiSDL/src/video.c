@@ -61,7 +61,7 @@ void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_
 void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
 //printf("in SDL_FillRect\n");
 
-  uint32_t *pixels = (uint32_t *)dst->pixels;
+ 
   int sur_x, sur_y, sur_h, sur_w;
 
   if (dstrect == NULL){
@@ -76,12 +76,25 @@ void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
     sur_w = dstrect->w;
     sur_h = dstrect->h;
   }
-
-  for (int i = 0; i < sur_h; ++i){
-    for (int j = 0; j < sur_w; ++j){
-      pixels[(sur_y + i) * dst->w + sur_x + j] = color;
-    }
-  }
+ if(dst->format->BitsPerPixel == 32){
+ 	uint32_t *pixels = (uint32_t *)dst->pixels;
+  	for (int i = 0; i < sur_h; ++i){
+   	 for (int j = 0; j < sur_w; ++j){
+      		pixels[(sur_y + i) * dst->w + sur_x + j] = color;
+    		}
+  	}
+}
+  else if(dst->format->BitsPerPixel == 8){
+  	uint8_t *pixels = (uint8_t *)dst->pixels;
+  	for (int i = 0; i < sur_h; ++i){
+   	 for (int j = 0; j < sur_w; ++j){
+      		pixels[(sur_y + i) * dst->w + sur_x + j] = color;
+    		}
+  	}
+  }	
+  else{
+		assert(0);
+	}
 }
 
 static inline uint32_t color_sequence(SDL_Color *color){
